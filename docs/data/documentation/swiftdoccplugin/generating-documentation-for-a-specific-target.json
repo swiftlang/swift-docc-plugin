@@ -1,0 +1,166 @@
+{
+  "abstract" : [
+    {
+      "text" : "Generate documentation for a specific target in your package.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target"
+  },
+  "kind" : "article",
+  "metadata" : {
+    "modules" : [
+      {
+        "name" : "SwiftDocCPlugin"
+      }
+    ],
+    "role" : "article",
+    "roleHeading" : "Article",
+    "title" : "Generating Documentation for a Specific Target"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "By default, the Swift-DocC plugin will generate documentation for every",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "compatible target in a package.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package generate-documentation"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To limit to a specific target, pass the name of the target to the ",
+              "type" : "text"
+            },
+            {
+              "code" : "swift package",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " command.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --target [target-name] generate-documentation"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 2,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "seeAlsoSections" : [
+    {
+      "generated" : true,
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+      ],
+      "title" : "Getting Started"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "SwiftDocCPlugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
+  "abstract" : [
+    {
+      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Getting Started with the Swift-DocC Plugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
+  "abstract" : [
+    {
+      "text" : "Use your web browser to preview the documentation for a target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Previewing Documentation",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/previewing-documentation"
+}
+}
+}

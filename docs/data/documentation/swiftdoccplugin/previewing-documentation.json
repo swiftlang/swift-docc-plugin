@@ -1,0 +1,213 @@
+{
+  "abstract" : [
+    {
+      "text" : "Use your web browser to preview the documentation for a target in your package.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+  },
+  "kind" : "article",
+  "metadata" : {
+    "modules" : [
+      {
+        "name" : "SwiftDocCPlugin"
+      }
+    ],
+    "role" : "article",
+    "roleHeading" : "Article",
+    "title" : "Previewing Documentation"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "The Swift-DocC plugin supports running a local web server to allow for exploring the documentation",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "in a project or previewing the documentation you’re writing.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Because the ",
+              "type" : "text"
+            },
+            {
+              "code" : "preview-documentation",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " command uses a local web server, you’ll need to disable",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "the SwiftPM plugin’s sandboxing functionality which blocks all network access by default.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To preview documentation for a specific target in your project, run the following from",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "the root of the Swift Package containing the target you’d like to preview:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --disable-sandbox --target [target-name] preview-documentation"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Swift-DocC will print something like the following:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "========================================",
+            "Starting Local Preview Server",
+            "     Address: http:\/\/localhost:8000\/documentation\/swiftdoccplugin",
+            "========================================",
+            "Monitoring \/Developer\/swift-docc-plugin\/Sources\/SwiftDocCPluginDocumentation\/SwiftDocCPlugin.docc for changes..."
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Navigate to the printed address in your browser to preview documentation for the target.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 2,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "seeAlsoSections" : [
+    {
+      "generated" : true,
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target"
+      ],
+      "title" : "Getting Started"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin\/previewing-documentation"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "SwiftDocCPlugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-a-Specific-Target": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for a specific target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for a Specific Target",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
+  "abstract" : [
+    {
+      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Getting Started with the Swift-DocC Plugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
+}
+}
+}

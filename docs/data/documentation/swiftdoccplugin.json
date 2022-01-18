@@ -1,0 +1,345 @@
+{
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+  },
+  "kind" : "symbol",
+  "metadata" : {
+    "externalID" : "SwiftDocCPlugin",
+    "modules" : [
+      {
+        "name" : "SwiftDocCPlugin"
+      }
+    ],
+    "role" : "collection",
+    "roleHeading" : "Command Plugin",
+    "symbolKind" : "module",
+    "title" : "SwiftDocCPlugin"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "The Swift-DocC plugin is a Swift Package Manager command plugin that supports building",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "documentation for SwiftPM libraries and executables.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "The Swift-DocC plugin is under ",
+                  "type" : "text"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "active-development",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "strong"
+                },
+                {
+                  "text" : " and is not ready for production",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "use.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            },
+            {
+              "inlineContent" : [
+                {
+                  "text" : "We anticipate releasing a ",
+                  "type" : "text"
+                },
+                {
+                  "code" : "1.0",
+                  "type" : "codeVoice"
+                },
+                {
+                  "text" : " version of the Swift-DocC plugin aligned with",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "the release of Swift ",
+                  "type" : "text"
+                },
+                {
+                  "code" : "5.6",
+                  "type" : "codeVoice"
+                },
+                {
+                  "text" : ".",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "style" : "important",
+          "type" : "aside"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "After adding the plugin as a dependency in your Swift package manifest, you can build",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "documentation for the libraries and executables in that package by running the following",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "from the command-line:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package generate-documentation"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "The documentation on this site is focused on the Swift-DocC plugin specifically. For more",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "general documentation on how to use Swift-DocC, see the documentation",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "identifier" : "https:\/\/www.swift.org\/documentation\/docc\/",
+              "isActive" : true,
+              "type" : "reference"
+            },
+            {
+              "text" : ".",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 2,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "topicSections" : [
+    {
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+      ],
+      "title" : "Getting Started"
+    },
+    {
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Hosting-Online",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Publishing-to-GitHub-Pages"
+      ],
+      "title" : "Publishing Documentation"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "SwiftDocCPlugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-Hosting-Online": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for hosting online at static hosts like",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "GitHub Pages or on your own server.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Hosting-Online",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for Hosting Online",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-hosting-online"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-a-Specific-Target": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for a specific target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for a Specific Target",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
+  "abstract" : [
+    {
+      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Getting Started with the Swift-DocC Plugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
+  "abstract" : [
+    {
+      "text" : "Use your web browser to preview the documentation for a target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Previewing Documentation",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/previewing-documentation"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Publishing-to-GitHub-Pages": {
+  "abstract" : [
+    {
+      "text" : "Build and publish documentation from your Swift Package to GitHub Pages or other static",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "web hosts.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Publishing-to-GitHub-Pages",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Publishing to GitHub Pages",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/publishing-to-github-pages"
+},
+"https://www.swift.org/documentation/docc/": {
+  "identifier" : "https:\/\/www.swift.org\/documentation\/docc\/",
+  "title" : "here",
+  "titleInlineContent" : [
+    {
+      "text" : "here",
+      "type" : "text"
+    }
+  ],
+  "type" : "link",
+  "url" : "https:\/\/www.swift.org\/documentation\/docc\/"
+}
+}
+}

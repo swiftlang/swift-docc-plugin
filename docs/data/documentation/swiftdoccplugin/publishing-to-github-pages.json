@@ -1,0 +1,792 @@
+{
+  "abstract" : [
+    {
+      "text" : "Build and publish documentation from your Swift Package to GitHub Pages or other static",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "web hosts.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Publishing-to-GitHub-Pages"
+  },
+  "kind" : "article",
+  "metadata" : {
+    "modules" : [
+      {
+        "name" : "SwiftDocCPlugin"
+      }
+    ],
+    "role" : "article",
+    "roleHeading" : "Article",
+    "title" : "Publishing to GitHub Pages"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "This documentation is specific to hosting on GitHub Pages but the steps",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "should apply to most static hosting solutions you’re familiar with.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "anchor" : "Configure-GitHub-Pages",
+          "level" : 2,
+          "text" : "Configure GitHub Pages",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Begin by following",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "identifier" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source",
+              "isActive" : true,
+              "type" : "reference"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "to enable GitHub pages on your repository and select a publishing source.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "You can choose to either publish from your ",
+              "type" : "text"
+            },
+            {
+              "code" : "main",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " branch alongside your project’s source code",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "or a specific branch that you’ll use exclusively for your GitHub pages site.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Either way, you should choose the option to publish from the ",
+              "type" : "text"
+            },
+            {
+              "code" : "\/docs",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "subdirectory instead of the default option to publish from your repository’s root.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Next, clone the repository you just configured for GitHub pages and checkout",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "the branch you chose as a publishing source.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ git clone [repository-url]",
+            "$ cd [repository-name]",
+            "$ git checkout [gh-pages-branch]"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "anchor" : "Understanding-your-Project’s-Configuration",
+          "level" : 2,
+          "text" : "Understanding your Project’s Configuration",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Now that you’ve set up a local clone of the repository you’ll be publishing documentation from,",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "you can build your Swift-DocC documentation site.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "Before invoking the Swift-DocC plugin, you’ll need to add it as a dependency of your package,",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "see ",
+                  "type" : "text"
+                },
+                {
+                  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+                  "isActive" : true,
+                  "type" : "reference"
+                },
+                {
+                  "text" : " for details.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "style" : "tip",
+          "type" : "aside"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Before running the ",
+              "type" : "text"
+            },
+            {
+              "code" : "swift package generate-documentation",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " command, you’ll need to know two things.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "items" : [
+            {
+              "content" : [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "What is the ",
+                      "type" : "text"
+                    },
+                    {
+                      "inlineContent" : [
+                        {
+                          "text" : "base path",
+                          "type" : "text"
+                        }
+                      ],
+                      "type" : "strong"
+                    },
+                    {
+                      "text" : " your documentation will be published at?",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "This differs based on the",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : " ",
+                      "type" : "text"
+                    },
+                    {
+                      "identifier" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/about-github-pages#types-of-github-pages-sites",
+                      "isActive" : true,
+                      "type" : "reference"
+                    },
+                    {
+                      "text" : "",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : " ",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : "but is ",
+                      "type" : "text"
+                    },
+                    {
+                      "inlineContent" : [
+                        {
+                          "text" : "almost",
+                          "type" : "text"
+                        }
+                      ],
+                      "type" : "emphasis"
+                    },
+                    {
+                      "text" : " always the name of your GitHub repository.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Your documentation site will be published at something like",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "code" : [
+                    "https:\/\/<username>.github.io\/<repository-name>"
+                  ],
+                  "syntax" : "txt",
+                  "type" : "codeListing"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "and Swift-DocC needs to know about any base path after the ",
+                      "type" : "text"
+                    },
+                    {
+                      "code" : "github.io",
+                      "type" : "codeVoice"
+                    },
+                    {
+                      "text" : " portion in order",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : " ",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : "to correctly configure relative links. In the above case, that would be ",
+                      "type" : "text"
+                    },
+                    {
+                      "code" : "<repository-name>",
+                      "type" : "codeVoice"
+                    },
+                    {
+                      "text" : ".",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            },
+            {
+              "content" : [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Which ",
+                      "type" : "text"
+                    },
+                    {
+                      "inlineContent" : [
+                        {
+                          "text" : "target",
+                          "type" : "text"
+                        }
+                      ],
+                      "type" : "strong"
+                    },
+                    {
+                      "text" : " in your Swift Package would you like to publish documentation for?",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Swift-DocC can build documentation for a single target at a time. When publishing documentation,",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : " ",
+                      "type" : "text"
+                    },
+                    {
+                      "text" : "you should select one target per documentation site.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            }
+          ],
+          "type" : "orderedList"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Once you’ve determined your hosting ",
+              "type" : "text"
+            },
+            {
+              "inlineContent" : [
+                {
+                  "text" : "base path",
+                  "type" : "text"
+                }
+              ],
+              "type" : "strong"
+            },
+            {
+              "text" : " and Swift Package ",
+              "type" : "text"
+            },
+            {
+              "inlineContent" : [
+                {
+                  "text" : "target",
+                  "type" : "text"
+                }
+              ],
+              "type" : "strong"
+            },
+            {
+              "text" : ", you’re ready to",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "generate documentation.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "anchor" : "Generating-the-Documentation-Site",
+          "level" : 2,
+          "text" : "Generating the Documentation Site",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To build documentation for your site and send the output to the ",
+              "type" : "text"
+            },
+            {
+              "code" : "\/docs",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " directory at the root",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "of the repository you cloned to host your documentation, run the following ",
+              "type" : "text"
+            },
+            {
+              "inlineContent" : [
+                {
+                  "text" : "from the root",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "of the Swift package you want to generate documentation from",
+                  "type" : "text"
+                }
+              ],
+              "type" : "strong"
+            },
+            {
+              "text" : ":",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --allow-writing-to-directory [path-to-docs-directory] \\",
+            "    --target [target-name] \\",
+            "    generate-documentation \\",
+            "    --disable-indexing \\",
+            "    --transform-for-static-hosting \\",
+            "    --hosting-base-path [hosting-base-path] \\",
+            "    --output-path [path-to-docs-directory]"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Here’s a mapping of the tokens in the above command to what they should be replaced with:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "header" : "row",
+          "rows" : [
+            [
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Token",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ],
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Description",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "code" : "[path-to-docs-directory]",
+                      "type" : "codeVoice"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ],
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "The path to the ",
+                      "type" : "text"
+                    },
+                    {
+                      "code" : "\/docs",
+                      "type" : "codeVoice"
+                    },
+                    {
+                      "text" : " directory at the root of the repository you configured for publishing to GitHub pages.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "code" : "[target-name]",
+                      "type" : "codeVoice"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ],
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "The name of the Swift Package target you’d like to build documentation for.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "code" : "[hosting-base-path]",
+                      "type" : "codeVoice"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ],
+              [
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                }
+              ]
+            ]
+          ],
+          "type" : "table"
+        },
+        {
+          "anchor" : "Publishing-the-Documentation-Site",
+          "level" : 2,
+          "text" : "Publishing the Documentation Site",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To publish your documentation site, commit and push the changes in the repository and",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "branch you configured for publishing to GitHub Pages.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ cd [path-to-github-pages-repository]",
+            "$ git add docs",
+            "$ git commit -m \"Update GitHub pages documentation site.\"",
+            "$ git push"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Once the push completes, the documentation site will be available at:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "https:\/\/<username>.github.io\/<repository-name>\/documentation\/<target-name>"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 2,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "seeAlsoSections" : [
+    {
+      "generated" : true,
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Hosting-Online"
+      ],
+      "title" : "Publishing Documentation"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin\/publishing-to-github-pages"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "SwiftDocCPlugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-Hosting-Online": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for hosting online at static hosts like",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "GitHub Pages or on your own server.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Hosting-Online",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for Hosting Online",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-hosting-online"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
+  "abstract" : [
+    {
+      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Getting Started with the Swift-DocC Plugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
+},
+"https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages#types-of-github-pages-sites": {
+  "identifier" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/about-github-pages#types-of-github-pages-sites",
+  "title" : "type of GitHub Pages site you have",
+  "titleInlineContent" : [
+    {
+      "text" : "type of GitHub Pages site you have",
+      "type" : "text"
+    }
+  ],
+  "type" : "link",
+  "url" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/about-github-pages#types-of-github-pages-sites"
+},
+"https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source": {
+  "identifier" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source",
+  "title" : "GitHub’s documentation",
+  "titleInlineContent" : [
+    {
+      "text" : "GitHub’s documentation",
+      "type" : "text"
+    }
+  ],
+  "type" : "link",
+  "url" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source"
+}
+}
+}

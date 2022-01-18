@@ -1,0 +1,390 @@
+{
+  "abstract" : [
+    {
+      "text" : "Generate documentation for hosting online at static hosts like",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "GitHub Pages or on your own server.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Hosting-Online"
+  },
+  "kind" : "article",
+  "metadata" : {
+    "modules" : [
+      {
+        "name" : "SwiftDocCPlugin"
+      }
+    ],
+    "role" : "article",
+    "roleHeading" : "Article",
+    "title" : "Generating Documentation for Hosting Online"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "By default, the Swift-DocC plugin will generate an index of content that is useful for IDE’s,",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "like Xcode, to render a navigator of all included documentation in the archive. Since this index",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "isn’t relevant when hosting online, you can pass the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--disable-indexing",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " flag",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "when generating documentation thats intended for an online host.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --target [target-name] generate-documentation --disable-indexing"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "You’ll likely want to pass an output path to Swift-DocC to send the relevant files",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "to a specific directory.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "Remember to pass the ",
+                  "type" : "text"
+                },
+                {
+                  "code" : "--allow-writing-to-directory",
+                  "type" : "codeVoice"
+                },
+                {
+                  "text" : " flag",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "to include that directory in the SwiftPM sandboxing environment for the Swift-DocC plugin.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "style" : "important",
+          "type" : "aside"
+        },
+        {
+          "code" : [
+            "$ swift package --target [target-name] \\ ",
+            "    --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --disable-indexing \\",
+            "    --output-path [output-directory-path]"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "The files at the passed ",
+              "type" : "text"
+            },
+            {
+              "code" : "[output-directory-path]",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " are now ready to be published online. Please",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "see the documentation",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "identifier" : "https:\/\/www.swift.org\/documentation\/docc\/distributing-documentation-to-other-developers#Host-a-Documentation-Archive-on-Your-Website",
+              "isActive" : true,
+              "type" : "reference"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "that explains how to configure the necessary routing rules for hosting a Swift-DocC archive",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "on your local server.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "anchor" : "Transforming-for-Static-Hosting",
+          "level" : 2,
+          "text" : "Transforming for Static Hosting",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Alternatively, if you’d like to avoid setting custom routing rules on your server or are",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "hosting in an environment where this isn’t possible, you can generate documentation that",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "has been transformed for static hosting.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --target [target-name] \\ ",
+            "    --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --disable-indexing \\",
+            "    --output-path [output-directory-path] \\",
+            "    --transform-for-static-hosting"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "This addition of the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--transform-for-static-hosting",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " flag removes the need of setting",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "any custom routing rules on your website, as long as you’re hosting the documentation",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "at the root of your website. If you’d like to host your documentation at a sub-path, you",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "can use the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--hosting-base-path",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " argument.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package --target [target-name] \\ ",
+            "    --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --disable-indexing \\",
+            "    --output-path [output-directory-path] \\",
+            "    --transform-for-static-hosting \\",
+            "    --hosting-base-path [hosting-base-path]"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 2,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "seeAlsoSections" : [
+    {
+      "generated" : true,
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Publishing-to-GitHub-Pages"
+      ],
+      "title" : "Publishing Documentation"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin\/generating-documentation-for-hosting-online"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "SwiftDocCPlugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Publishing-to-GitHub-Pages": {
+  "abstract" : [
+    {
+      "text" : "Build and publish documentation from your Swift Package to GitHub Pages or other static",
+      "type" : "text"
+    },
+    {
+      "text" : " ",
+      "type" : "text"
+    },
+    {
+      "text" : "web hosts.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Publishing-to-GitHub-Pages",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Publishing to GitHub Pages",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/publishing-to-github-pages"
+},
+"https://www.swift.org/documentation/docc/distributing-documentation-to-other-developers#Host-a-Documentation-Archive-on-Your-Website": {
+  "identifier" : "https:\/\/www.swift.org\/documentation\/docc\/distributing-documentation-to-other-developers#Host-a-Documentation-Archive-on-Your-Website",
+  "title" : "here",
+  "titleInlineContent" : [
+    {
+      "text" : "here",
+      "type" : "text"
+    }
+  ],
+  "type" : "link",
+  "url" : "https:\/\/www.swift.org\/documentation\/docc\/distributing-documentation-to-other-developers#Host-a-Documentation-Archive-on-Your-Website"
+}
+}
+}
