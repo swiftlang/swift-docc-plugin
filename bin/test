@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# This source file is part of the Swift.org open source project
+#
+# Copyright (c) 2022 Apple Inc. and the Swift project authors
+# Licensed under Apache License v2.0 with Runtime Library Exception
+#
+# See https://swift.org/LICENSE.txt for license information
+# See https://swift.org/CONTRIBUTORS.txt for Swift project authors
+#
+
+set -eu
+
+# A `realpath` alternative using the default C implementation.
+filepath() {
+  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+# First get the absolute path to this file so we can get the
+# absolute file path to the Swift-DocC-Plugin root source dir.
+SWIFT_DOCC_PLUGIN_ROOT="$(dirname $(dirname $(filepath $0)))"
+
+# Build and test Swift-DocC Plugin
+swift test --parallel --package-path "$SWIFT_DOCC_PLUGIN_ROOT"
+
+# Build and test Swift-DocC Plugin integration tests
+swift test --parallel --package-path "$SWIFT_DOCC_PLUGIN_ROOT/IntegrationTests"
+
+# Run source code checks for the codebase.
+LC_ALL=C "$SWIFT_DOCC_PLUGIN_ROOT"/bin/check-source
+
+printf "\033[0;32mokay.\033[0m\n"

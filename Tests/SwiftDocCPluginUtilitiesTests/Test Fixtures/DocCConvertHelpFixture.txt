@@ -1,0 +1,54 @@
+OVERVIEW: Converts documentation from a source bundle.
+
+USAGE: docc convert [<options>] <source-bundle-path>
+
+ARGUMENTS:
+  <source-bundle-path>    Path to a documentation bundle directory.
+        The '.docc' bundle docc will build.
+
+OPTIONS:
+  --platform <platform>   Set the current release version of a platform.
+        Use the following format: "name={platform name},version={semantic version}".
+  --analyze               Outputs additional analyzer style warnings in addition to standard warnings/errors.
+  --emit-digest           Writes additional metadata files to the output directory.
+  --index                 Writes the navigator index to the output directory.
+  --emit-fixits/--no-emit-fixits
+                          Outputs fixits for common issues (default: false)
+  --experimental-documentation-coverage
+                          Generates documentation coverage output. (currently Experimental)
+  --level <level>         Desired level of documentation coverage output. (default: none)
+  --kinds <kind>          The kinds of entities to filter generated documentation for.
+  --experimental-enable-custom-templates
+                          Allows for custom templates, like `header.html`.
+  --enable-inherited-docs Inherit documentation for inherited symbols
+  --fallback-display-name, --display-name <fallback-display-name>
+                          A fallback display name if no value is provided in the documentation bundle's Info.plist file.
+  --fallback-bundle-identifier, --bundle-identifier <fallback-bundle-identifier>
+                          A fallback bundle identifier if no value is provided in the documentation bundle's Info.plist
+                          file.
+  --fallback-bundle-version, --bundle-version <fallback-bundle-version>
+                          A fallback bundle version if no value is provided in the documentation bundle's Info.plist
+                          file.
+  --default-code-listing-language <default-code-listing-language>
+                          A fallback default language for code listings if no value is provided in the documentation
+                          bundle's Info.plist file.
+  --fallback-default-module-kind <fallback-default-module-kind>
+                          A fallback default module kind if no value is provided in the documentation bundle's
+                          Info.plist file.
+  --output-path, --output-dir <output-path>
+                          The location where the documentation compiler writes the built documentation.
+  --additional-symbol-graph-dir <additional-symbol-graph-dir>
+                          A path to a directory of additional symbol graph files.
+  --diagnostic-level <diagnostic-level>
+                          Filters diagnostics above this level from output
+        This filter level is inclusive. If a level of `information` is specified, diagnostics with a severity up to and
+        including `information` will be printed.
+        This option is ignored if `--analyze` is passed.
+        Must be one of "error", "warning", "information", or "hint"
+  --transform-for-static-hosting
+                          Produce a Swift-DocC Archive that supports a static hosting environment.
+  --hosting-base-path <hosting-base-path>
+                          The base path your documentation website will be hosted at.
+        For example, to deploy your site to 'example.com/my_name/my_project/documentation' instead of
+        'example.com/documentation', pass '/my_name/my_project' as the base path.
+  -h, --help              Show help information.
