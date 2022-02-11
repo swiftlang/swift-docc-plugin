@@ -33,8 +33,6 @@ final class SingleLibraryTargetTests: XCTestCase {
     }
     
     func testDocumentationGenerationDoesNotEmitErrors() throws {
-        try XCTSkipIf(true, "rdar://86787186")
-        
         let result = try swiftPackage(
             "generate-documentation",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
@@ -54,8 +52,8 @@ final class SingleLibraryTargetTests: XCTestCase {
         
         let result = try swiftPackage(
             """
-            --disable-sandbox generate-documentation \
-                --output-path "\(customOutputDirectory.path)"
+            --allow-writing-to-directory "\(customOutputDirectory.path)" \
+            generate-documentation --output-path "\(customOutputDirectory.path)"
             """,
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )

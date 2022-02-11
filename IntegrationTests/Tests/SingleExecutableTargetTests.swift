@@ -29,6 +29,7 @@ final class SingleExecutableTargetTests: XCTestCase {
                 "executable/foo.json",
                 "foo/foo().json",
                 "foo/main().json",
+                "foo/init().json",
             ]
         )
     }
