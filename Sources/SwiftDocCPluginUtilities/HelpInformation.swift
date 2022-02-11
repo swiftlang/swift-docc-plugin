@@ -47,12 +47,6 @@ public enum HelpInformation {
             PluginFlag.disableIndex,
         ]
         
-        helpText += """
-            
-            PLUGIN OPTIONS:
-            
-            """
-        
         for flag in supportedPluginFlags {
             helpText += """
                   \(flag.parsedValues.sorted().joined(separator: ", "))
@@ -72,24 +66,48 @@ public enum HelpInformation {
                 """
         }
         
-        return helpText
+        return helpText.trimmingCharacters(in: .newlines) + "\n"
     }
 
     private static var convertPluginHelpOverview = """
         OVERVIEW: Creates a Swift-DocC documentation archive from a Swift Package.
 
-        USAGE: swift package [--target <target>] generate-documentation [<plugin-options> <docc-options>]
+        USAGE: swift package [<package-manager-option>] generate-documentation [<plugin-options>] [<docc-options>]
+        
+        PACKAGE MANAGER OPTIONS:
+          --allow-writing-to-package-directory
+                                  Allow the plugin to write to the package directory.
+          --allow-writing-to-directory <directory-path>
+                                  Allow the plugin to write to an additional directory.
 
+        PLUGIN OPTIONS:
+          --target <target>       Generate documentation for the specified target.
+          --product <product>     Generate documentation for the specified product.
+        
         """
 
     private static var previewPluginHelpOverview = """
         OVERVIEW: Creates and previews a Swift-DocC documentation archive from a Swift Package.
 
-        USAGE: swift package [--target <target>] preview-documentation [<plugin-options> <docc-options>]
-
+        USAGE: swift package --disable-sandbox [<package-manager-option>] preview-documentation [<plugin-options>] [<docc-options>]
+        
         NOTE: This plugin is only able to preview a single target at a time. If your
               package contains more than one documentable target, you must specify which
-              target should be previewed with the -target option.
+              target should be previewed with the --target or --product option.
+        
+        PACKAGE MANAGER OPTIONS:
+          --disable-sandbox
+                                  Disable using the sandbox when executing subprocesses.
+                This flag is **required** when previewing documentation because Swift-DocC
+                preview requires local network access to run a local web server.
+          --allow-writing-to-package-directory
+                                  Allow the plugin to write to the package directory.
+          --allow-writing-to-directory <directory-path>
+                                  Allow the plugin to write to an additional directory.
+        
+        PLUGIN OPTIONS:
+          --target <target>       Preview documentation for the specified target.
+          --product <product>     Preview documentation for the specified product.
         
         """
 }

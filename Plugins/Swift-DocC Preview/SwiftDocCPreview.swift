@@ -123,8 +123,13 @@ import PackagePlugin
         guard process.terminationReason == .exit && process.terminationStatus == 0 else {
             Diagnostics.error("""
                 'docc preview' invocation failed with a nonzero exit code: '\(process.terminationStatus)'.
+                
+                Note: The Swift-DocC Preview plugin requires passing the '--disable-sandbox' flag
+                to the Swift Package Manager because it requires local network access to
+                run a local web server. See 'swift package plugin preview-documentation --help' for details.
                 """
             )
+            
             return
         }
     }
