@@ -13,7 +13,7 @@ the SwiftPM plugin's sandboxing functionality which blocks all network access by
 To preview documentation for a specific target in your project, run the following from
 the root of the Swift Package containing the target you'd like to preview:
 
-    $ swift package --disable-sandbox --target [target-name] preview-documentation
+    $ swift package --disable-sandbox preview-documentation --target [target-name]
 
 Swift-DocC will print something like the following:
 
@@ -24,5 +24,12 @@ Swift-DocC will print something like the following:
     Monitoring /Developer/swift-docc-plugin/Sources/SwiftDocCPluginDocumentation/SwiftDocCPlugin.docc for changes...
 
 Navigate to the printed address in your browser to preview documentation for the target.
+
+> Tip: You can also preview documentation for a product defined by any of your package's 
+> dependencies. This may be useful for learning about any packages you're importing.
+>
+> ```shell
+> $ swift package --disable-sandbox preview-documentation --product [product-name]
+> ```
 
 <!-- Copyright (c) 2022 Apple Inc and the Swift Project authors. All Rights Reserved. -->

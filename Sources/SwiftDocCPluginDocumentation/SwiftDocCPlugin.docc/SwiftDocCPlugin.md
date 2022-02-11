@@ -14,8 +14,8 @@ documentation for SwiftPM libraries and executables.
 > the release of Swift `5.6`.
 
 After adding the plugin as a dependency in your Swift package manifest, you can build
-documentation for the libraries and executables in that package by running the following
-from the command-line:
+documentation for the libraries and executables in that package and its dependencies by running the
+following from the command-line:
 
     $ swift package generate-documentation
 
