@@ -14,11 +14,10 @@ private let currentShellURL: URL = {
 }()
 
 extension XCTestCase {
-    /// Invokes the swift package CLI with the given arguments.
-    func swiftPackage(
+    func swiftPackageProcess(
         _ arguments: String,
         workingDirectory directoryURL: URL? = nil
-    ) throws -> SwiftInvocationResult {
+    ) throws -> Process {
         let process = Process()
         process.executableURL = currentShellURL
         process.environment = [
@@ -28,6 +27,16 @@ extension XCTestCase {
             "-c", "swift package \(arguments)",
         ]
         process.currentDirectoryURL = directoryURL
+        
+        return process
+    }
+    
+    /// Invokes the swift package CLI with the given arguments.
+    func swiftPackage(
+        _ arguments: String,
+        workingDirectory directoryURL: URL? = nil
+    ) throws -> SwiftInvocationResult {
+        let process = try swiftPackageProcess(arguments, workingDirectory: directoryURL)
         
         let standardOutput = Pipe()
         let standardError = Pipe()
@@ -73,5 +82,9 @@ extension Pipe {
         return try fileHandleForReading.readToEnd().flatMap {
             String(data: $0, encoding: .utf8)
         }
+    }
+    
+    var availableOutput: String? {
+        return String(data: fileHandleForReading.availableData, encoding: .utf8)
     }
 }
