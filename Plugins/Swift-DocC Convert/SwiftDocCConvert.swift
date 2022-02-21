@@ -29,6 +29,8 @@ import PackagePlugin
             throw ArgumentParsingError.packageDoesNotContainSwiftSourceModuleTargets
         }
         
+        let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
+        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
@@ -48,11 +50,19 @@ import PackagePlugin
         for (index, target) in swiftSourceModuleTargets.enumerated() {
             let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
             
+            if verbose {
+                print("symbol graph options: '\(symbolGraphOptions)'")
+            }
+            
             // Ask SwiftPM to generate or update symbol graph files for the target.
             let symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
                 for: target,
                 options: symbolGraphOptions
             ).directoryPath.string
+            
+            if verbose {
+                print("symbol graph directory path: '\(symbolGraphDirectoryPath)'")
+            }
             
             if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
                 // This target did not produce any symbol graphs. Let's check if it has a
@@ -80,6 +90,10 @@ import PackagePlugin
             // Construct the output path for the generated DocC archive
             let doccArchiveOutputPath = target.doccArchiveOutputPath(in: context)
             
+            if verbose {
+                print("docc archive output path: '\(doccArchiveOutputPath)'")
+            }
+            
             // Use the parsed arguments gathered earlier to generate the necessary
             // arguments to pass to `docc`. ParsedArguments will merge the flags provided
             // by the user with default fallback values for required flags that were not
@@ -92,6 +106,11 @@ import PackagePlugin
                 symbolGraphDirectoryPath: symbolGraphDirectoryPath,
                 outputPath: doccArchiveOutputPath
             )
+            
+            if verbose {
+                let arguments = doccArguments.joined(separator: " ")
+                print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+            }
             
             // Run `docc convert` with the generated arguments and wait until the process completes
             let process = try Process.run(doccExecutableURL, arguments: doccArguments)

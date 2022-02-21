@@ -24,6 +24,9 @@ import PackagePlugin
         } else {
             possibleTargets = specifiedTargets
         }
+        
+        let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
+        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
@@ -64,11 +67,20 @@ import PackagePlugin
         }
         
         let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+        
+        if verbose {
+            print("symbol graph options: '\(symbolGraphOptions)'")
+        }
+        
         // Ask SwiftPM to generate or update symbol graph files for the target.
         let symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
             for: target,
             options: symbolGraphOptions
         ).directoryPath.string
+        
+        if verbose {
+            print("symbol graph directory path: '\(symbolGraphDirectoryPath)'")
+        }
         
         if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
             // This target did not produce any symbol graphs. Let's check if it has a
@@ -97,6 +109,11 @@ import PackagePlugin
             symbolGraphDirectoryPath: symbolGraphDirectoryPath,
             outputPath: target.doccArchiveOutputPath(in: context)
         )
+        
+        if verbose {
+            let arguments = doccArguments.joined(separator: " ")
+            print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+        }
         
         // Run `docc preview` with the generated arguments and wait until the process completes
         let process = try Process.run(doccExecutableURL, arguments: doccArguments)
