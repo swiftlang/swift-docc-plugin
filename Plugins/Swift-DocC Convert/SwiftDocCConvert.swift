@@ -48,6 +48,13 @@ import PackagePlugin
         
         // Iterate over the Swift source module targets we were given.
         for (index, target) in swiftSourceModuleTargets.enumerated() {
+            if index != 0 {
+                // Emit a line break if this is not the first target being built.
+                print()
+            }
+            
+            print("Generating documentation for '\(target.name)'...")
+            
             let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
             
             if verbose {
@@ -112,17 +119,24 @@ import PackagePlugin
                 print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
             }
             
+            print("Converting documentation...")
+            let conversionStartTime = DispatchTime.now()
+            
             // Run `docc convert` with the generated arguments and wait until the process completes
             let process = try Process.run(doccExecutableURL, arguments: doccArguments)
             process.waitUntilExit()
             
+            let conversionDuration = conversionStartTime.distance(to: .now())
+            
             // Check whether the `docc convert` invocation was successful.
             if process.terminationReason == .exit && process.terminationStatus == 0 {
+                print("Conversion complete! (\(conversionDuration.descriptionInSeconds))")
+                
                 let describedOutputPath = doccArguments.outputPath ?? "unknown location"
-                print("Generated DocC archive at '\(describedOutputPath)'.")
+                print("Generated DocC archive at '\(describedOutputPath)'")
             } else {
                 Diagnostics.error("""
-                    'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'.
+                    'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'
                     """
                 )
             }
