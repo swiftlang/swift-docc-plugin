@@ -10,17 +10,27 @@ import Foundation
 import PackagePlugin
 
 /// Creates a Swift-DocC documentation archive from a Swift Package.
-@main struct SwiftDocCConvert: CommandPlugin {
-    func performCommand(
-        context: PluginContext,
-        targets: [Target],
-        arguments: [String]
-    ) throws {
+@main struct SwiftDocCConvert: DocCCommandPlugin {
+    func performDocCCommand(context: PluginContext, arguments: [String]) throws {
         // We'll be creating commands that invoke `docc`, so start by locating it.
         let doccExecutableURL = try context.doccExecutable
         
+        var argumentExtractor = ArgumentExtractor(arguments)
+        let specifiedTargets = try argumentExtractor.extractSpecifiedTargets(in: context.package)
+        
+        let swiftSourceModuleTargets: [SwiftSourceModuleTarget]
+        if specifiedTargets.isEmpty {
+            swiftSourceModuleTargets = context.package.allDocumentableTargets
+        } else {
+            swiftSourceModuleTargets = specifiedTargets
+        }
+        
+        guard !swiftSourceModuleTargets.isEmpty else {
+            throw ArgumentParsingError.packageDoesNotContainSwiftSourceModuleTargets
+        }
+        
         // Parse the given command-line arguments
-        let parsedArguments = ParsedArguments(arguments)
+        let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
         // If the `--help` or `-h` flag was passed, print the plugin's help information
         // and exit.
@@ -35,11 +45,13 @@ import PackagePlugin
         }
         
         // Iterate over the Swift source module targets we were given.
-        try targets.lazy.compactMap(\.asSwiftSourceModuleTarget).forEach { target in
+        for (index, target) in swiftSourceModuleTargets.enumerated() {
+            let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+            
             // Ask SwiftPM to generate or update symbol graph files for the target.
             let symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
                 for: target,
-                options: target.defaultSymbolGraphOptions(in: context.package)
+                options: symbolGraphOptions
             ).directoryPath.string
             
             // Construct the output path for the generated DocC archive
@@ -51,7 +63,7 @@ import PackagePlugin
             // provided.
             let doccArguments = parsedArguments.doccArguments(
                 action: .convert,
-                targetKind: target.representsExecutable(in: context.package) ? .executable : .library,
+                targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
                 symbolGraphDirectoryPath: symbolGraphDirectoryPath,
@@ -72,6 +84,10 @@ import PackagePlugin
                     """
                 )
             }
+        }
+        
+        if swiftSourceModuleTargets.count > 1 {
+            print("\nMultiple DocC archives generated at '\(context.pluginWorkDirectory.string)'")
         }
     }
 }
