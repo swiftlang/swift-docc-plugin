@@ -70,6 +70,21 @@ import PackagePlugin
             options: symbolGraphOptions
         ).directoryPath.string
         
+        if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
+            // This target did not produce any symbol graphs. Let's check if it has a
+            // DocC catalog.
+            
+            guard target.doccCatalogPath != nil else {
+                let message = """
+                    '\(target.name)' does not contain any documentable symbols or a \
+                    DocC catalog and will not produce documentation
+                    """
+                
+                Diagnostics.error(message)
+                return
+            }
+        }
+        
         // Use the parsed arguments gathered earlier to generate the necessary
         // arguments to pass to `docc`. ParsedArguments will merge the flags provided
         // by the user with default fallback values for required flags that were not

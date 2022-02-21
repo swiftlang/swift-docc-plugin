@@ -54,6 +54,29 @@ import PackagePlugin
                 options: symbolGraphOptions
             ).directoryPath.string
             
+            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
+                // This target did not produce any symbol graphs. Let's check if it has a
+                // DocC catalog.
+                
+                guard target.doccCatalogPath != nil else {
+                    let message = """
+                        '\(target.name)' does not contain any documentable symbols or a \
+                        DocC catalog and will not produce documentation
+                        """
+                    
+                    if swiftSourceModuleTargets.count > 1 {
+                        // We're building multiple targets, just throw a warning for this
+                        // one target that does not produce documentation.
+                        Diagnostics.warning(message)
+                        continue
+                    } else {
+                        // This is the only target being built so throw an error
+                        Diagnostics.error(message)
+                        return
+                    }
+                }
+            }
+            
             // Construct the output path for the generated DocC archive
             let doccArchiveOutputPath = target.doccArchiveOutputPath(in: context)
             
