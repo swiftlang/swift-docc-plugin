@@ -16,11 +16,9 @@ private let currentShellURL: URL = {
 func process(_ arguments: String, workingDirectory directoryURL: URL? = nil) throws -> Process {
     let process = Process()
     process.executableURL = currentShellURL
-    process.environment = [
-        "SWIFTPM_ENABLE_COMMAND_PLUGINS" : "1",
-    ]
+    process.environment = ProcessInfo.processInfo.environment
     process.arguments = [
-        "-l", "-c", arguments,
+        "-c", arguments,
     ]
     process.currentDirectoryURL = directoryURL
     
@@ -53,6 +51,7 @@ extension XCTestCase {
         process.waitUntilExit()
         
         return SwiftInvocationResult(
+            workingDirectory: directoryURL,
             arguments: arguments,
             standardOutput: try standardOutput.asString() ?? "",
             standardError: try standardError.asString() ?? "",
@@ -62,6 +61,7 @@ extension XCTestCase {
 }
 
 struct SwiftInvocationResult {
+    let workingDirectory: URL?
     let arguments: String
     let standardOutput: String
     let standardError: String
@@ -79,14 +79,15 @@ struct SwiftInvocationResult {
             .compactMap(URL.init(fileURLWithPath:))
     }
     
-    private static func gatherShellEnvironmentInfo() throws -> String {
+    private static func gatherShellEnvironmentInfo(workingDirectory directoryURL: URL?) throws -> String {
         let gatherEnvironmentProcess = try process(
             """
             echo -n "pwd: " && pwd && \
             echo -n "which swift: " && which swift && \
             swiftc -v && \
             swift package --version
-            """
+            """,
+            workingDirectory: directoryURL
         )
         
         let gatherEnvironmentPipe = Pipe()
@@ -103,13 +104,16 @@ struct SwiftInvocationResult {
         file: StaticString = #file,
         line: UInt = #line
     ) {
-        let environmentInfo = (try? Self.gatherShellEnvironmentInfo()) ?? "failed to gather environment information"
+        let environmentInfo = (
+            try? Self.gatherShellEnvironmentInfo(workingDirectory: workingDirectory)
+        ) ?? "failed to gather environment information"
         
         XCTAssertEqual(
             exitStatus, expectedExitStatus,
             """
             Expected exit status of '\(expectedExitStatus)' and found '\(exitStatus)'.
             Shell environment information:
+            shell: \(currentShellURL.path)
             \(environmentInfo)
             Swift package arguments:
             \(arguments)
