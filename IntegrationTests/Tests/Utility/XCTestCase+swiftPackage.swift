@@ -24,7 +24,7 @@ extension XCTestCase {
             "SWIFTPM_ENABLE_COMMAND_PLUGINS" : "1",
         ]
         process.arguments = [
-            "-c", "swift package \(arguments)",
+            "-l", "-c", "swift package \(arguments)",
         ]
         process.currentDirectoryURL = directoryURL
         
