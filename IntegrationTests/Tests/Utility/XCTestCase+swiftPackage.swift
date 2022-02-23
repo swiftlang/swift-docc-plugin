@@ -13,22 +13,27 @@ private let currentShellURL: URL = {
     return URL(fileURLWithPath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/sh")
 }()
 
+func process(_ arguments: String, workingDirectory directoryURL: URL? = nil) throws -> Process {
+    let process = Process()
+    process.executableURL = currentShellURL
+    process.environment = [
+        "SWIFTPM_ENABLE_COMMAND_PLUGINS" : "1",
+    ]
+    process.arguments = [
+        "-l", "-c", arguments,
+    ]
+    process.currentDirectoryURL = directoryURL
+    
+    return process
+}
+
+
 extension XCTestCase {
     func swiftPackageProcess(
         _ arguments: String,
         workingDirectory directoryURL: URL? = nil
     ) throws -> Process {
-        let process = Process()
-        process.executableURL = currentShellURL
-        process.environment = [
-            "SWIFTPM_ENABLE_COMMAND_PLUGINS" : "1",
-        ]
-        process.arguments = [
-            "-l", "-c", "swift package \(arguments)",
-        ]
-        process.currentDirectoryURL = directoryURL
-        
-        return process
+        return try process("swift package \(arguments)", workingDirectory: directoryURL)
     }
     
     /// Invokes the swift package CLI with the given arguments.
@@ -74,15 +79,38 @@ struct SwiftInvocationResult {
             .compactMap(URL.init(fileURLWithPath:))
     }
     
+    private static func gatherShellEnvironmentInfo() throws -> String {
+        let gatherEnvironmentProcess = try process(
+            """
+            echo -n "pwd: " && pwd && \
+            echo -n "which swift: " && which swift && \
+            swiftc -v && \
+            swift package --version
+            """
+        )
+        
+        let gatherEnvironmentPipe = Pipe()
+        gatherEnvironmentProcess.standardOutput = gatherEnvironmentPipe
+        gatherEnvironmentProcess.standardError = gatherEnvironmentPipe
+        
+        try gatherEnvironmentProcess.run()
+        gatherEnvironmentProcess.waitUntilExit()
+        return try gatherEnvironmentPipe.asString() ?? "unknown"
+    }
+    
     func assertExitStatusEquals(
         _ expectedExitStatus: Int,
         file: StaticString = #file,
         line: UInt = #line
     ) {
+        let environmentInfo = (try? Self.gatherShellEnvironmentInfo()) ?? "failed to gather environment information"
+        
         XCTAssertEqual(
             exitStatus, expectedExitStatus,
             """
             Expected exit status of '\(expectedExitStatus)' and found '\(exitStatus)'.
+            Shell environment information:
+            \(environmentInfo)
             Swift package arguments:
             \(arguments)
             
