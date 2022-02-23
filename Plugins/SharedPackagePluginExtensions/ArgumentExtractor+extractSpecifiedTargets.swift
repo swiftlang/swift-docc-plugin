@@ -9,7 +9,7 @@
 import Foundation
 import PackagePlugin
 
-enum ArgumentParsingError: LocalizedError {
+enum ArgumentParsingError: LocalizedError, CustomStringConvertible {
     case unknownProduct(_ productName: String, compatibleProducts: String)
     case unknownTarget(_ targetName: String, compatibleTargets: String)
     case productDoesNotContainSwiftSourceModuleTargets(String)
@@ -17,7 +17,7 @@ enum ArgumentParsingError: LocalizedError {
     case targetIsNotSwiftSourceModule(String)
     case testTarget(String)
     
-    var errorDescription: String? {
+    var description: String {
         switch self {
         case .unknownProduct(let productName, let compatibleProducts):
             return """
@@ -40,6 +40,10 @@ enum ArgumentParsingError: LocalizedError {
         case .packageDoesNotContainSwiftSourceModuleTargets:
             return "the current package does not contain any compatible Swift source modules"
         }
+    }
+    
+    var errorDescription: String? {
+        return description
     }
 }
 
