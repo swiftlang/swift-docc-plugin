@@ -15,7 +15,7 @@ final class MixedTargetsTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
@@ -40,7 +40,7 @@ final class MixedTargetsTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 2)
         
         let executableDoccArchiveURL = try XCTUnwrap(

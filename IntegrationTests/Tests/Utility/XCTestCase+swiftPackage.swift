@@ -48,6 +48,7 @@ extension XCTestCase {
         process.waitUntilExit()
         
         return SwiftInvocationResult(
+            arguments: arguments,
             standardOutput: try standardOutput.asString() ?? "",
             standardError: try standardError.asString() ?? "",
             exitStatus: Int(process.terminationStatus)
@@ -56,6 +57,7 @@ extension XCTestCase {
 }
 
 struct SwiftInvocationResult {
+    let arguments: String
     let standardOutput: String
     let standardError: String
     let exitStatus: Int
@@ -70,6 +72,28 @@ struct SwiftInvocationResult {
                 return component.hasSuffix(".doccarchive")
             }
             .compactMap(URL.init(fileURLWithPath:))
+    }
+    
+    func assertExitStatusEquals(
+        _ expectedExitStatus: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        XCTAssertEqual(
+            exitStatus, expectedExitStatus,
+            """
+            Expected exit status of '\(expectedExitStatus)' and found '\(exitStatus)'.
+            Swift package arguments:
+            \(arguments)
+            
+            Standard error:
+            \(standardError)
+            
+            Standard output:
+            \(standardOutput)
+            """,
+            file: file, line: line
+        )
     }
 }
 

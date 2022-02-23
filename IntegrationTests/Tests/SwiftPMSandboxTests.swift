@@ -21,6 +21,6 @@ final class SwiftPMSandboxTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0, result.standardError)
+        result.assertExitStatusEquals(0)
     }
 }

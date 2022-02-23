@@ -15,7 +15,7 @@ final class SingleExecutableTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleExecutableTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)

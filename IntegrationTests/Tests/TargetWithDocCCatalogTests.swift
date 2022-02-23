@@ -15,7 +15,7 @@ final class TargetWithDocCCatalogTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "TargetWithDocCCatalog")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)

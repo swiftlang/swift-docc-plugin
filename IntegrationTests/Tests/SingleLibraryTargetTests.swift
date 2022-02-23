@@ -15,7 +15,7 @@ final class SingleLibraryTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
@@ -38,7 +38,7 @@ final class SingleLibraryTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertTrue(
             result.standardError.isEmpty,
             "Standard error should be empty. Contains: '\(result.standardError)'."
@@ -58,7 +58,7 @@ final class SingleLibraryTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         let referencedDoccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
         

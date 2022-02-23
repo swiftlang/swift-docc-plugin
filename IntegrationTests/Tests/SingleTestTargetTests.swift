@@ -15,7 +15,7 @@ final class SingleTestTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleTestTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 1)
+        result.assertExitStatusEquals(1)
         XCTAssertTrue(result.referencedDocCArchives.isEmpty)
     }
 }
