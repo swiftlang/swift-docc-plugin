@@ -6,4 +6,4 @@
 # See https://swift.org/LICENSE.txt for license information
 # See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-FROM swiftlang/swift:nightly-5.6-bionic
+FROM swiftlang/swift:nightly-5.6-focal
