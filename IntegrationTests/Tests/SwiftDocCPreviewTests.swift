@@ -24,7 +24,7 @@ final class SwiftDocCPreview: XCTestCase {
         
         for index in 1...3 {
             let process = try swiftPackageProcess(
-                "--disable-sandbox preview-documentation --port \(port)",
+                ["--disable-sandbox", "preview-documentation", "--port", port],
                 workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleExecutableTarget")
             )
             
@@ -62,7 +62,13 @@ final class SwiftDocCPreview: XCTestCase {
             try await Task.sleep(nanoseconds: 500000000)
             
             guard process.isRunning else {
-                XCTFail("Preview server failed to start on iteration '\(index)'.")
+                XCTFail(
+                    """
+                    Preview server failed to start on iteration '\(index)'.
+                    
+                    Process output: \(processOutput)
+                    """
+                )
                 return
             }
             

@@ -11,7 +11,7 @@ import XCTest
 final class MixedTargetsTests: XCTestCase {
     func testGenerateDocumentationForSpecificTarget() throws {
         let result = try swiftPackage(
-            "generate-documentation --target Executable",
+            "generate-documentation", "--target", "Executable",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
         )
         
@@ -36,7 +36,7 @@ final class MixedTargetsTests: XCTestCase {
     
     func testGenerateDocumentationForMultipleSpecificTargets() throws {
         let result = try swiftPackage(
-            "generate-documentation --target Executable --target Library",
+            "generate-documentation", "--target", "Executable", "--target", "Library",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
         )
         

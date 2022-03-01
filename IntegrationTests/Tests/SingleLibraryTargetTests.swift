@@ -51,10 +51,8 @@ final class SingleLibraryTargetTests: XCTestCase {
         )
         
         let result = try swiftPackage(
-            """
-            --allow-writing-to-directory "\(customOutputDirectory.path)" \
-            generate-documentation --output-path "\(customOutputDirectory.path)"
-            """,
+            "--allow-writing-to-directory", customOutputDirectory.path,
+            "generate-documentation", "--output-path", customOutputDirectory.path,
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         

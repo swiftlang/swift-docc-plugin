@@ -9,34 +9,22 @@
 import Foundation
 import XCTest
 
-private let currentShellURL: URL = {
-    return URL(fileURLWithPath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/sh")
-}()
-
-func process(_ arguments: String, workingDirectory directoryURL: URL? = nil) throws -> Process {
-    let process = Process()
-    process.executableURL = currentShellURL
-    process.environment = ProcessInfo.processInfo.environment
-    process.arguments = [
-        "-c", arguments,
-    ]
-    process.currentDirectoryURL = directoryURL
-    
-    return process
-}
-
-
 extension XCTestCase {
     func swiftPackageProcess(
-        _ arguments: String,
+        _ arguments: [CustomStringConvertible],
         workingDirectory directoryURL: URL? = nil
     ) throws -> Process {
-        return try process("swift package \(arguments)", workingDirectory: directoryURL)
+        let process = Process()
+        process.executableURL = try swiftExecutableURL
+        
+        process.arguments = ["package"] + arguments.map(\.description)
+        process.currentDirectoryURL = directoryURL
+        return process
     }
     
     /// Invokes the swift package CLI with the given arguments.
     func swiftPackage(
-        _ arguments: String,
+        _ arguments: CustomStringConvertible...,
         workingDirectory directoryURL: URL? = nil
     ) throws -> SwiftInvocationResult {
         let process = try swiftPackageProcess(arguments, workingDirectory: directoryURL)
@@ -58,11 +46,29 @@ extension XCTestCase {
             exitStatus: Int(process.terminationStatus)
         )
     }
+    
+    private var swiftExecutableURL: URL {
+        get throws {
+            let whichProcess = Process.shell("which swift")
+            
+            let standardOutputPipe = Pipe()
+            whichProcess.standardOutput = standardOutputPipe
+            
+            try whichProcess.run()
+            whichProcess.waitUntilExit()
+            
+            let swiftExecutablePath = try XCTUnwrap(
+                standardOutputPipe.asString()
+            ).trimmingCharacters(in: .newlines)
+            
+            return URL(fileURLWithPath: swiftExecutablePath).resolvingSymlinksInPath()
+        }
+    }
 }
 
 struct SwiftInvocationResult {
     let workingDirectory: URL?
-    let arguments: String
+    let arguments: [CustomStringConvertible]
     let standardOutput: String
     let standardError: String
     let exitStatus: Int
@@ -80,7 +86,7 @@ struct SwiftInvocationResult {
     }
     
     private static func gatherShellEnvironmentInfo(workingDirectory directoryURL: URL?) throws -> String {
-        let gatherEnvironmentProcess = try process(
+        let gatherEnvironmentProcess = Process.shell(
             """
             echo -n "pwd: " && pwd && \
             echo -n "which swift: " && which swift && \
@@ -113,7 +119,6 @@ struct SwiftInvocationResult {
             """
             Expected exit status of '\(expectedExitStatus)' and found '\(exitStatus)'.
             Shell environment information:
-            shell: \(currentShellURL.path)
             \(environmentInfo)
             Swift package arguments:
             \(arguments)
@@ -129,12 +134,8 @@ struct SwiftInvocationResult {
     }
 }
 
-enum ProcessError: Error {
-    case nonZeroExitStatus
-}
-
 extension Pipe {
-    func asString() throws -> String? {
+    fileprivate func asString() throws -> String? {
         return try fileHandleForReading.readToEnd().flatMap {
             String(data: $0, encoding: .utf8)
         }
@@ -142,5 +143,23 @@ extension Pipe {
     
     var availableOutput: String? {
         return String(data: fileHandleForReading.availableData, encoding: .utf8)
+    }
+}
+
+extension Process {
+    private static let currentShellURL: URL = {
+        return URL(fileURLWithPath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/sh")
+    }()
+
+    fileprivate static func shell(_ arguments: String, workingDirectory directoryURL: URL? = nil) -> Process {
+        let process = Process()
+        process.executableURL = currentShellURL
+        process.environment = ProcessInfo.processInfo.environment
+        process.arguments = [
+            "-c", arguments,
+        ]
+        process.currentDirectoryURL = directoryURL
+        
+        return process
     }
 }
