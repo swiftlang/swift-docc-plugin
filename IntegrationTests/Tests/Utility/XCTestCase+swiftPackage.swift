@@ -16,6 +16,7 @@ extension XCTestCase {
     ) throws -> Process {
         let process = Process()
         process.executableURL = try swiftExecutableURL
+        process.environment = ProcessInfo.processInfo.environment
         
         process.arguments = ["package"] + arguments.map(\.description)
         process.currentDirectoryURL = directoryURL
