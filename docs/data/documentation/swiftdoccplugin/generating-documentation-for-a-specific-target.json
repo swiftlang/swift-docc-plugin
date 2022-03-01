@@ -47,7 +47,7 @@
               "type" : "text"
             },
             {
-              "text" : "compatible target in a package.",
+              "text" : "compatible target in the current package and its dependencies.",
               "type" : "text"
             }
           ],
@@ -63,11 +63,15 @@
         {
           "inlineContent" : [
             {
-              "text" : "To limit to a specific target, pass the name of the target to the ",
+              "text" : "To limit to a specific target defined in your package, pass the name of the target to the",
               "type" : "text"
             },
             {
-              "code" : "swift package",
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "code" : "generate-documentation",
               "type" : "codeVoice"
             },
             {
@@ -79,7 +83,52 @@
         },
         {
           "code" : [
-            "$ swift package --target [target-name] generate-documentation"
+            "$ swift package generate-documentation --target SwiftMarkdown"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To limit to a specific product defined in your package ",
+              "type" : "text"
+            },
+            {
+              "inlineContent" : [
+                {
+                  "text" : "or one of its dependencies",
+                  "type" : "text"
+                }
+              ],
+              "type" : "emphasis"
+            },
+            {
+              "text" : ", pass the",
+              "type" : "text"
+            },
+            {
+              "text" : " ",
+              "type" : "text"
+            },
+            {
+              "text" : "name of the product to the ",
+              "type" : "text"
+            },
+            {
+              "code" : "generate-documentation",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " command.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package generate-documentation --product ArgumentParser"
           ],
           "syntax" : "shell",
           "type" : "codeListing"

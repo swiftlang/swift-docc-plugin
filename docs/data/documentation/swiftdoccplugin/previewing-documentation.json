@@ -97,7 +97,7 @@
         },
         {
           "code" : [
-            "$ swift package --disable-sandbox --target [target-name] preview-documentation"
+            "$ swift package --disable-sandbox preview-documentation --target [target-name]"
           ],
           "syntax" : "shell",
           "type" : "codeListing"
@@ -130,6 +130,36 @@
             }
           ],
           "type" : "paragraph"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "You can also preview documentation for a product defined by any of your package’s",
+                  "type" : "text"
+                },
+                {
+                  "text" : " ",
+                  "type" : "text"
+                },
+                {
+                  "text" : "dependencies. This may be useful for learning about any packages you’re importing.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            },
+            {
+              "code" : [
+                "$ swift package --disable-sandbox preview-documentation --product [product-name]"
+              ],
+              "syntax" : "shell",
+              "type" : "codeListing"
+            }
+          ],
+          "style" : "tip",
+          "type" : "aside"
         }
       ],
       "kind" : "content"

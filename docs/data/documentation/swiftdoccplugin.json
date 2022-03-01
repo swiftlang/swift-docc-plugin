@@ -135,7 +135,7 @@
               "type" : "text"
             },
             {
-              "text" : "documentation for the libraries and executables in that package by running the following",
+              "text" : "documentation for the libraries and executables in that package and its dependencies by running the",
               "type" : "text"
             },
             {
@@ -143,7 +143,7 @@
               "type" : "text"
             },
             {
-              "text" : "from the command-line:",
+              "text" : "following from the command-line:",
               "type" : "text"
             }
           ],

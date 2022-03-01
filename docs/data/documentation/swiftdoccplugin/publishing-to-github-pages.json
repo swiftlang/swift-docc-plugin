@@ -501,8 +501,7 @@
         {
           "code" : [
             "$ swift package --allow-writing-to-directory [path-to-docs-directory] \\",
-            "    --target [target-name] \\",
-            "    generate-documentation \\",
+            "    generate-documentation --target [target-name] \\",
             "    --disable-indexing \\",
             "    --transform-for-static-hosting \\",
             "    --hosting-base-path [hosting-base-path] \\",

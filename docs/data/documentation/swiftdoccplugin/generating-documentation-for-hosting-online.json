@@ -87,7 +87,7 @@
         },
         {
           "code" : [
-            "$ swift package --target [target-name] generate-documentation --disable-indexing"
+            "$ swift package generate-documentation --target [target-name] --disable-indexing"
           ],
           "syntax" : "shell",
           "type" : "codeListing"
@@ -142,9 +142,8 @@
         },
         {
           "code" : [
-            "$ swift package --target [target-name] \\ ",
-            "    --allow-writing-to-directory [output-directory-path] \\ ",
-            "    generate-documentation --disable-indexing \\",
+            "$ swift package --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --target [target-name] --disable-indexing \\",
             "    --output-path [output-directory-path]"
           ],
           "syntax" : "shell",
@@ -233,9 +232,8 @@
         },
         {
           "code" : [
-            "$ swift package --target [target-name] \\ ",
-            "    --allow-writing-to-directory [output-directory-path] \\ ",
-            "    generate-documentation --disable-indexing \\",
+            "$ swift package --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --target [target-name] --disable-indexing \\",
             "    --output-path [output-directory-path] \\",
             "    --transform-for-static-hosting"
           ],
@@ -293,9 +291,8 @@
         },
         {
           "code" : [
-            "$ swift package --target [target-name] \\ ",
-            "    --allow-writing-to-directory [output-directory-path] \\ ",
-            "    generate-documentation --disable-indexing \\",
+            "$ swift package --allow-writing-to-directory [output-directory-path] \\ ",
+            "    generate-documentation --target [target-name] --disable-indexing \\",
             "    --output-path [output-directory-path] \\",
             "    --transform-for-static-hosting \\",
             "    --hosting-base-path [hosting-base-path]"
