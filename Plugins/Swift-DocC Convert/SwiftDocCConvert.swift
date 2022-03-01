@@ -11,7 +11,7 @@ import PackagePlugin
 
 /// Creates a Swift-DocC documentation archive from a Swift Package.
 @main struct SwiftDocCConvert: CommandPlugin {
-    func performCommand(context: PluginContext, arguments: [String]) throws {
+    func performCommand(context: PluginContext, arguments: [String]) async throws {
         // We'll be creating commands that invoke `docc`, so start by locating it.
         let doccExecutableURL = try context.doccExecutable
         
