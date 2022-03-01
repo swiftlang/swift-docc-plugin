@@ -39,10 +39,19 @@ final class SingleLibraryTargetTests: XCTestCase {
         )
         
         result.assertExitStatusEquals(0)
-        XCTAssertTrue(
+        
+        /*
+         
+         Skipping the remaining assertion because SwiftPM has recently started emitting regular
+         build status logging to standard error instead of standard output.
+         
+         Tracked with rdar://89598464.
+        
+         XCTAssertTrue(
             result.standardError.isEmpty,
             "Standard error should be empty. Contains: '\(result.standardError)'."
-        )
+         )
+        */
     }
     
     func testGenerateDocumentationWithCustomOutput() throws {
