@@ -40,6 +40,7 @@ extension XCTestCase {
         
         return SwiftInvocationResult(
             workingDirectory: directoryURL,
+            swiftExecutable: try swiftExecutableURL,
             arguments: arguments,
             standardOutput: try standardOutput.asString() ?? "",
             standardError: try standardError.asString() ?? "",
@@ -68,6 +69,7 @@ extension XCTestCase {
 
 struct SwiftInvocationResult {
     let workingDirectory: URL?
+    let swiftExecutable: URL
     let arguments: [CustomStringConvertible]
     let standardOutput: String
     let standardError: String
@@ -85,15 +87,15 @@ struct SwiftInvocationResult {
             .compactMap(URL.init(fileURLWithPath:))
     }
     
-    private static func gatherShellEnvironmentInfo(workingDirectory directoryURL: URL?) throws -> String {
+    private func gatherShellEnvironmentInfo() throws -> String {
         let gatherEnvironmentProcess = Process.shell(
             """
             echo -n "pwd: " && pwd && \
-            echo -n "which swift: " && which swift && \
-            swiftc -v && \
-            swift package --version
+            echo "which swift: \(swiftExecutable.path)" && \
+            \(swiftExecutable.path) --version && \
+            \(swiftExecutable.path) package --version
             """,
-            workingDirectory: directoryURL
+            workingDirectory: workingDirectory
         )
         
         let gatherEnvironmentPipe = Pipe()
@@ -111,7 +113,7 @@ struct SwiftInvocationResult {
         line: UInt = #line
     ) {
         let environmentInfo = (
-            try? Self.gatherShellEnvironmentInfo(workingDirectory: workingDirectory)
+            try? gatherShellEnvironmentInfo()
         ) ?? "failed to gather environment information"
         
         XCTAssertEqual(
