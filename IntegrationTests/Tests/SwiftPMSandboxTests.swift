@@ -13,14 +13,12 @@ final class SwiftPMSandboxTests: XCTestCase {
         let outputDirectory = try temporaryDirectory()
         
         let result = try swiftPackage(
-            """
-            --allow-writing-to-directory "\(outputDirectory.path)" \
-                generate-documentation \
-                --output-path "\(outputDirectory.path)"
-            """,
+            "--allow-writing-to-directory", outputDirectory.path,
+            "generate-documentation",
+            "--output-path", outputDirectory.path,
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0, result.standardError)
+        result.assertExitStatusEquals(0)
     }
 }

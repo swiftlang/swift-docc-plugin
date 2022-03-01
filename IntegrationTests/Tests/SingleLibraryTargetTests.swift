@@ -15,7 +15,7 @@ final class SingleLibraryTargetTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
@@ -33,18 +33,25 @@ final class SingleLibraryTargetTests: XCTestCase {
     }
     
     func testDocumentationGenerationDoesNotEmitErrors() throws {
-        try XCTSkipIf(true, "rdar://86787186")
-        
         let result = try swiftPackage(
             "generate-documentation",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
-        XCTAssertTrue(
+        result.assertExitStatusEquals(0)
+        
+        /*
+         
+         Skipping the remaining assertion because SwiftPM has recently started emitting regular
+         build status logging to standard error instead of standard output.
+         
+         Tracked with rdar://89598464.
+        
+         XCTAssertTrue(
             result.standardError.isEmpty,
             "Standard error should be empty. Contains: '\(result.standardError)'."
-        )
+         )
+        */
     }
     
     func testGenerateDocumentationWithCustomOutput() throws {
@@ -53,14 +60,12 @@ final class SingleLibraryTargetTests: XCTestCase {
         )
         
         let result = try swiftPackage(
-            """
-            --disable-sandbox generate-documentation \
-                --output-path "\(customOutputDirectory.path)"
-            """,
+            "--allow-writing-to-directory", customOutputDirectory.path,
+            "generate-documentation", "--output-path", customOutputDirectory.path,
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         XCTAssertEqual(result.referencedDocCArchives.count, 1)
         let referencedDoccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
         

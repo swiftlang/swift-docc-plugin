@@ -12,9 +12,16 @@ import PackageDescription
 
 let package = Package(
     name: "IntegrationTests",
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+    ],
     targets: [
         .testTarget(
             name: "IntegrationTests",
+            dependencies: [
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+            ],
             path: "Tests",
             resources: [
                 .copy("Fixtures/SingleLibraryTarget"),

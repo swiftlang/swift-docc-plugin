@@ -6,10 +6,10 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-import PackagePlugin
+import Foundation
 
-extension Target {
-    var asSwiftSourceModuleTarget: SwiftSourceModuleTarget? {
-        return self as? SwiftSourceModuleTarget
+extension String {
+    var singleQuoted: String {
+        return "'\(self)'"
     }
 }

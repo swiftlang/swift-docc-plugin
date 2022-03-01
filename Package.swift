@@ -16,15 +16,16 @@ let package = Package(
         .macOS("10.15.4"),
     ],
     products: [
-        .plugin(name: "Swift-DocC Convert", targets: ["Swift-DocC Convert"]),
+        .plugin(name: "Swift-DocC", targets: ["Swift-DocC"]),
         .plugin(name: "Swift-DocC Preview", targets: ["Swift-DocC Preview"]),
     ],
     targets: [
         .plugin(
-            name: "Swift-DocC Convert",
+            name: "Swift-DocC",
             capability: .command(
                 intent: .documentationGeneration()
             ),
+            path: "Plugins/Swift-DocC Convert",
             exclude: ["Symbolic Links/README.md"]
         ),
         

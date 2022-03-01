@@ -13,6 +13,8 @@
     func foo() {}
     
     static func main() {}
+    
+    init() {}
 }
 
 /// This is bar's documentation.
@@ -20,4 +22,6 @@
 /// Bar is a private struct and should not be included in documentation.
 private struct Bar {
     private func bar() {}
+    
+    private init() {}
 }

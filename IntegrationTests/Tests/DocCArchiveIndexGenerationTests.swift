@@ -15,7 +15,7 @@ final class DocCArchiveIndexGenerationTests: XCTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(0)
         let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
         
         let indexDirectoryContents = try filesIn(.indexSubdirectory, of: doccArchiveURL)

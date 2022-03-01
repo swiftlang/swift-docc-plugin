@@ -10,14 +10,12 @@ import XCTest
 
 final class SingleTestTargetTests: XCTestCase {
     func testDoesNotGenerateDocumentation() throws {
-        try XCTSkipIf(true, "rdar://86786080")
-        
         let result = try swiftPackage(
             "generate-documentation",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleTestTarget")
         )
         
-        XCTAssertEqual(result.exitStatus, 0)
+        result.assertExitStatusEquals(1)
         XCTAssertTrue(result.referencedDocCArchives.isEmpty)
     }
 }

@@ -43,15 +43,15 @@ You can then invoke the plugin from the root of your repository like so:
 swift package generate-documentation
 ```
 
-This will generate documentation for all compatible targets in your package and print
-the location of the resulting DocC archives.
+This will generate documentation for all compatible targets defined in your package and its dependencies 
+and print the location of the resulting DocC archives.
 
 If you'd like to generate documentation for a specific target and output that
 to a specific directory, you can do something like the following:
 
 ```shell
-swift package --allow-writing-to-directory ./docs --target MyFramework \
-    generate-documentation --output-path ./docs
+swift package --allow-writing-to-directory ./docs \
+    generate-documentation --target MyFramework --output-path ./docs
 ```
 
 Notice that the output path must also be passed to SwiftPM via the 
@@ -64,8 +64,8 @@ along to the `docc` command-line tool. For example, to take advantage of Swift-D
 for hosting in static environments like GitHub Pages, you could run the following:
 
 ```shell
-swift package --allow-writing-to-directory ./docs --target MyFramework \
-    generate-documentation --output-path ./docs \
+swift package --allow-writing-to-directory ./docs \
+    generate-documentation --target MyFramework --output-path ./docs \
     --transform-for-static-hosting --hosting-base-path MyFramework
 ```
 
@@ -77,7 +77,14 @@ unlike converting documentation, previewing is limited to a single target a time
 To preview documentation for the MyFramework target, you could run the following:
 
 ```shell
-swift package --disable-sandbox --target MyFramework preview-documentation
+swift package --disable-sandbox preview-documentation --target MyFramework
+```
+
+To preview documentation for a product defined by one of your package's dependencies,
+you could run the following:
+
+```shell
+swift package --disable-sandbox preview-documentation --product OtherFramework
 ```
 
 ### Hosting Documentation

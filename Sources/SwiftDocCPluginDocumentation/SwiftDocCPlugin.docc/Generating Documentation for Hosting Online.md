@@ -10,7 +10,7 @@ like Xcode, to render a navigator of all included documentation in the archive. 
 isn't relevant when hosting online, you can pass the `--disable-indexing` flag
 when generating documentation thats intended for an online host.
 
-    $ swift package --target [target-name] generate-documentation --disable-indexing
+    $ swift package generate-documentation --target [target-name] --disable-indexing
 
 You'll likely want to pass an output path to Swift-DocC to send the relevant files
 to a specific directory. 
@@ -18,9 +18,8 @@ to a specific directory.
 > Important: Remember to pass the `--allow-writing-to-directory` flag
 > to include that directory in the SwiftPM sandboxing environment for the Swift-DocC plugin.
 
-    $ swift package --target [target-name] \ 
-        --allow-writing-to-directory [output-directory-path] \ 
-        generate-documentation --disable-indexing \
+    $ swift package --allow-writing-to-directory [output-directory-path] \ 
+        generate-documentation --target [target-name] --disable-indexing \
         --output-path [output-directory-path]
 
 The files at the passed `[output-directory-path]` are now ready to be published online. Please
@@ -35,9 +34,8 @@ Alternatively, if you'd like to avoid setting custom routing rules on your serve
 hosting in an environment where this isn't possible, you can generate documentation that
 has been transformed for static hosting.
 
-    $ swift package --target [target-name] \ 
-        --allow-writing-to-directory [output-directory-path] \ 
-        generate-documentation --disable-indexing \
+    $ swift package --allow-writing-to-directory [output-directory-path] \ 
+        generate-documentation --target [target-name] --disable-indexing \
         --output-path [output-directory-path] \
         --transform-for-static-hosting
 
@@ -46,9 +44,8 @@ any custom routing rules on your website, as long as you're hosting the document
 at the root of your website. If you'd like to host your documentation at a sub-path, you
 can use the `--hosting-base-path` argument.
 
-    $ swift package --target [target-name] \ 
-        --allow-writing-to-directory [output-directory-path] \ 
-        generate-documentation --disable-indexing \
+    $ swift package --allow-writing-to-directory [output-directory-path] \ 
+        generate-documentation --target [target-name] --disable-indexing \
         --output-path [output-directory-path] \
         --transform-for-static-hosting \
         --hosting-base-path [hosting-base-path]

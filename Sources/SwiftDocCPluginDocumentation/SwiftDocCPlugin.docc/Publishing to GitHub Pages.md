@@ -67,8 +67,7 @@ of the repository you cloned to host your documentation, run the following **fro
 of the Swift package you want to generate documentation from**:
 
     $ swift package --allow-writing-to-directory [path-to-docs-directory] \
-        --target [target-name] \
-        generate-documentation \
+        generate-documentation --target [target-name] \
         --disable-indexing \
         --transform-for-static-hosting \
         --hosting-base-path [hosting-base-path] \
