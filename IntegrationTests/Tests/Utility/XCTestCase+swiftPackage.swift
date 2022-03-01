@@ -63,7 +63,12 @@ extension XCTestCase {
                 standardOutputPipe.asString()
             ).trimmingCharacters(in: .newlines)
             
-            return URL(fileURLWithPath: swiftExecutablePath).resolvingSymlinksInPath()
+            // Explicitly refer to 'swift' here since 'which swift' returns ../usr/bin/swift-frontend
+            // instead of /usr/bin/swift on SwiftCI.
+            return URL(fileURLWithPath: swiftExecutablePath)
+                .resolvingSymlinksInPath()
+                .deletingLastPathComponent()
+                .appendingPathComponent("swift")
         }
     }
 }

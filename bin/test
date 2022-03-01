@@ -24,7 +24,7 @@ SWIFT_DOCC_PLUGIN_ROOT="$(dirname $(dirname $(filepath $0)))"
 swift test --parallel --package-path "$SWIFT_DOCC_PLUGIN_ROOT"
 
 # Build and test Swift-DocC Plugin integration tests
-swift test --package-path "$SWIFT_DOCC_PLUGIN_ROOT/IntegrationTests"
+swift test --parallel --package-path "$SWIFT_DOCC_PLUGIN_ROOT/IntegrationTests"
 
 # Run source code checks for the codebase.
 LC_ALL=C "$SWIFT_DOCC_PLUGIN_ROOT"/bin/check-source
