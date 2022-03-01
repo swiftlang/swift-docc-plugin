@@ -116,9 +116,20 @@ import PackagePlugin
         }
         
         // Configure the `docc preview` process with the generated arguments
-        let process = Process()
-        process.executableURL = doccExecutableURL
-        process.arguments = doccArguments
+        let previewProcess = Process()
+        previewProcess.executableURL = doccExecutableURL
+        previewProcess.arguments = doccArguments
+        
+        
+        func stopPreviewProcess() {
+            #if os(macOS) && os(iOS) && os(tvOS) && os(watchOS)
+            previewProcess.interrupt()
+            #else
+            // On non-Darwin systems, `docc` doesn't properly exit with just an interrupt signal
+            // so send a SIGKILL instead.
+            kill(previewProcess.processIdentifier, SIGKILL)
+            #endif
+        }
         
         // Monitor for a termination signal and pass any along to the child `docc` preview
         // process.
@@ -128,7 +139,8 @@ import PackagePlugin
         signal(SIGTERM, SIG_IGN)
         let terminateSignalSource = DispatchSource.makeSignalSource(signal: SIGTERM)
         terminateSignalSource.setEventHandler {
-            process.terminate()
+            terminateSignalSource.cancel()
+            stopPreviewProcess()
         }
         terminateSignalSource.resume()
 
@@ -137,18 +149,19 @@ import PackagePlugin
         signal(SIGINT, SIG_IGN)
         let interruptSignalSource = DispatchSource.makeSignalSource(signal: SIGINT)
         interruptSignalSource.setEventHandler {
-            process.interrupt()
+            interruptSignalSource.cancel()
+            stopPreviewProcess()
         }
         interruptSignalSource.resume()
         
         // Run the docc preview process and wait until it exits.
-        try process.run()
-        process.waitUntilExit()
+        try previewProcess.run()
+        previewProcess.waitUntilExit()
         
         // Check whether the `docc preview` invocation was successful.
-        guard process.terminationReason == .exit && process.terminationStatus == 0 else {
+        guard previewProcess.terminationReason == .exit && previewProcess.terminationStatus == 0 else {
             Diagnostics.error("""
-                'docc preview' invocation failed with a nonzero exit code: '\(process.terminationStatus)'.
+                'docc preview' invocation failed with a nonzero exit code: '\(previewProcess.terminationStatus)'.
                 
                 Note: The Swift-DocC Preview plugin requires passing the '--disable-sandbox' flag
                 to the Swift Package Manager because it requires local network access to
