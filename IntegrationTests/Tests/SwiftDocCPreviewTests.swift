@@ -23,11 +23,12 @@ final class SwiftDocCPreview: XCTestCase {
         let port = try getAvailablePort()
         
         for index in 1...3 {
-            let outputDirectory = try temporaryDirectory()
+            let outputDirectory = try temporaryDirectory().appendingPathComponent("output")
             
             let process = try swiftPackageProcess(
                 [
                     "--disable-sandbox",
+                    "--allow-writing-to-directory", outputDirectory.path,
                     "preview-documentation",
                     "--port", port,
                     "--output-path", outputDirectory.path
@@ -53,7 +54,7 @@ final class SwiftDocCPreview: XCTestCase {
             
             let previewServerHasStartedExpectation = expectation(description: "Preview server started.")
             
-            _ = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { timer in
+            let checkPreviewServerTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { timer in
                 if previewServerHasStarted {
                     previewServerHasStartedExpectation.fulfill()
                     timer.invalidate()
@@ -61,37 +62,50 @@ final class SwiftDocCPreview: XCTestCase {
             }
             
             wait(for: [previewServerHasStartedExpectation], timeout: 15)
+            checkPreviewServerTimer.invalidate()
             
             guard previewServerHasStarted else {
                 XCTFail(
                     """
                     Preview server never started on iteration '\(index)'.
                     
-                    Process output: \(try outputPipe.asString() ?? "nil")
+                    Process output:
+                    \(try outputPipe.asString() ?? "nil")
                     """
                 )
                 return
             }
             
             // Wait an additional half second
-            Thread.sleep(forTimeInterval: 0.5)
+            wait(for: 0.5)
             
             guard process.isRunning else {
                 XCTFail(
                     """
                     Preview server failed to start on iteration '\(index)'.
                     
-                    Process output: \(try outputPipe.asString() ?? "nil")
+                    Process output:
+                    \(try outputPipe.asString() ?? "nil")
                     """
                 )
                 return
             }
             
-            // Sleep 1.5 seconds
-            Thread.sleep(forTimeInterval: 1.5)
+            // Wait 1.5 seconds
+            wait(for: 1.5)
             
             // Assert that long-running preview server process is still running after 2 seconds
-            XCTAssertTrue(process.isRunning, "Preview server failed early on iteration '\(index)'.")
+            guard process.isRunning else {
+                XCTFail(
+                    """
+                    Preview server failed early on iteration '\(index)'.
+                    
+                    Process output:
+                    \(try outputPipe.asString() ?? "nil")
+                    """
+                )
+                return
+            }
             
             // Send an interrupt to the SwiftPM parent process
             process.interrupt()
