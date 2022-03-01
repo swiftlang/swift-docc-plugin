@@ -143,14 +143,10 @@ struct SwiftInvocationResult {
 }
 
 extension Pipe {
-    fileprivate func asString() throws -> String? {
+    func asString() throws -> String? {
         return try fileHandleForReading.readToEnd().flatMap {
             String(data: $0, encoding: .utf8)
         }
-    }
-    
-    var availableOutput: String? {
-        return String(data: fileHandleForReading.availableData, encoding: .utf8)
     }
 }
 
