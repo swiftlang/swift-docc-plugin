@@ -92,7 +92,7 @@ struct SnippetBuildCommand: ParsableCommand {
         let topLevelSnippets = try files(in: snippetsDirectory, withExtension: "swift")
             .map { try Snippet(parsing: $0.asURL) }
 
-        let topLevelSnippetGroup = SnippetGroup(name: "Getting Started",
+        let topLevelSnippetGroup = SnippetGroup(name: "Snippets",
                                                 baseDirectory: snippetsDirectory.asURL,
                                                 snippets: topLevelSnippets,
                                                 explanation: "")
