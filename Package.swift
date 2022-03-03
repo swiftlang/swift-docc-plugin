@@ -26,6 +26,9 @@ let package = Package(
             capability: .command(
                 intent: .documentationGeneration()
             ),
+            dependencies: [
+                "snippet-build",
+            ],
             path: "Plugins/Swift-DocC Convert",
             exclude: ["Symbolic Links/README.md"]
         ),
@@ -74,7 +77,7 @@ if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
     package.dependencies += [
         .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "1.0.1")),
-        .package(url: "https://github.com/apple/swift-tools-support-core.git", .branch("main")),
+        .package(url: "https://github.com/apple/swift-tools-support-core.git", branch: "main"),
     ]
 } else {
     package.dependencies += [

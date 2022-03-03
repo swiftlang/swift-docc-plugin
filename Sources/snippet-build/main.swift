@@ -62,6 +62,7 @@ struct SnippetBuildCommand: ParsableCommand {
         let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "swift-docc-plugin/snippet-build")
         let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil))
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: groups + snippets, relationships: relationships)
+        try FileManager.default.createDirectory(atPath: emitPath.pathString, withIntermediateDirectories: true, attributes: nil)
         let encoder = JSONEncoder()
         let data = try encoder.encode(symbolGraph)
         try data.write(to: emitFilename.asURL)

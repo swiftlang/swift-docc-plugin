@@ -10,7 +10,65 @@ import Foundation
 import PackagePlugin
 
 /// Creates a Swift-DocC documentation archive from a Swift Package.
-@main struct SwiftDocCConvert: CommandPlugin {
+@main final class SwiftDocCConvert: CommandPlugin {
+    /// Maps a SwiftPM package unique identifier to the path of a generated snippet symbol graph
+    /// for the package.
+    var snippetSymbolGraphs = [Package.ID : SnippetSymbolGraph]()
+    
+    enum SnippetSymbolGraph {
+        case packageDoesNotContainSnippets
+        case packageContainsSnippets(Path)
+    }
+    
+    func generateSnippets(
+        for target: SwiftSourceModuleTarget,
+        context: PluginContext
+    ) throws -> SnippetSymbolGraph {
+        guard let package = context.package.package(for: target) else {
+            return .packageDoesNotContainSnippets
+        }
+        
+        if let existingSymbolGraphs = snippetSymbolGraphs[package.id] {
+            return existingSymbolGraphs
+        }
+        
+        let snippetsDirectory = package.directory.appending(["_Snippets"])
+        guard FileManager.default.fileExists(atPath: snippetsDirectory.string) else {
+            snippetSymbolGraphs[package.id] = .packageDoesNotContainSnippets
+            return .packageDoesNotContainSnippets
+        }
+        
+        let snippetTool = try context.tool(named: "snippet-build")
+        let snippetToolURL = URL(fileURLWithPath: snippetTool.path.string)
+        
+        let outputPath = context.pluginWorkDirectory.appending(
+            [
+                ".build",
+                "snippet-symbol-graphs",
+                "\(package.displayName)-\(package.id)",
+            ]
+        )
+        
+        let process = Process()
+        process.executableURL = snippetToolURL
+        process.arguments = [
+            "--package-path", package.directory.string,
+            "--output-dir", outputPath.string,
+            "--module-name", package.displayName,
+        ]
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        if FileManager.default.fileExists(atPath: outputPath.string) {
+            snippetSymbolGraphs[package.id] = .packageContainsSnippets(outputPath)
+            return .packageContainsSnippets(outputPath)
+        } else {
+            snippetSymbolGraphs[package.id] = .packageDoesNotContainSnippets
+            return .packageDoesNotContainSnippets
+        }
+    }
+    
     func performCommand(context: PluginContext, arguments: [String]) throws {
         // We'll be creating commands that invoke `docc`, so start by locating it.
         let doccExecutableURL = try context.doccExecutable
@@ -30,6 +88,10 @@ import PackagePlugin
         }
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
+        
+        let experimentalSnippetSupportIsEnabled = argumentExtractor.extractFlag(
+            named: "enable-experimental-snippet-support"
+        ) > 0
         
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
@@ -62,16 +124,52 @@ import PackagePlugin
             }
             
             // Ask SwiftPM to generate or update symbol graph files for the target.
-            let symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
+            var symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
                 for: target,
                 options: symbolGraphOptions
-            ).directoryPath.string
+            ).directoryPath
             
             if verbose {
                 print("symbol graph directory path: '\(symbolGraphDirectoryPath)'")
             }
             
-            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
+            if experimentalSnippetSupportIsEnabled {
+                if case let .packageContainsSnippets(snippetPath) = try generateSnippets(
+                    for: target,
+                    context: context
+                ) {
+                    print("to path: ", symbolGraphDirectoryPath)
+                    let unifiedSymbolGraphDirectory = context.pluginWorkDirectory.appending(
+                        [
+                            ".build",
+                            "symbol-graphs",
+                            "\(target.name)-\(target.id)"
+                        ]
+                    )
+                    
+                    try? FileManager.default.removeItem(atPath: unifiedSymbolGraphDirectory.string)
+                    
+                    try FileManager.default.createDirectory(
+                        atPath: unifiedSymbolGraphDirectory.string,
+                        withIntermediateDirectories: true,
+                        attributes: nil
+                    )
+                    
+                    try FileManager.default.copyItem(
+                        atPath: snippetPath.string,
+                        toPath: unifiedSymbolGraphDirectory.appending(["snippet-graphs"]).string
+                    )
+                    
+                    try FileManager.default.copyItem(
+                        atPath: symbolGraphDirectoryPath.string,
+                        toPath: unifiedSymbolGraphDirectory.appending(["target-module-graphs"]).string
+                    )
+                    
+                    symbolGraphDirectoryPath = unifiedSymbolGraphDirectory
+                }
+            }
+            
+            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath.string).isEmpty {
                 // This target did not produce any symbol graphs. Let's check if it has a
                 // DocC catalog.
                 
@@ -110,7 +208,7 @@ import PackagePlugin
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
-                symbolGraphDirectoryPath: symbolGraphDirectoryPath,
+                symbolGraphDirectoryPath: symbolGraphDirectoryPath.string,
                 outputPath: doccArchiveOutputPath
             )
             
