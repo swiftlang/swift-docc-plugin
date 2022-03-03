@@ -52,7 +52,7 @@ import PackagePlugin
         let process = Process()
         process.executableURL = snippetToolURL
         process.arguments = [
-            "--package-path", package.directory.string,
+            "--snippets-dir", snippetsDirectory.string,
             "--output-dir", outputPath.string,
             "--module-name", package.displayName,
         ]
