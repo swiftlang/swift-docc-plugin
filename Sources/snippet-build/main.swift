@@ -12,8 +12,8 @@ import SymbolKit
 import TSCBasic
 
 struct SnippetBuildCommand: ParsableCommand {
-    @Option(help: "The Swift package path containing a `Snippets` directory")
-    var packagePath: String
+    @Option(help: "The directory containing Swift snippets")
+    var snippetsDir: String
 
     @Option(help: "The directory to write Symbol Graph JSON files")
     var outputDir: String
@@ -22,15 +22,24 @@ struct SnippetBuildCommand: ParsableCommand {
     var moduleName: String
 
     func run() throws {
-        let snippetGroups = try loadSnippetsAndSnippetGroups(from: AbsolutePath(packagePath))
+        print("Looking for snippets in \(snippetsDir.debugDescription)")
+        let snippetGroups = try loadSnippetsAndSnippetGroups(from: AbsolutePath(snippetsDir))
+
+        let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
+        print("Found \(snippetGroups.count) snippet groups, \(totalSnippetCount) snippets in total.")
+
         guard !snippetGroups.isEmpty,
               snippetGroups.allSatisfy({ !$0.snippets.isEmpty }) else {
                   return
               }
-        try emitSymbolGraphs(forSnippetGroups: snippetGroups, to: AbsolutePath(outputDir), moduleName: moduleName)
+
+        let symbolGraphFilename = AbsolutePath(outputDir).appending(component: "\(moduleName)-snippets.symbols.json")
+
+        print("Writing snippet symbol graph to \(symbolGraphFilename.pathString.debugDescription)")
+        try emitSymbolGraph(forSnippetGroups: snippetGroups, to: symbolGraphFilename, moduleName: moduleName)
     }
 
-    public func emitSymbolGraphs(forSnippetGroups snippetGroups: [SnippetGroup], to emitPath: AbsolutePath, moduleName: String) throws {
+    public func emitSymbolGraph(forSnippetGroups snippetGroups: [SnippetGroup], to emitFilename: AbsolutePath, moduleName: String) throws {
         var groups = [SymbolGraph.Symbol]()
         var snippets = [SymbolGraph.Symbol]()
         var relationships = [SymbolGraph.Relationship]()
@@ -55,7 +64,7 @@ struct SnippetBuildCommand: ParsableCommand {
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: groups + snippets, relationships: relationships)
         let encoder = JSONEncoder()
         let data = try encoder.encode(symbolGraph)
-        try data.write(to: emitPath.appending(component: "\(moduleName)-snippets.symbols.json").asURL)
+        try data.write(to: emitFilename.asURL)
     }
 
     func files(in directory: AbsolutePath, withExtension fileExtension: String? = nil) throws -> [AbsolutePath] {
@@ -83,8 +92,7 @@ struct SnippetBuildCommand: ParsableCommand {
             .filter { localFileSystem.isDirectory($0) }
     }
 
-    func loadSnippetsAndSnippetGroups(from packagePath: AbsolutePath) throws -> [SnippetGroup] {
-        let snippetsDirectory = packagePath.appending(component: "Snippets")
+    func loadSnippetsAndSnippetGroups(from snippetsDirectory: AbsolutePath) throws -> [SnippetGroup] {
         guard localFileSystem.isDirectory(snippetsDirectory) else {
             return []
         }
