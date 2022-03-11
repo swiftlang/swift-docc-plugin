@@ -9,9 +9,6 @@ Please see
 [the plugin's documentation](https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/)
 for more detailed usage instructions.
 
-**Note:** The Swift-DocC plugin is under **active-development** and is not ready for production
-use. 
-
 We anticipate releasing a `1.0` version of the Swift-DocC plugin aligned with
 the release of Swift `5.6`.
 
@@ -24,7 +21,7 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/apple/swift-docc-plugin", branch: "main"),
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
         // targets
@@ -32,8 +29,7 @@ let package = Package(
 )
 ```
 
-Swift 5.6 is required in order to run the plugin. Development snapshots that include Swift 5.6
-can be found on [Swift.org](https://www.swift.org/download/#snapshots).
+Swift 5.6 is required in order to run the plugin.
 
 ### Converting Documentation
 
