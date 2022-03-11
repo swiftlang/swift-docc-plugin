@@ -17,9 +17,6 @@ extension XCTestCase {
     /// This allows tests to more reliably run in parallel and in CI where
     /// we can't be sure which ports will be available.
     func getAvailablePort() throws -> Int {
-        // https://bugs.swift.org/browse/SR-15912
-        try XCTSkipIf(true, "SR-15912: Trunk snapshot compiler for linux miscompiles NIO.")
-        
         // Start up the server.
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let server = ServerBootstrap(group: eventLoopGroup)
