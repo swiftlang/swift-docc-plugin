@@ -9,9 +9,6 @@ Please see
 [the plugin's documentation](https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/)
 for more detailed usage instructions.
 
-We anticipate releasing a `1.0` version of the Swift-DocC plugin aligned with
-the release of Swift `5.6`.
-
 ### Adding the Swift-DocC Plugin as a Dependency
 
 To use the Swift-DocC plugin with your package, first add it as a dependency:
