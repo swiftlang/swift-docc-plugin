@@ -11,7 +11,7 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/apple/swift-docc-plugin", branch: "main"),
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
         // targets
@@ -20,8 +20,6 @@ let package = Package(
 ```
 
 > Important: Swift 5.6 is required in order to run the plugin. 
->            Development snapshots that include Swift 5.6
->            can be found on [Swift.org](https://www.swift.org/download/#snapshots).
 
 You can then invoke the plugin from the root of your repository like so:
 
