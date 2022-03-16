@@ -10,69 +10,7 @@ import Foundation
 import PackagePlugin
 
 /// Creates a Swift-DocC documentation archive from a Swift Package.
-@main final class SwiftDocCConvert: CommandPlugin {
-    /// Maps a SwiftPM package unique identifier to the path of a generated snippet symbol graph
-    /// for the package.
-    var snippetSymbolGraphs = [Package.ID : SnippetSymbolGraph]()
-    
-    enum SnippetSymbolGraph {
-        case packageDoesNotContainSnippets
-        case packageContainsSnippets(Path)
-    }
-    
-    func generateSnippets(
-        for target: SwiftSourceModuleTarget,
-        context: PluginContext
-    ) throws -> SnippetSymbolGraph {
-        guard let package = context.package.package(for: target) else {
-            return .packageDoesNotContainSnippets
-        }
-        
-        if let existingSymbolGraphs = snippetSymbolGraphs[package.id] {
-            return existingSymbolGraphs
-        }
-        
-        let snippetsDirectory = package.directory.appending(["_Snippets"])
-        guard FileManager.default.fileExists(atPath: snippetsDirectory.string) else {
-            snippetSymbolGraphs[package.id] = .packageDoesNotContainSnippets
-            return .packageDoesNotContainSnippets
-        }
-        
-        let snippetTool = try context.tool(named: "snippet-build")
-        let snippetToolURL = URL(fileURLWithPath: snippetTool.path.string)
-        
-        let outputPath = context.pluginWorkDirectory.appending(
-            [
-                ".build",
-                "snippet-symbol-graphs",
-                "\(package.displayName)-\(package.id)",
-            ]
-        )
-        
-        let process = Process()
-        process.executableURL = snippetToolURL
-        process.arguments = [
-            // Can't use ArgumentParser in snippet-build rdar://89789701
-            // "--snippets-dir", snippetsDirectory.string,
-            // "--output-dir", outputPath.string,
-            // "--module-name", package.displayName,
-            snippetsDirectory.string,
-            outputPath.string,
-            package.displayName,
-        ]
-        
-        try process.run()
-        process.waitUntilExit()
-        
-        if FileManager.default.fileExists(atPath: outputPath.string) {
-            snippetSymbolGraphs[package.id] = .packageContainsSnippets(outputPath)
-            return .packageContainsSnippets(outputPath)
-        } else {
-            snippetSymbolGraphs[package.id] = .packageDoesNotContainSnippets
-            return .packageDoesNotContainSnippets
-        }
-    }
-    
+@main struct SwiftDocCConvert: CommandPlugin {
     func performCommand(context: PluginContext, arguments: [String]) throws {
         // We'll be creating commands that invoke `docc`, so start by locating it.
         let doccExecutableURL = try context.doccExecutable
@@ -112,6 +50,17 @@ import PackagePlugin
             return
         }
         
+        let snippetBuilder: SnippetBuilder?
+        if experimentalSnippetSupportIsEnabled {
+            let snippetBuildTool = try context.tool(named: "snippet-build")
+            snippetBuilder = SnippetBuilder(
+                snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
+                workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
+            )
+        } else {
+            snippetBuilder = nil
+        }
+        
         // Iterate over the Swift source module targets we were given.
         for (index, target) in swiftSourceModuleTargets.enumerated() {
             if index != 0 {
@@ -121,59 +70,14 @@ import PackagePlugin
             
             print("Generating documentation for '\(target.name)'...")
             
-            let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
-            
-            if verbose {
-                print("symbol graph options: '\(symbolGraphOptions)'")
-            }
-            
-            // Ask SwiftPM to generate or update symbol graph files for the target.
-            var symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
+            let symbolGraphs = try packageManager.doccSymbolGraphs(
                 for: target,
-                options: symbolGraphOptions
-            ).directoryPath
+                context: context,
+                verbose: verbose,
+                snippetBuilder: snippetBuilder
+            )
             
-            if verbose {
-                print("symbol graph directory path: '\(symbolGraphDirectoryPath)'")
-            }
-            
-            if experimentalSnippetSupportIsEnabled {
-                if case let .packageContainsSnippets(snippetPath) = try generateSnippets(
-                    for: target,
-                    context: context
-                ) {
-                    print("to path: ", symbolGraphDirectoryPath)
-                    let unifiedSymbolGraphDirectory = context.pluginWorkDirectory.appending(
-                        [
-                            ".build",
-                            "symbol-graphs",
-                            "\(target.name)-\(target.id)"
-                        ]
-                    )
-                    
-                    try? FileManager.default.removeItem(atPath: unifiedSymbolGraphDirectory.string)
-                    
-                    try FileManager.default.createDirectory(
-                        atPath: unifiedSymbolGraphDirectory.string,
-                        withIntermediateDirectories: true,
-                        attributes: nil
-                    )
-                    
-                    try FileManager.default.copyItem(
-                        atPath: snippetPath.string,
-                        toPath: unifiedSymbolGraphDirectory.appending(["snippet-graphs"]).string
-                    )
-                    
-                    try FileManager.default.copyItem(
-                        atPath: symbolGraphDirectoryPath.string,
-                        toPath: unifiedSymbolGraphDirectory.appending(["target-module-graphs"]).string
-                    )
-                    
-                    symbolGraphDirectoryPath = unifiedSymbolGraphDirectory
-                }
-            }
-            
-            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath.string).isEmpty {
+            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
                 // This target did not produce any symbol graphs. Let's check if it has a
                 // DocC catalog.
                 
@@ -212,7 +116,7 @@ import PackagePlugin
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
-                symbolGraphDirectoryPath: symbolGraphDirectoryPath.string,
+                symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
                 outputPath: doccArchiveOutputPath
             )
             
