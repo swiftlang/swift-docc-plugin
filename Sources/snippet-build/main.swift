@@ -6,24 +6,29 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-import ArgumentParser
 import Foundation
 import SymbolKit
-import TSCBasic
 
-struct SnippetBuildCommand: ParsableCommand {
-    @Option(help: "The directory containing Swift snippets")
+struct SnippetBuildCommand {
     var snippetsDir: String
-
-    @Option(help: "The directory to write Symbol Graph JSON files")
     var outputDir: String
-
-    @Option(help: "The module name to use for the Symbol Graph")
     var moduleName: String
+
+    static func printUsage() {
+        let usage = """
+            USAGE: snippet-build <snippet directory> <output directory> <module name>
+
+            ARGUMENTS:
+                <snippet directory> - The directory containing Swift snippets
+                <output directory> - The diretory in which to place Symbol Graph JSON file(s) representing the snippets
+                <module name> - The module name ot use for the Symbol Graph (typically should be the package name)
+            """
+        print(usage)
+    }
 
     func run() throws {
         print("Looking for snippets in \(snippetsDir.debugDescription)")
-        let snippetGroups = try loadSnippetsAndSnippetGroups(from: AbsolutePath(snippetsDir))
+        let snippetGroups = try loadSnippetsAndSnippetGroups(from: URL(fileURLWithPath: snippetsDir))
 
         let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
         print("Found \(snippetGroups.count) snippet groups, \(totalSnippetCount) snippets in total.")
@@ -33,13 +38,13 @@ struct SnippetBuildCommand: ParsableCommand {
                   return
               }
 
-        let symbolGraphFilename = AbsolutePath(outputDir).appending(component: "\(moduleName)-snippets.symbols.json")
+        let symbolGraphFilename = URL(fileURLWithPath: outputDir).appendingPathComponent("\(moduleName)-snippets.symbols.json")
 
-        print("Writing snippet symbol graph to \(symbolGraphFilename.pathString.debugDescription)")
+        print("Writing snippet symbol graph to \(symbolGraphFilename.debugDescription)")
         try emitSymbolGraph(forSnippetGroups: snippetGroups, to: symbolGraphFilename, moduleName: moduleName)
     }
 
-    public func emitSymbolGraph(forSnippetGroups snippetGroups: [SnippetGroup], to emitFilename: AbsolutePath, moduleName: String) throws {
+    func emitSymbolGraph(forSnippetGroups snippetGroups: [SnippetGroup], to emitFilename: URL, moduleName: String) throws {
         var groups = [SymbolGraph.Symbol]()
         var snippets = [SymbolGraph.Symbol]()
         var relationships = [SymbolGraph.Relationship]()
@@ -62,66 +67,66 @@ struct SnippetBuildCommand: ParsableCommand {
         let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "swift-docc-plugin/snippet-build")
         let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil))
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: groups + snippets, relationships: relationships)
-        try FileManager.default.createDirectory(atPath: emitFilename.parentDirectory.pathString, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(atPath: emitFilename.deletingLastPathComponent().path, withIntermediateDirectories: true, attributes: nil)
         let encoder = JSONEncoder()
         let data = try encoder.encode(symbolGraph)
-        try data.write(to: emitFilename.asURL)
+        try data.write(to: emitFilename)
     }
 
-    func files(in directory: AbsolutePath, withExtension fileExtension: String? = nil) throws -> [AbsolutePath] {
-        guard localFileSystem.isDirectory(directory) else {
+    func files(in directory: URL, withExtension fileExtension: String? = nil) throws -> [URL] {
+        guard directory.isDirectory else {
             return []
         }
 
-        let files = try localFileSystem.getDirectoryContents(directory)
-            .map { directory.appending(RelativePath($0)) }
-            .filter { localFileSystem.isFile($0) }
+        let files = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+            .map { directory.appendingPathComponent($0) }
+            .filter { $0.isFile }
 
         guard let fileExtension = fileExtension else {
             return files
         }
 
-        return files.filter { $0.extension == fileExtension }
+        return files.filter { $0.pathExtension == fileExtension }
     }
 
-    func subdirectories(in directory: AbsolutePath) throws -> [AbsolutePath] {
-        guard localFileSystem.isDirectory(directory) else {
+    func subdirectories(in directory: URL) throws -> [URL] {
+        guard directory.isDirectory else {
             return []
         }
-        return try localFileSystem.getDirectoryContents(directory)
-            .map { directory.appending(RelativePath($0)) }
-            .filter { localFileSystem.isDirectory($0) }
+        return try FileManager.default.contentsOfDirectory(atPath: directory.path)
+            .map { directory.appendingPathComponent($0) }
+            .filter { $0.isDirectory }
     }
 
-    func loadSnippetsAndSnippetGroups(from snippetsDirectory: AbsolutePath) throws -> [SnippetGroup] {
-        guard localFileSystem.isDirectory(snippetsDirectory) else {
+    func loadSnippetsAndSnippetGroups(from snippetsDirectory: URL) throws -> [SnippetGroup] {
+        guard snippetsDirectory.isDirectory else {
             return []
         }
 
         let topLevelSnippets = try files(in: snippetsDirectory, withExtension: "swift")
-            .map { try Snippet(parsing: $0.asURL) }
+            .map { try Snippet(parsing: $0) }
 
         let topLevelSnippetGroup = SnippetGroup(name: "Snippets",
-                                                baseDirectory: snippetsDirectory.asURL,
+                                                baseDirectory: snippetsDirectory,
                                                 snippets: topLevelSnippets,
                                                 explanation: "")
 
         let subdirectoryGroups = try subdirectories(in: snippetsDirectory)
             .map { subdirectory -> SnippetGroup in
                 let snippets = try files(in: subdirectory, withExtension: "swift")
-                    .map { try Snippet(parsing: $0.asURL) }
+                    .map { try Snippet(parsing: $0) }
 
-                let explanationFile = subdirectory.appending(component: "Explanation.md")
+                let explanationFile = subdirectory.appendingPathComponent("Explanation.md")
 
                 let snippetGroupExplanation: String
-                if localFileSystem.isFile(explanationFile) {
-                    snippetGroupExplanation = try String(contentsOf: explanationFile.asURL)
+                if explanationFile.isFile {
+                    snippetGroupExplanation = try String(contentsOf: explanationFile)
                 } else {
                     snippetGroupExplanation = ""
                 }
 
-                return SnippetGroup(name: subdirectory.basename,
-                                    baseDirectory: subdirectory.asURL,
+                return SnippetGroup(name: subdirectory.lastPathComponent,
+                                    baseDirectory: subdirectory,
                                     snippets: snippets,
                                     explanation: snippetGroupExplanation)
             }
@@ -132,6 +137,17 @@ struct SnippetBuildCommand: ParsableCommand {
 
         return snippetGroups.filter { !$0.snippets.isEmpty }
     }
+
+    static func main() throws {
+        if CommandLine.arguments.count < 4 {
+            printUsage()
+            exit(0)
+        }
+        let snippetBuild = SnippetBuildCommand(snippetsDir: CommandLine.arguments[1],
+                                               outputDir: CommandLine.arguments[2],
+                                               moduleName: CommandLine.arguments[3])
+        try snippetBuild.run()
+    }
 }
 
-SnippetBuildCommand.main()
+try SnippetBuildCommand.main()

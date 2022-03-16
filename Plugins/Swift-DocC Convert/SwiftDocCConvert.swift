@@ -52,9 +52,13 @@ import PackagePlugin
         let process = Process()
         process.executableURL = snippetToolURL
         process.arguments = [
-            "--snippets-dir", snippetsDirectory.string,
-            "--output-dir", outputPath.string,
-            "--module-name", package.displayName,
+            // Can't use ArgumentParser in snippet-build rdar://89789701
+            // "--snippets-dir", snippetsDirectory.string,
+            // "--output-dir", outputPath.string,
+            // "--module-name", package.displayName,
+            snippetsDirectory.string,
+            outputPath.string,
+            package.displayName,
         ]
         
         try process.run()

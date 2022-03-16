@@ -66,9 +66,7 @@ let package = Package(
         .executableTarget(
             name: "snippet-build",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SymbolKit", package: "swift-docc-symbolkit"),
-                .product(name: "TSCBasic", package: "swift-tools-support-core"),
             ])
     ]
 )
@@ -76,13 +74,9 @@ let package = Package(
 if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
     package.dependencies += [
         .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "1.0.1")),
-        .package(url: "https://github.com/apple/swift-tools-support-core.git", branch: "main"),
     ]
 } else {
     package.dependencies += [
         .package(name: "SymbolKit", path: "../swift-docc-symbolkit"),
-        .package(path: "../swift-argument-parser"),
-        .package(path: "../swift-tools-support-core"),
     ]
 }
