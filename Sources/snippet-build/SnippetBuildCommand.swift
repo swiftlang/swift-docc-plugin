@@ -9,6 +9,7 @@
 import Foundation
 import SymbolKit
 
+@main
 struct SnippetBuildCommand {
     var snippetsDir: String
     var outputDir: String
@@ -149,5 +150,3 @@ struct SnippetBuildCommand {
         try snippetBuild.run()
     }
 }
-
-try SnippetBuildCommand.main()
