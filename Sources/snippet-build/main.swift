@@ -21,7 +21,7 @@ struct SnippetBuildCommand {
             ARGUMENTS:
                 <snippet directory> - The directory containing Swift snippets
                 <output directory> - The diretory in which to place Symbol Graph JSON file(s) representing the snippets
-                <module name> - The module name ot use for the Symbol Graph (typically should be the package name)
+                <module name> - The module name to use for the Symbol Graph (typically should be the package name)
             """
         print(usage)
     }
