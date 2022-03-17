@@ -28,11 +28,9 @@ struct SnippetBuildCommand {
     }
 
     func run() throws {
-        print("Looking for snippets in \(snippetsDir.debugDescription)")
         let snippetGroups = try loadSnippetsAndSnippetGroups(from: URL(fileURLWithPath: snippetsDir))
 
         let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
-        print("Found \(snippetGroups.count) snippet groups, \(totalSnippetCount) snippets in total.")
 
         guard !snippetGroups.isEmpty,
               snippetGroups.allSatisfy({ !$0.snippets.isEmpty }) else {
@@ -41,7 +39,6 @@ struct SnippetBuildCommand {
 
         let symbolGraphFilename = URL(fileURLWithPath: outputDir).appendingPathComponent("\(moduleName)-snippets.symbols.json")
 
-        print("Writing snippet symbol graph to \(symbolGraphFilename.debugDescription)")
         try emitSymbolGraph(forSnippetGroups: snippetGroups, to: symbolGraphFilename, moduleName: moduleName)
     }
 
