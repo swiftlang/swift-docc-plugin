@@ -20,6 +20,9 @@ let package = Package(
         .plugin(name: "Swift-DocC", targets: ["Swift-DocC"]),
         .plugin(name: "Swift-DocC Preview", targets: ["Swift-DocC Preview"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
+    ],
     targets: [
         .plugin(
             name: "Swift-DocC",
@@ -70,13 +73,3 @@ let package = Package(
             ])
     ]
 )
-
-if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
-    package.dependencies += [
-        .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
-    ]
-} else {
-    package.dependencies += [
-        .package(name: "SymbolKit", path: "../swift-docc-symbolkit"),
-    ]
-}
