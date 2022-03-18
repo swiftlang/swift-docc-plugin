@@ -25,11 +25,11 @@ final class SnippetBuilderTests: XCTestCase {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
             "/my/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         let existingFilePaths: Set<String> = [
             "/my/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         snippetBuilder._fileExists = { path in
             XCTAssertTrue(
@@ -47,7 +47,7 @@ final class SnippetBuilderTests: XCTestCase {
                     process.arguments,
                     [
                         "/my/package/_Snippets",
-                        "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+                        "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]
                 )
@@ -70,7 +70,7 @@ final class SnippetBuilderTests: XCTestCase {
             XCTAssertEqual(snippetBuilderRunProcessCount, 1)
             XCTAssertEqual(
                 snippetDirectory?.path,
-                "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id"
+                "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id"
             )
         }
     }
@@ -109,16 +109,16 @@ final class SnippetBuilderTests: XCTestCase {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
             "/my/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
             "/my/other/package/Snippets",
             "/my/other/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyOtherPackage-other-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
         ]
         let existingFilePaths: Set<String> = [
             "/my/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
             "/my/other/package/Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyOtherPackage-other-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
         ]
         snippetBuilder._fileExists = { path in
             XCTAssertTrue(
@@ -136,7 +136,7 @@ final class SnippetBuilderTests: XCTestCase {
                     process.arguments,
                     [
                         "/my/package/_Snippets",
-                        "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+                        "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]
                 )
@@ -145,7 +145,7 @@ final class SnippetBuilderTests: XCTestCase {
                     process.arguments,
                     [
                         "/my/other/package/Snippets",
-                        "/test-working-directory/.build/snippet-symbol-graphs/MyOtherPackage-other-package-id",
+                        "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
                         "MyOtherPackage",
                     ]
                 )
@@ -165,7 +165,7 @@ final class SnippetBuilderTests: XCTestCase {
             XCTAssertEqual(snippetBuilderRunProcessCount, 1)
             XCTAssertEqual(
                 snippetDirectory?.path,
-                "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id"
+                "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id"
             )
         }
         
@@ -179,7 +179,7 @@ final class SnippetBuilderTests: XCTestCase {
             XCTAssertEqual(snippetBuilderRunProcessCount, 2)
             XCTAssertEqual(
                 snippetDirectory?.path,
-                "/test-working-directory/.build/snippet-symbol-graphs/MyOtherPackage-other-package-id"
+                "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id"
             )
         }
     }
@@ -188,7 +188,7 @@ final class SnippetBuilderTests: XCTestCase {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
             "/my/package/_Snippets",
-            "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         let existingFilePaths: Set<String> = [
             "/my/package/_Snippets",
@@ -212,7 +212,7 @@ final class SnippetBuilderTests: XCTestCase {
                     process.arguments,
                     [
                         "/my/package/_Snippets",
-                        "/test-working-directory/.build/snippet-symbol-graphs/MyPackage-package-id",
+                        "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]
                 )
