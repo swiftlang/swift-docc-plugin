@@ -7,6 +7,7 @@
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
 import Foundation
+import Snippets
 import SymbolKit
 
 @main
@@ -29,8 +30,6 @@ struct SnippetBuildCommand {
 
     func run() throws {
         let snippetGroups = try loadSnippetsAndSnippetGroups(from: URL(fileURLWithPath: snippetsDir))
-
-        let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
 
         guard !snippetGroups.isEmpty,
               snippetGroups.allSatisfy({ !$0.snippets.isEmpty }) else {

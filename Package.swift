@@ -51,6 +51,7 @@ let package = Package(
         .testTarget(
             name: "SwiftDocCPluginUtilitiesTests",
             dependencies: [
+                "Snippets",
                 "SwiftDocCPluginUtilities",
             ],
             resources: [
@@ -66,10 +67,12 @@ let package = Package(
             path: "Sources/SwiftDocCPluginDocumentation",
             exclude: ["README.md"]
         ),
+        .target(name: "Snippets"),
         .executableTarget(
             name: "snippet-build",
             dependencies: [
+                "Snippets",
                 .product(name: "SymbolKit", package: "swift-docc-symbolkit"),
-            ])
+            ]),
     ]
 )

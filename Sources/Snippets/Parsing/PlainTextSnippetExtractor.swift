@@ -6,12 +6,12 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-fileprivate enum SnippetVisibility {
+enum SnippetVisibility {
     case shown
     case hidden
 }
 
-fileprivate extension StringProtocol {
+extension StringProtocol {
     /// If the string is a line comment, attempt to parse
     /// a ``SnippetVisibility`` with `mark: show` or `mark: hide`.
     var parsedVisibilityMark: SnippetVisibility? {
@@ -46,7 +46,7 @@ fileprivate extension StringProtocol {
     }
 }
 
-fileprivate extension String {
+extension String {
     mutating func removeLeadingAndTrailingNewlines() {
         while self.starts(with: "\n") {
             self.removeFirst(1)
