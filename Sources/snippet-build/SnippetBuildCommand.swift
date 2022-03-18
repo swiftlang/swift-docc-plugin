@@ -31,10 +31,10 @@ struct SnippetBuildCommand {
     func run() throws {
         let snippetGroups = try loadSnippetsAndSnippetGroups(from: URL(fileURLWithPath: snippetsDir))
 
-        guard !snippetGroups.isEmpty,
-              snippetGroups.allSatisfy({ !$0.snippets.isEmpty }) else {
-                  return
-              }
+        let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
+        guard totalSnippetCount > 0 else {
+            return
+        }
 
         let symbolGraphFilename = URL(fileURLWithPath: outputDir).appendingPathComponent("\(moduleName)-snippets.symbols.json")
 
