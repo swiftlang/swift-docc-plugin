@@ -47,15 +47,6 @@ extension StringProtocol {
 }
 
 extension String {
-    mutating func removeLeadingAndTrailingNewlines() {
-        while self.starts(with: "\n") {
-            self.removeFirst(1)
-        }
-        while self.suffix(1) == "\n" {
-            self.removeLast(1)
-        }
-    }
-
     /// Returns a re-indented string with the most indentation removed
     /// without changing the relative indentation between lines. This is
     /// useful for re-indenting some inner part of a block of nested code.
@@ -128,13 +119,8 @@ struct PlainTextSnippetExtractor {
                 lastPresentationCodeLine = String(line)
             }
         }
-        self.explanation
-            .removeLeadingAndTrailingNewlines()
-
-        self.presentationCode
-            .removeLeadingAndTrailingNewlines()
-        
-        self.presentationCode
-            .trimExtraIndentation()
+        explanation = explanation.trimmingCharacters(in: ["\n"])
+        presentationCode = presentationCode.trimmingCharacters(in: ["\n"])
+        presentationCode.trimExtraIndentation()
     }
 }
