@@ -26,7 +26,7 @@ extension XCTestCase {
     /// Invokes the swift package CLI with the given arguments.
     func swiftPackage(
         _ arguments: CustomStringConvertible...,
-        workingDirectory directoryURL: URL? = nil
+        workingDirectory directoryURL: URL
     ) throws -> SwiftInvocationResult {
         let process = try swiftPackageProcess(arguments, workingDirectory: directoryURL)
         
@@ -42,7 +42,7 @@ extension XCTestCase {
         return SwiftInvocationResult(
             workingDirectory: directoryURL,
             swiftExecutable: try swiftExecutableURL,
-            arguments: arguments,
+            arguments: arguments.map(\.description),
             standardOutput: try standardOutput.asString() ?? "",
             standardError: try standardError.asString() ?? "",
             exitStatus: Int(process.terminationStatus)
@@ -74,9 +74,9 @@ extension XCTestCase {
 }
 
 struct SwiftInvocationResult {
-    let workingDirectory: URL?
+    let workingDirectory: URL
     let swiftExecutable: URL
-    let arguments: [CustomStringConvertible]
+    let arguments: [String]
     let standardOutput: String
     let standardError: String
     let exitStatus: Int
@@ -92,7 +92,28 @@ struct SwiftInvocationResult {
             }
             .compactMap(URL.init(fileURLWithPath:))
     }
-    
+
+    var pluginOutputsDirectory: URL {
+        let pluginWorkingSubdirectory: String
+        if arguments.contains("preview-documentation") {
+            pluginWorkingSubdirectory = "Swift-DocC Preview"
+        } else {
+            pluginWorkingSubdirectory = "Swift-DocC"
+        }
+
+        return workingDirectory
+            .appendingPathComponent(".build", isDirectory: true)
+            .appendingPathComponent("plugins", isDirectory: true)
+            .appendingPathComponent(pluginWorkingSubdirectory, isDirectory: true)
+            .appendingPathComponent("outputs", isDirectory: true)
+    }
+
+    var symbolGraphsDirectory: URL {
+        return pluginOutputsDirectory
+            .appendingPathComponent(".build", isDirectory: true)
+            .appendingPathComponent("symbol-graphs", isDirectory: true)
+    }
+
     private func gatherShellEnvironmentInfo() throws -> String {
         let gatherEnvironmentProcess = Process.shell(
             """

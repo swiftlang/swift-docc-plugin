@@ -98,6 +98,7 @@ extension PackageManager {
         )
         .appendingPathComponent(".build", isDirectory: true)
         .appendingPathComponent("symbol-graphs", isDirectory: true)
+        .appendingPathComponent("unified-symbol-graphs", isDirectory: true)
         .appendingPathComponent("\(target.name)-\(target.id)", isDirectory: true)
         
         if verbose {

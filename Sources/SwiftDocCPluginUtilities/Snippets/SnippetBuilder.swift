@@ -53,6 +53,7 @@ public class SnippetBuilder {
     ) -> URL {
         return pluginWorkingDirectory
             .appendingPathComponent(".build", isDirectory: true)
+            .appendingPathComponent("symbol-graphs", isDirectory: true)
             .appendingPathComponent("snippet-symbol-graphs", isDirectory: true)
             .appendingPathComponent("\(packageDisplayName)-\(packageIdentifier)", isDirectory: true)
     }
