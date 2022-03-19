@@ -9,16 +9,46 @@
 import Foundation
 import XCTest
 
+private let temporarySwiftPMDirectory = Bundle.module.resourceURL!
+    .appendingPathComponent(
+        "Temporary-SwiftPM-Caching-Directory-\(ProcessInfo.processInfo.globallyUniqueString)",
+        isDirectory: true
+    )
+
+private let swiftPMBuildDirectory = temporarySwiftPMDirectory
+    .appendingPathComponent("BuildDirectory", isDirectory: true)
+
+private let swiftPMCacheDirectory = temporarySwiftPMDirectory
+    .appendingPathComponent("SharedCacheDirectory", isDirectory: true)
+
+private let doccPreviewOutputDirectory = swiftPMBuildDirectory
+    .appendingPathComponent("plugins", isDirectory: true)
+    .appendingPathComponent("Swift-DocC Preview", isDirectory: true)
+    .appendingPathComponent("outputs", isDirectory: true)
+
+private let doccConvertOutputDirectory = swiftPMBuildDirectory
+    .appendingPathComponent("plugins", isDirectory: true)
+    .appendingPathComponent("Swift-DocC", isDirectory: true)
+    .appendingPathComponent("outputs", isDirectory: true)
+
 extension XCTestCase {
     func swiftPackageProcess(
         _ arguments: [CustomStringConvertible],
         workingDirectory directoryURL: URL? = nil
     ) throws -> Process {
+        // Clear any existing plugins state
+        try? FileManager.default.removeItem(at: doccPreviewOutputDirectory)
+        try? FileManager.default.removeItem(at: doccConvertOutputDirectory)
+
         let process = Process()
         process.executableURL = try swiftExecutableURL
         process.environment = ProcessInfo.processInfo.environment
         
-        process.arguments = ["package"] + arguments.map(\.description)
+        process.arguments = [
+            "package",
+            "--cache-path", swiftPMCacheDirectory.path,
+            "--build-path", swiftPMBuildDirectory.path,
+        ] + arguments.map(\.description)
         process.currentDirectoryURL = directoryURL
         return process
     }
@@ -125,18 +155,11 @@ struct SwiftInvocationResult {
     }
 
     var pluginOutputsDirectory: URL {
-        let pluginWorkingSubdirectory: String
         if arguments.contains("preview-documentation") {
-            pluginWorkingSubdirectory = "Swift-DocC Preview"
+            return doccPreviewOutputDirectory
         } else {
-            pluginWorkingSubdirectory = "Swift-DocC"
+            return doccConvertOutputDirectory
         }
-
-        return workingDirectory
-            .appendingPathComponent(".build", isDirectory: true)
-            .appendingPathComponent("plugins", isDirectory: true)
-            .appendingPathComponent(pluginWorkingSubdirectory, isDirectory: true)
-            .appendingPathComponent("outputs", isDirectory: true)
     }
 
     var symbolGraphsDirectory: URL {

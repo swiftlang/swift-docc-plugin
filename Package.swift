@@ -44,6 +44,9 @@ let package = Package(
                     description: "Preview the Swift-DocC documentation for a specified target."
                 )
             ),
+            dependencies: [
+                "snippet-build",
+            ],
             exclude: ["Symbolic Links/README.md"]
         ),
         
