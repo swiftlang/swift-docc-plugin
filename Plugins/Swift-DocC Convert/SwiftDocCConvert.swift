@@ -31,6 +31,10 @@ import PackagePlugin
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
         
+        let experimentalSnippetSupportIsEnabled = argumentExtractor.extractFlag(
+            named: "enable-experimental-snippet-support"
+        ) > 0
+        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
@@ -46,6 +50,17 @@ import PackagePlugin
             return
         }
         
+        let snippetBuilder: SnippetBuilder?
+        if experimentalSnippetSupportIsEnabled {
+            let snippetBuildTool = try context.tool(named: "snippet-build")
+            snippetBuilder = SnippetBuilder(
+                snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
+                workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
+            )
+        } else {
+            snippetBuilder = nil
+        }
+        
         // Iterate over the Swift source module targets we were given.
         for (index, target) in swiftSourceModuleTargets.enumerated() {
             if index != 0 {
@@ -55,23 +70,14 @@ import PackagePlugin
             
             print("Generating documentation for '\(target.name)'...")
             
-            let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
-            
-            if verbose {
-                print("symbol graph options: '\(symbolGraphOptions)'")
-            }
-            
-            // Ask SwiftPM to generate or update symbol graph files for the target.
-            let symbolGraphDirectoryPath = try packageManager.getSymbolGraph(
+            let symbolGraphs = try packageManager.doccSymbolGraphs(
                 for: target,
-                options: symbolGraphOptions
-            ).directoryPath.string
+                context: context,
+                verbose: verbose,
+                snippetBuilder: snippetBuilder
+            )
             
-            if verbose {
-                print("symbol graph directory path: '\(symbolGraphDirectoryPath)'")
-            }
-            
-            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphDirectoryPath).isEmpty {
+            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
                 // This target did not produce any symbol graphs. Let's check if it has a
                 // DocC catalog.
                 
@@ -110,7 +116,7 @@ import PackagePlugin
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
-                symbolGraphDirectoryPath: symbolGraphDirectoryPath,
+                symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
                 outputPath: doccArchiveOutputPath
             )
             

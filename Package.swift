@@ -8,6 +8,7 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
+import Foundation
 import PackageDescription
 
 let package = Package(
@@ -19,12 +20,18 @@ let package = Package(
         .plugin(name: "Swift-DocC", targets: ["Swift-DocC"]),
         .plugin(name: "Swift-DocC Preview", targets: ["Swift-DocC Preview"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
+    ],
     targets: [
         .plugin(
             name: "Swift-DocC",
             capability: .command(
                 intent: .documentationGeneration()
             ),
+            dependencies: [
+                "snippet-build",
+            ],
             path: "Plugins/Swift-DocC Convert",
             exclude: ["Symbolic Links/README.md"]
         ),
@@ -37,6 +44,9 @@ let package = Package(
                     description: "Preview the Swift-DocC documentation for a specified target."
                 )
             ),
+            dependencies: [
+                "snippet-build",
+            ],
             exclude: ["Symbolic Links/README.md"]
         ),
         
@@ -44,6 +54,7 @@ let package = Package(
         .testTarget(
             name: "SwiftDocCPluginUtilitiesTests",
             dependencies: [
+                "Snippets",
                 "SwiftDocCPluginUtilities",
             ],
             resources: [
@@ -59,5 +70,12 @@ let package = Package(
             path: "Sources/SwiftDocCPluginDocumentation",
             exclude: ["README.md"]
         ),
+        .target(name: "Snippets"),
+        .executableTarget(
+            name: "snippet-build",
+            dependencies: [
+                "Snippets",
+                .product(name: "SymbolKit", package: "swift-docc-symbolkit"),
+            ]),
     ]
 )

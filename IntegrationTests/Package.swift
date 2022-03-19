@@ -29,6 +29,7 @@ let package = Package(
                 .copy("Fixtures/SingleExecutableTarget"),
                 .copy("Fixtures/MixedTargets"),
                 .copy("Fixtures/TargetWithDocCCatalog"),
+                .copy("Fixtures/PackageWithSnippets"),
             ]
         ),
     ]

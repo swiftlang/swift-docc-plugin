@@ -126,6 +126,20 @@ extension Package {
         
         return allDocumentableProducts.map(\.name.singleQuoted).joined(separator: ", ")
     }
+    
+    func package(for target: SwiftSourceModuleTarget) -> Package? {
+        let possiblePackages = dependencies.map(\.package) + [self]
+        
+        return possiblePackages.first { package in
+            package.containsTarget(target)
+        }
+    }
+    
+    func containsTarget(_ target: SwiftSourceModuleTarget) -> Bool {
+        return targets.contains { packageTarget in
+            packageTarget.id == target.id
+        }
+    }
 }
 
 private extension Collection where Element == Target {
