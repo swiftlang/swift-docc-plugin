@@ -30,23 +30,54 @@ extension XCTestCase {
     ) throws -> SwiftInvocationResult {
         let process = try swiftPackageProcess(arguments, workingDirectory: directoryURL)
         
-        let standardOutput = Pipe()
-        let standardError = Pipe()
+        let standardOutputPipe = Pipe()
+        let standardErrorPipe = Pipe()
         
-        process.standardOutput = standardOutput
-        process.standardError = standardError
-        
+        process.standardOutput = standardOutputPipe
+        process.standardError = standardErrorPipe
+
+        let processQueue = DispatchQueue(label: "process")
+        var standardOutputData = Data()
+        var standardErrorData = Data()
+
+        standardOutputPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            processQueue.async {
+                standardOutputData.append(data)
+            }
+        }
+
+        standardErrorPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            processQueue.async {
+                standardErrorData.append(data)
+            }
+        }
+
         try process.run()
         process.waitUntilExit()
-        
-        return SwiftInvocationResult(
-            workingDirectory: directoryURL,
-            swiftExecutable: try swiftExecutableURL,
-            arguments: arguments.map(\.description),
-            standardOutput: try standardOutput.asString() ?? "",
-            standardError: try standardError.asString() ?? "",
-            exitStatus: Int(process.terminationStatus)
-        )
+
+        standardOutputPipe.fileHandleForReading.readabilityHandler = nil
+        standardErrorPipe.fileHandleForReading.readabilityHandler = nil
+
+        processQueue.async {
+            standardOutputPipe.fileHandleForReading.closeFile()
+            standardErrorPipe.fileHandleForReading.closeFile()
+        }
+
+        return try processQueue.sync {
+            let standardOutputString = String(data: standardOutputData, encoding: .utf8)
+            let standardErrorString = String(data: standardErrorData, encoding: .utf8)
+
+            return SwiftInvocationResult(
+                workingDirectory: directoryURL,
+                swiftExecutable: try swiftExecutableURL,
+                arguments: arguments.map(\.description),
+                standardOutput: standardOutputString ?? "",
+                standardError: standardErrorString ?? "",
+                exitStatus: Int(process.terminationStatus)
+            )
+        }
     }
     
     private var swiftExecutableURL: URL {
