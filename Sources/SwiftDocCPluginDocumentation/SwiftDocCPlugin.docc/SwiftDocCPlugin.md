@@ -7,8 +7,19 @@ Produce Swift-DocC documentation for Swift Package libraries and executables.
 The Swift-DocC plugin is a Swift Package Manager command plugin that supports building
 documentation for SwiftPM libraries and executables.
 
-After adding the plugin as a dependency in your Swift package manifest, you can build
-documentation for the libraries and executables in that package and its dependencies by running the
+First, add the plugin as a dependency in your Swift package manifest:
+
+```swift
+let package = Package(
+    products: […],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+    ],
+    targets: […]
+)
+```
+
+Then, build documentation for the libraries and executables in that package and its dependencies by running the
 following from the command-line:
 
     $ swift package generate-documentation
