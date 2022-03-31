@@ -21,9 +21,6 @@ public struct Snippet {
     /// The code to display as the snippet.
     public var presentationCode: String
 
-    /// The name of the owning group, if snippet is in a ``SnippetGroup``.
-    public var groupName: String? = nil
-
     /// The identifier of the snippet.
     public var identifier: String {
         return sourceFile.deletingPathExtension().lastPathComponent

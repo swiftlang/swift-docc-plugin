@@ -19,7 +19,6 @@ class SnippetBuildTests: XCTestCase {
         XCTAssertEqual(fakeSourceFilename, snippet.sourceFile)
         XCTAssertTrue(snippet.explanation.isEmpty)
         XCTAssertTrue(snippet.presentationCode.isEmpty)
-        XCTAssertNil(snippet.groupName)
         XCTAssertEqual("test", snippet.identifier)
     }
 
@@ -53,7 +52,6 @@ class SnippetBuildTests: XCTestCase {
         XCTAssertEqual(fakeSourceFilename, snippet.sourceFile)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
         XCTAssertEqual(expectedCode, snippet.presentationCode)
-        XCTAssertNil(snippet.groupName)
         XCTAssertEqual("test", snippet.identifier)
     }
 
