@@ -33,7 +33,7 @@ Now that you've set up a local clone of the repository you'll be publishing docu
 you can build your Swift-DocC documentation site.
 
 > Tip: Before invoking the Swift-DocC plugin, you'll need to add it as a dependency of your package,
->      see <doc:Getting-Started-with-the-Swift-DocC-Plugin> for details.
+>      see <doc:SwiftDocCPlugin> for details.
 
 Before running the `swift package generate-documentation` command, you'll need to know two things.
 
