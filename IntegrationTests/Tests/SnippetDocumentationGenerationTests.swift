@@ -25,6 +25,10 @@ final class SnippetDocumentationGenerationTests: XCTestCase {
         XCTAssertEqual(
             Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
             [
+                // REMOVEME: "documentation/packagewithsnippets.json"
+                // should disappear once the fix for 
+                // https://github.com/apple/swift-docc/pull/116 is available in CI.
+                "documentation/packagewithsnippets.json",
                 "documentation/library.json",
                 "library/beststruct.json",
                 "beststruct/best().json",

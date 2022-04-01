@@ -29,41 +29,18 @@ struct SnippetBuildCommand {
     }
 
     func run() throws {
-        let snippetGroups = try loadSnippetsAndSnippetGroups(from: URL(fileURLWithPath: snippetsDir))
-
-        let totalSnippetCount = snippetGroups.reduce(0) { $0 + $1.snippets.count }
-        guard totalSnippetCount > 0 else {
-            return
-        }
-
-        let symbolGraphFilename = URL(fileURLWithPath: outputDir).appendingPathComponent("\(moduleName)-snippets.symbols.json")
-
-        try emitSymbolGraph(forSnippetGroups: snippetGroups, to: symbolGraphFilename, moduleName: moduleName)
+        let snippets = try loadSnippets(from: URL(fileURLWithPath: snippetsDir))
+        guard snippets.count > 0 else { return }
+        let symbolGraphFilename = URL(fileURLWithPath: outputDir)
+            .appendingPathComponent("\(moduleName)-snippets.symbols.json")
+        try emitSymbolGraph(for: snippets, to: symbolGraphFilename, moduleName: moduleName)
     }
 
-    func emitSymbolGraph(forSnippetGroups snippetGroups: [SnippetGroup], to emitFilename: URL, moduleName: String) throws {
-        var groups = [SymbolGraph.Symbol]()
-        var snippets = [SymbolGraph.Symbol]()
-        var relationships = [SymbolGraph.Relationship]()
-
-        for group in snippetGroups {
-            let groupSymbol = SymbolGraph.Symbol(group, packageName: moduleName)
-            let snippetSymbols = group.snippets.map {
-                SymbolGraph.Symbol($0, packageName: moduleName, groupName: group.name)
-            }
-
-            groups.append(groupSymbol)
-            snippets.append(contentsOf: snippetSymbols)
-
-            let snippetGroupRelationships = snippetSymbols.map { snippetSymbol in
-                SymbolGraph.Relationship(source: snippetSymbol.identifier.precise, target: groupSymbol.identifier.precise, kind: .memberOf, targetFallback: nil)
-            }
-            relationships.append(contentsOf: snippetGroupRelationships)
-        }
-
+    func emitSymbolGraph(for snippets: [Snippet], to emitFilename: URL, moduleName: String) throws {
+        let snippetSymbols = snippets.map { SymbolGraph.Symbol($0, moduleName: moduleName) }
         let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "swift-docc-plugin/snippet-build")
         let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil))
-        let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: groups + snippets, relationships: relationships)
+        let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: snippetSymbols, relationships: [])
         try FileManager.default.createDirectory(atPath: emitFilename.deletingLastPathComponent().path, withIntermediateDirectories: true, attributes: nil)
         let encoder = JSONEncoder()
         let data = try encoder.encode(symbolGraph)
@@ -95,44 +72,18 @@ struct SnippetBuildCommand {
             .filter { $0.isDirectory }
     }
 
-    func loadSnippetsAndSnippetGroups(from snippetsDirectory: URL) throws -> [SnippetGroup] {
+    func loadSnippets(from snippetsDirectory: URL) throws -> [Snippet] {
         guard snippetsDirectory.isDirectory else {
             return []
         }
 
-        let topLevelSnippets = try files(in: snippetsDirectory, withExtension: "swift")
-            .map { try Snippet(parsing: $0) }
-
-        let topLevelSnippetGroup = SnippetGroup(name: "Snippets",
-                                                baseDirectory: snippetsDirectory,
-                                                snippets: topLevelSnippets,
-                                                explanation: "")
-
-        let subdirectoryGroups = try subdirectories(in: snippetsDirectory)
-            .map { subdirectory -> SnippetGroup in
-                let snippets = try files(in: subdirectory, withExtension: "swift")
-                    .map { try Snippet(parsing: $0) }
-
-                let explanationFile = subdirectory.appendingPathComponent("Explanation.md")
-
-                let snippetGroupExplanation: String
-                if explanationFile.isFile {
-                    snippetGroupExplanation = try String(contentsOf: explanationFile)
-                } else {
-                    snippetGroupExplanation = ""
+        let snippetFiles = try files(in: snippetsDirectory, withExtension: "swift") +
+            subdirectories(in: snippetsDirectory)
+                .flatMap { subdirectory -> [URL] in
+                    try files(in: subdirectory, withExtension: "swift")
                 }
 
-                return SnippetGroup(name: subdirectory.lastPathComponent,
-                                    baseDirectory: subdirectory,
-                                    snippets: snippets,
-                                    explanation: snippetGroupExplanation)
-            }
-
-        let snippetGroups = [topLevelSnippetGroup] + subdirectoryGroups.sorted {
-            $0.name < $1.name
-        }
-
-        return snippetGroups.filter { !$0.snippets.isEmpty }
+        return try snippetFiles.map { try Snippet(parsing: $0) }
     }
 
     static func main() throws {
