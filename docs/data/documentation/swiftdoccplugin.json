@@ -58,15 +58,47 @@
         {
           "inlineContent" : [
             {
-              "text" : "After adding the plugin as a dependency in your Swift package manifest, you can build",
+              "text" : "To use the Swift-DocC plugin with your package, first add it as a dependency:",
               "type" : "text"
-            },
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "let package = Package(",
+            "    \/\/ name, platforms, products, etc.",
+            "    dependencies: [",
+            "        \/\/ other dependencies",
+            "        .package(url: \"https:\/\/github.com\/apple\/swift-docc-plugin\", from: \"1.0.0\"),",
+            "    ],",
+            "    targets: [",
+            "        \/\/ targets",
+            "    ]",
+            ")"
+          ],
+          "syntax" : "swift",
+          "type" : "codeListing"
+        },
+        {
+          "content" : [
             {
-              "text" : " ",
-              "type" : "text"
-            },
+              "inlineContent" : [
+                {
+                  "text" : "Swift 5.6 or higher is required in order to run the plugin.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "style" : "note",
+          "type" : "aside"
+        },
+        {
+          "inlineContent" : [
             {
-              "text" : "documentation for the libraries and executables in that package and its dependencies by running the",
+              "text" : "Then, build documentation for the libraries and executables in that package and its dependencies by running the",
               "type" : "text"
             },
             {
@@ -132,7 +164,6 @@
   "topicSections" : [
     {
       "identifiers" : [
-        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
         "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
         "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
       ],
@@ -209,20 +240,6 @@
   "title" : "Generating Documentation for a Specific Target",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target"
-},
-"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
-  "abstract" : [
-    {
-      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
-      "type" : "text"
-    }
-  ],
-  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
-  "kind" : "article",
-  "role" : "article",
-  "title" : "Getting Started with the Swift-DocC Plugin",
-  "type" : "topic",
-  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
 },
 "doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
   "abstract" : [

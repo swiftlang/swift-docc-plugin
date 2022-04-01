@@ -205,7 +205,7 @@
                   "type" : "text"
                 },
                 {
-                  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
+                  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
                   "isActive" : true,
                   "type" : "reference"
                 },
@@ -748,20 +748,6 @@
   "title" : "Generating Documentation for Hosting Online",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-hosting-online"
-},
-"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
-  "abstract" : [
-    {
-      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
-      "type" : "text"
-    }
-  ],
-  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
-  "kind" : "article",
-  "role" : "article",
-  "title" : "Getting Started with the Swift-DocC Plugin",
-  "type" : "topic",
-  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
 },
 "https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages#types-of-github-pages-sites": {
   "identifier" : "https:\/\/docs.github.com\/pages\/getting-started-with-github-pages\/about-github-pages#types-of-github-pages-sites",

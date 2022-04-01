@@ -149,7 +149,6 @@
     {
       "generated" : true,
       "identifiers" : [
-        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
         "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
       ],
       "title" : "Getting Started"
@@ -182,20 +181,6 @@
   "title" : "SwiftDocCPlugin",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin"
-},
-"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Getting-Started-with-the-Swift-DocC-Plugin": {
-  "abstract" : [
-    {
-      "text" : "Add the Swift-DocC plugin as a dependency of your package and generate Swift-DocC documentation.",
-      "type" : "text"
-    }
-  ],
-  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Getting-Started-with-the-Swift-DocC-Plugin",
-  "kind" : "article",
-  "role" : "article",
-  "title" : "Getting Started with the Swift-DocC Plugin",
-  "type" : "topic",
-  "url" : "\/documentation\/swiftdoccplugin\/getting-started-with-the-swift-docc-plugin"
 },
 "doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
   "abstract" : [
