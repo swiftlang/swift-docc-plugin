@@ -79,8 +79,7 @@ Here's a mapping of the tokens in the above command to what they should be repla
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
 | `[path-to-docs-directory]` | The path to the `/docs` directory at the root of the repository you configured for publishing to GitHub pages. |
 | `[target-name]`            | The name of the Swift Package target you'd like to build documentation for.                                    |
-| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
-
+| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository. If private pages are being used, please refrain from using this option.
 
 ## Publishing the Documentation Site
 
@@ -95,5 +94,9 @@ branch you configured for publishing to GitHub Pages.
 Once the push completes, the documentation site will be available at:
 
     https://<username>.github.io/<repository-name>/documentation/<target-name>
+    
+If the documenation is published as a private page, then each repository in the organization has a unique subdomain. So the documentation site will be available at:
+
+    https://<unique-subdomain>.pages.github.io/documentation/<target-name>
 
 <!-- Copyright (c) 2022 Apple Inc and the Swift Project authors. All Rights Reserved. -->
