@@ -46,11 +46,22 @@ Before running the `swift package generate-documentation` command, you'll need t
     Your documentation site will be published at something like
 
     ```txt
-    https://<username>.github.io/<repository-name>
+    https://<username>.github.io/<repository-name>/...
     ```
 
     and Swift-DocC needs to know about any base path after the `github.io` portion in order
     to correctly configure relative links. In the above case, that would be `<repository-name>`.
+    
+    However, if you publish the page as a private github page, then the url structure will be different.
+    
+    Your documentation site will be published at something like
+    
+    ```txt
+    https://<unique-subdomain>.pages.github.io/...
+    ```
+    
+    As you can see, this is quite different from the public pages url. Each repo in your organization, will have its own subdomain, for hosting its private pages. Hence, the `[hosting-base-path]` argument is not needed for private pages, as it has its own subdomain.
+    
 
 2. Which **target** in your Swift Package would you like to publish documentation for?
 
@@ -79,7 +90,7 @@ Here's a mapping of the tokens in the above command to what they should be repla
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
 | `[path-to-docs-directory]` | The path to the `/docs` directory at the root of the repository you configured for publishing to GitHub pages. |
 | `[target-name]`            | The name of the Swift Package target you'd like to build documentation for.                                    |
-| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository. If private pages are being used, please refrain from using this option.
+| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
 
 ## Publishing the Documentation Site
 
@@ -95,7 +106,7 @@ Once the push completes, the documentation site will be available at:
 
     https://<username>.github.io/<repository-name>/documentation/<target-name>
     
-If the documenation is published as a private page, then each repository in the organization has a unique subdomain. So the documentation site will be available at:
+If the documenation is published as a private page, then the documentation site will be available at:
 
     https://<unique-subdomain>.pages.github.io/documentation/<target-name>
 
