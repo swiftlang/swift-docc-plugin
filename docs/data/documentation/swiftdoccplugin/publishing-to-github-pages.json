@@ -166,7 +166,7 @@
           "type" : "codeListing"
         },
         {
-          "anchor" : "Understanding-your-Project’s-Configuration",
+          "anchor" : "Understanding-your-Projects-Configuration",
           "level" : 2,
           "text" : "Understanding your Project’s Configuration",
           "type" : "heading"
@@ -317,7 +317,7 @@
                 },
                 {
                   "code" : [
-                    "https:\/\/<username>.github.io\/<repository-name>"
+                    "https:\/\/<username>.github.io\/<repository-name>\/..."
                   ],
                   "syntax" : "txt",
                   "type" : "codeListing"
@@ -354,6 +354,63 @@
                     }
                   ],
                   "type" : "paragraph"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "However, there are some configurations of GitHub Pages where this base URL path will not be required. For example, GitHub Enterprise Cloud has a feature that allows you to publish your GitHub Pages site privately. In situations like this, the URL structure will be different and will not require a custom base path.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Your documentation site will be published at something like",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "code" : [
+                    "https:\/\/<unique-subdomain>.pages.github.io\/..."
+                  ],
+                  "syntax" : "txt",
+                  "type" : "codeListing"
+                },
+                {
+                  "inlineContent" : [
+                    {
+                      "text" : "Because these websites have their own unique subdomain, your website is published directly at the root and the ",
+                      "type" : "text"
+                    },
+                    {
+                      "code" : "[hosting-base-path]",
+                      "type" : "codeVoice"
+                    },
+                    {
+                      "text" : " argument is not needed.",
+                      "type" : "text"
+                    }
+                  ],
+                  "type" : "paragraph"
+                },
+                {
+                  "content" : [
+                    {
+                      "inlineContent" : [
+                        {
+                          "text" : "If your unsure what kind of GitHub Pages site you have, pay close attention to the URL listed on the GitHub Pages tab of your repository’s settings after you’ve enabled the feature.",
+                          "type" : "text"
+                        }
+                      ],
+                      "type" : "paragraph"
+                    }
+                  ],
+                  "style" : "tip",
+                  "type" : "aside"
                 }
               ]
             },
@@ -618,7 +675,7 @@
                 {
                   "inlineContent" : [
                     {
-                      "text" : "The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.",
+                      "text" : "The base path, if any, your website will be hosted at. Most likely this will be the name of your GitHub repository.",
                       "type" : "text"
                     }
                   ],
@@ -677,6 +734,22 @@
           ],
           "syntax" : "shell",
           "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "If your GitHub Pages site is published privately, then the documentation will be available at:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "https:\/\/<unique-subdomain>.pages.github.io\/documentation\/<target-name>"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
         }
       ],
       "kind" : "content"
@@ -684,7 +757,7 @@
   ],
   "schemaVersion" : {
     "major" : 0,
-    "minor" : 2,
+    "minor" : 3,
     "patch" : 0
   },
   "sections" : [

@@ -1,0 +1,46 @@
+{
+  "interfaceLanguages" : {
+    "swift" : [
+      {
+        "children" : [
+          {
+            "title" : "Getting Started",
+            "type" : "groupMarker"
+          },
+          {
+            "path" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target",
+            "title" : "Generating Documentation for a Specific Target",
+            "type" : "article"
+          },
+          {
+            "path" : "\/documentation\/swiftdoccplugin\/previewing-documentation",
+            "title" : "Previewing Documentation",
+            "type" : "article"
+          },
+          {
+            "title" : "Publishing Documentation",
+            "type" : "groupMarker"
+          },
+          {
+            "path" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-hosting-online",
+            "title" : "Generating Documentation for Hosting Online",
+            "type" : "article"
+          },
+          {
+            "path" : "\/documentation\/swiftdoccplugin\/publishing-to-github-pages",
+            "title" : "Publishing to GitHub Pages",
+            "type" : "article"
+          }
+        ],
+        "path" : "\/documentation\/swiftdoccplugin",
+        "title" : "SwiftDocCPlugin",
+        "type" : "module"
+      }
+    ]
+  },
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 1,
+    "patch" : 0
+  }
+}
