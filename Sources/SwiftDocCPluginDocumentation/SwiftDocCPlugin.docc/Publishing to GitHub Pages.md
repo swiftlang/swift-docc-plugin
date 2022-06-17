@@ -108,7 +108,7 @@ Once the push completes, the documentation site will be available at:
 
     https://<username>.github.io/<repository-name>/documentation/<target-name>
     
-If the documenation is published as a private page, then the documentation site will be available at:
+If your GitHub Pages site is published privately, then the documentation will be available at:
 
     https://<unique-subdomain>.pages.github.io/documentation/<target-name>
 
