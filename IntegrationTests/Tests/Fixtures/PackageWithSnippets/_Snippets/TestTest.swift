@@ -12,6 +12,6 @@ import Library
 let best = BestStruct()
 best.best()
 
-// MARK: Hide
+// snippet.hide
 
 print(best)
