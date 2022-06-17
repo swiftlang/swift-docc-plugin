@@ -90,7 +90,7 @@ Here's a mapping of the tokens in the above command to what they should be repla
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
 | `[path-to-docs-directory]` | The path to the `/docs` directory at the root of the repository you configured for publishing to GitHub pages. |
 | `[target-name]`            | The name of the Swift Package target you'd like to build documentation for.                                    |
-| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
+| `[hosting-base-path]`      | The base path, if any, your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
 
 ## Publishing the Documentation Site
 
