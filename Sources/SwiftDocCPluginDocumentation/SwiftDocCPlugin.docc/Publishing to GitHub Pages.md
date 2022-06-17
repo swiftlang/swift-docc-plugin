@@ -52,7 +52,7 @@ Before running the `swift package generate-documentation` command, you'll need t
     and Swift-DocC needs to know about any base path after the `github.io` portion in order
     to correctly configure relative links. In the above case, that would be `<repository-name>`.
     
-    However, if you publish the page as a private github page, then the url structure will be different.
+    However, there are some configurations of GitHub Pages where this base URL path will not be required. For example, GitHub Enterprise Cloud has a feature that allows you to publish your GitHub Pages site privately. In situations like this, the URL structure will be different and will not require a custom base path.
     
     Your documentation site will be published at something like
     
