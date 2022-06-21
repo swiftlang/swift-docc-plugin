@@ -32,10 +32,10 @@ class SnippetBuildTests: XCTestCase {
             print("Hello, world!")
         }
 
-        // MARK: Hide
+        // snippet.hide
         hidden()
 
-        // MARK: Show
+        // snippet.show
         shown()
         """
 
@@ -58,16 +58,16 @@ class SnippetBuildTests: XCTestCase {
     func testParseRedundantMarkers() {
         let source = """
         //! This is a snippet
-        // MARK: Show
+        // snippet.show
         func shown() {
             print("Hello, world!")
         }
 
-        // MARK: Hide
+        // snippet.hide
         hidden()
 
-        // MARK: Hide
-        // MARK: Show
+        // snippet.hide
+        // snippet.show
         shown()
         """
 
@@ -105,11 +105,11 @@ class SnippetBuildTests: XCTestCase {
     func testParseRemoveExtraIndentation() {
         do {
             let source = """
-            // MARK: Hide
+            // snippet.hide
             struct MyStruct {
-                // MARK: Show
+                // snippet.show
                 func foo()
-            // MARK: Hide
+            // snippet.hide
             }
             """
             let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
@@ -118,13 +118,13 @@ class SnippetBuildTests: XCTestCase {
         
         do {
             let source = """
-            // MARK: Hide
+            // snippet.hide
             struct Outer {
-                // MARK: Show
+                // snippet.show
                 struct Inner {
                     func foo()
                 }
-            // MARK: Hide
+            // snippet.hide
             }
             """
 
@@ -140,21 +140,21 @@ class SnippetBuildTests: XCTestCase {
 }
 
 class VisibilityMarkTests: XCTestCase {
-    func testParseMarkShow() {
-        XCTAssertEqual(.shown, "// mark: show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// Mark: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// MARK: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      MARK: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      MARK: Show    ".parsedVisibilityMark)
-        XCTAssertNil("MARK: Show".parsedVisibilityMark)
-    }
+    func testParseHideShow() {
+        XCTAssertEqual(.shown, "// snippet.show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "// Snippet.Show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "// SNIPPET.SHOW".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "//      snippet.show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "//      snippet.show      ".parsedVisibilityMark)
 
-    func testParseMarkHide() {
-        XCTAssertEqual(.hidden, "// mark: hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// Mark: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// MARK: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      MARK: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      MARK: Hide   ".parsedVisibilityMark)
-        XCTAssertNil("MARK: Hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// snippet.hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// Snippet.Hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// SNIPPET.HIDE".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "//      snippet.hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "//      snippet.hide   ".parsedVisibilityMark)
+
+        // Markers need to be a comment.
+        XCTAssertNil("snippet.show".parsedVisibilityMark)
+        XCTAssertNil("snippet.hide".parsedVisibilityMark)
     }
 }

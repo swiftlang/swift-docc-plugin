@@ -13,7 +13,7 @@ enum SnippetVisibility {
 
 extension StringProtocol {
     /// If the string is a line comment, attempt to parse
-    /// a ``SnippetVisibility`` with `mark: show` or `mark: hide`.
+    /// a ``SnippetVisibility`` with `snippet.show` or `snippet.hide`.
     var parsedVisibilityMark: SnippetVisibility? {
         guard var comment = parsedLineCommentText else {
             return nil
@@ -21,9 +21,9 @@ extension StringProtocol {
 
         comment = comment.drop { $0.isWhitespace }
 
-        if comment.lowercased().starts(with: "mark: show") {
+        if comment.lowercased().starts(with: "snippet.show") {
             return SnippetVisibility.shown
-        } else if comment.lowercased().starts(with: "mark: hide") {
+        } else if comment.lowercased().starts(with: "snippet.hide") {
             return SnippetVisibility.hidden
         } else {
             return nil
