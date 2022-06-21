@@ -46,11 +46,24 @@ Before running the `swift package generate-documentation` command, you'll need t
     Your documentation site will be published at something like
 
     ```txt
-    https://<username>.github.io/<repository-name>
+    https://<username>.github.io/<repository-name>/...
     ```
 
     and Swift-DocC needs to know about any base path after the `github.io` portion in order
     to correctly configure relative links. In the above case, that would be `<repository-name>`.
+    
+    However, there are some configurations of GitHub Pages where this base URL path will not be required. For example, GitHub Enterprise Cloud has a feature that allows you to publish your GitHub Pages site privately. In situations like this, the URL structure will be different and will not require a custom base path.
+    
+    Your documentation site will be published at something like
+    
+    ```txt
+    https://<unique-subdomain>.pages.github.io/...
+    ```
+    
+    Because these websites have their own unique subdomain, your website is published directly at the root and the `[hosting-base-path]` argument is not needed. 
+    
+    > Tip: If your unsure what kind of GitHub Pages site you have, pay close attention to the URL listed on the GitHub Pages tab of your repository's settings after you've enabled the feature.
+    
 
 2. Which **target** in your Swift Package would you like to publish documentation for?
 
@@ -79,8 +92,7 @@ Here's a mapping of the tokens in the above command to what they should be repla
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
 | `[path-to-docs-directory]` | The path to the `/docs` directory at the root of the repository you configured for publishing to GitHub pages. |
 | `[target-name]`            | The name of the Swift Package target you'd like to build documentation for.                                    |
-| `[hosting-base-path]`      | The base path your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
-
+| `[hosting-base-path]`      | The base path, if any, your website will be hosted at. Most likely this will be the name of your GitHub repository.     |
 
 ## Publishing the Documentation Site
 
@@ -95,5 +107,9 @@ branch you configured for publishing to GitHub Pages.
 Once the push completes, the documentation site will be available at:
 
     https://<username>.github.io/<repository-name>/documentation/<target-name>
+    
+If your GitHub Pages site is published privately, then the documentation will be available at:
+
+    https://<unique-subdomain>.pages.github.io/documentation/<target-name>
 
 <!-- Copyright (c) 2022 Apple Inc and the Swift Project authors. All Rights Reserved. -->
