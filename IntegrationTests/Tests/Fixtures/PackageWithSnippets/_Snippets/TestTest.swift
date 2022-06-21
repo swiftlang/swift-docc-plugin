@@ -6,7 +6,7 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-//! Create a foo.
+// Create a foo.
 import Library
 
 let best = BestStruct()
