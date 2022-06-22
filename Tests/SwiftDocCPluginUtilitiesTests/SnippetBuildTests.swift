@@ -26,7 +26,7 @@ class SnippetBuildTests: XCTestCase {
         let expectedExplanation = "This is a snippet"
 
         let source = """
-        //! \(expectedExplanation)
+        // \(expectedExplanation)
 
         func shown() {
             print("Hello, world!")
@@ -57,7 +57,7 @@ class SnippetBuildTests: XCTestCase {
 
     func testParseRedundantMarkers() {
         let source = """
-        //! This is a snippet
+        // This is a snippet
         // snippet.show
         func shown() {
             print("Hello, world!")
@@ -87,9 +87,9 @@ class SnippetBuildTests: XCTestCase {
     func testParseRemoveLeadingAndTrailingNewlines() {
         let source = """
 
-        //!
-        //! This is a snippet.
-        //!
+        //
+        // This is a snippet.
+        //
 
 
         func foo()
@@ -102,7 +102,7 @@ class SnippetBuildTests: XCTestCase {
         XCTAssertEqual("func foo()", snippet.presentationCode)
     }
 
-    func testParseRemoveExtraIndentation() {
+    func testExplanationParseRemoveExtraIndentationBeforeCommentMarker() {
         do {
             let source = """
             // snippet.hide
@@ -135,6 +135,76 @@ class SnippetBuildTests: XCTestCase {
                 func foo()
             }
             """, snippet.presentationCode)
+        }
+    }
+
+    func testExplanationInterruptedByVisibilityMark() {
+        let source = """
+        // This is
+        // the explanation.
+        // snippet.hide
+        import Foo
+        // snippet.show
+        // Just a regular comment.
+        Foo.foo()
+        """
+        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        XCTAssertEqual("This is\nthe explanation.", snippet.explanation)
+        XCTAssertEqual("""
+        // Just a regular comment.
+        Foo.foo()
+        """, snippet.presentationCode)
+    }
+
+    func testExplanationRemoveMinimumIndentation() {
+        // Only trimming initial indentation measured from the first line: this is
+        // behavior common to Swift documentation comments.
+        // Indentation measuring point in the `source` below:
+        //    *
+        let source = """
+        //    An explanation\u{0020}\u{0020}
+        //    with high indentation
+        //        is trimmed
+        //       just enough
+        // but not too much.
+        foo()
+        """
+
+        // \u{0020}\u{0020} here is a hard line break in Markdown: included here to ensure it's preserved.
+
+        // "but not too much" shouldn't be trimmed just because the measurement point was beyond it:
+        // this is behavior common to Swift documentation comments.
+        let expectedExplanation = """
+        An explanation\u{0020}\u{0020}
+        with high indentation
+            is trimmed
+           just enough
+        but not too much.
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        XCTAssertEqual(expectedExplanation, snippet.explanation)
+    }
+
+    func testExplanationInterruptedByNonCommentLine() {
+        let sources = [
+            """
+            // This is
+            // the explanation
+            thisIsNot()
+            """,
+
+            """
+            // This is
+            // the explanation
+
+            // this is not
+            thisIsNot()
+            """,
+        ]
+        for source in sources {
+            let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+            XCTAssertEqual("This is\nthe explanation", snippet.explanation)
         }
     }
 }
