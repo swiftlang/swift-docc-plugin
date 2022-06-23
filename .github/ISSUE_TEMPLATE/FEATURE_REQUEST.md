@@ -5,7 +5,7 @@ labels: enhancement
 ---
 
 <!--
-	Thank you for contributing to Swift-DocC plugin!
+	Thank you for contributing to the Swift-DocC plugin!
 
 	Before you submit your issue, please replace each paragraph
 	below with information about your proposed feature.
