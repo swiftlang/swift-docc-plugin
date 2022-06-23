@@ -96,7 +96,7 @@ When you submit a bug report we ask that you follow the
 [provided template](https://github.com/apple/swift-docc-plugin/issues/new?template=BUG_REPORT.md)
 and provide as many details as possible.
 
-If you can confirm that the bug occurs when using the latest commit of Swift-DocC plugin
+If you can confirm that the bug occurs when using the latest commit of the Swift-DocC plugin
 from the `main` branch, that will help us track down the bug faster.
 
 ### Submitting a Feature Request
