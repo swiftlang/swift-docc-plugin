@@ -90,7 +90,7 @@ tutorial for publishing to GitHub Pages, please see
 
 ### Submitting a Bug Report
 
-Swift-DocC plugin tracks all bug reports with 
+The Swift-DocC plugin tracks all bug reports with 
 [GitHub Issues](https://github.com/apple/swift-docc-plugin/issues).
 When you submit a bug report we ask that you follow the
 [provided template](https://github.com/apple/swift-docc-plugin/issues/new?template=BUG_REPORT.md)
