@@ -16,7 +16,7 @@ contact_links:
   - name: Discussion Forum
     url: https://forums.swift.org/c/development/swift-docc
     about: Ask and answer questions about Swift-DocC
-  - name: Swift-DocC plugin Documentation
+  - name: Documentation
     url: https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/
     about: Read Swift-DocC Plugin's API documentation  
   - name: Swift-DocC Documentation
