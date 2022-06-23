@@ -19,6 +19,3 @@ contact_links:
   - name: Documentation
     url: https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/
     about: Read about how to use the Swift-DocC Plugin in your projects
-  - name: Swift-DocC Documentation
-    url: https://www.swift.org/documentation/docc/
-    about: Learn about how to use the Swift-DocC documentation tool in your projects
