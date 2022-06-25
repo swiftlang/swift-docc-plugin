@@ -13,7 +13,7 @@ enum SnippetVisibility {
 
 extension StringProtocol {
     /// If the string is a line comment, attempt to parse
-    /// a ``SnippetVisibility`` with `mark: show` or `mark: hide`.
+    /// a ``SnippetVisibility`` with `snippet.show` or `snippet.hide`.
     var parsedVisibilityMark: SnippetVisibility? {
         guard var comment = parsedLineCommentText else {
             return nil
@@ -21,9 +21,9 @@ extension StringProtocol {
 
         comment = comment.drop { $0.isWhitespace }
 
-        if comment.lowercased().starts(with: "mark: show") {
+        if comment.lowercased().starts(with: "snippet.show") {
             return SnippetVisibility.shown
-        } else if comment.lowercased().starts(with: "mark: hide") {
+        } else if comment.lowercased().starts(with: "snippet.hide") {
             return SnippetVisibility.hidden
         } else {
             return nil
@@ -87,10 +87,29 @@ struct PlainTextSnippetExtractor {
 
     init(source: String) {
         self.source = source
-        let lines = source.split(separator: "\n", omittingEmptySubsequences: false)
+        var lines = source.split(separator: "\n", omittingEmptySubsequences: false)[...]
+            .drop { $0.isEmptyOrWhiteSpace }
 
-        var lastExplanationLine = "..."
-        var lastPresentationCodeLine = "..."
+        var explanationLines = [Substring]()
+        for line in lines {
+            guard let commentText = line.parsedLineCommentText,
+                  line.parsedVisibilityMark == nil else {
+                break
+            }
+            explanationLines.append(commentText)
+        }
+        // Indentation to be removed from subsequent lines is measured
+        // from the first comment line with content.
+        let measuredIndentationFromFirstLineWithContent = explanationLines.first {
+            !$0.isEmptyOrWhiteSpace
+        }?.prefix { $0.isWhitespace }.count ?? 0
+        explanationLines = explanationLines.map {
+            let whitespaceAmountOnThisLine = $0.prefix { $0.isWhitespace }.count
+            return $0.dropFirst(min(whitespaceAmountOnThisLine, measuredIndentationFromFirstLineWithContent))
+        }
+        self.explanation = explanationLines.joined(separator: "\n")
+
+        lines.removeFirst(explanationLines.count)
 
         for line in lines {
             if let visibility = line.parsedVisibilityMark {
@@ -102,22 +121,7 @@ struct PlainTextSnippetExtractor {
                 continue
             }
 
-            if var comment = line.parsedLineCommentText,
-               comment.starts(with: "!") {
-                comment.removeFirst(1)
-                comment = comment.drop { $0.isWhitespace }
-                if lastExplanationLine.isEmptyOrWhiteSpace && comment.isEmptyOrWhiteSpace {
-                    continue
-                }
-                print(comment, to: &explanation)
-                lastExplanationLine = String(comment)
-            } else {
-                if lastPresentationCodeLine.isEmptyOrWhiteSpace && line.isEmptyOrWhiteSpace {
-                    continue
-                }
-                print(line, to: &presentationCode)
-                lastPresentationCodeLine = String(line)
-            }
+            print(line, to: &presentationCode)
         }
         explanation = explanation.trimmingCharacters(in: ["\n"])
         presentationCode = presentationCode.trimmingCharacters(in: ["\n"])

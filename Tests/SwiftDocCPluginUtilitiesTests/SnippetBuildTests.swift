@@ -26,16 +26,16 @@ class SnippetBuildTests: XCTestCase {
         let expectedExplanation = "This is a snippet"
 
         let source = """
-        //! \(expectedExplanation)
+        // \(expectedExplanation)
 
         func shown() {
             print("Hello, world!")
         }
 
-        // MARK: Hide
+        // snippet.hide
         hidden()
 
-        // MARK: Show
+        // snippet.show
         shown()
         """
 
@@ -57,17 +57,17 @@ class SnippetBuildTests: XCTestCase {
 
     func testParseRedundantMarkers() {
         let source = """
-        //! This is a snippet
-        // MARK: Show
+        // This is a snippet
+        // snippet.show
         func shown() {
             print("Hello, world!")
         }
 
-        // MARK: Hide
+        // snippet.hide
         hidden()
 
-        // MARK: Hide
-        // MARK: Show
+        // snippet.hide
+        // snippet.show
         shown()
         """
 
@@ -87,9 +87,9 @@ class SnippetBuildTests: XCTestCase {
     func testParseRemoveLeadingAndTrailingNewlines() {
         let source = """
 
-        //!
-        //! This is a snippet.
-        //!
+        //
+        // This is a snippet.
+        //
 
 
         func foo()
@@ -102,14 +102,14 @@ class SnippetBuildTests: XCTestCase {
         XCTAssertEqual("func foo()", snippet.presentationCode)
     }
 
-    func testParseRemoveExtraIndentation() {
+    func testExplanationParseRemoveExtraIndentationBeforeCommentMarker() {
         do {
             let source = """
-            // MARK: Hide
+            // snippet.hide
             struct MyStruct {
-                // MARK: Show
+                // snippet.show
                 func foo()
-            // MARK: Hide
+            // snippet.hide
             }
             """
             let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
@@ -118,13 +118,13 @@ class SnippetBuildTests: XCTestCase {
         
         do {
             let source = """
-            // MARK: Hide
+            // snippet.hide
             struct Outer {
-                // MARK: Show
+                // snippet.show
                 struct Inner {
                     func foo()
                 }
-            // MARK: Hide
+            // snippet.hide
             }
             """
 
@@ -137,24 +137,94 @@ class SnippetBuildTests: XCTestCase {
             """, snippet.presentationCode)
         }
     }
+
+    func testExplanationInterruptedByVisibilityMark() {
+        let source = """
+        // This is
+        // the explanation.
+        // snippet.hide
+        import Foo
+        // snippet.show
+        // Just a regular comment.
+        Foo.foo()
+        """
+        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        XCTAssertEqual("This is\nthe explanation.", snippet.explanation)
+        XCTAssertEqual("""
+        // Just a regular comment.
+        Foo.foo()
+        """, snippet.presentationCode)
+    }
+
+    func testExplanationRemoveMinimumIndentation() {
+        // Only trimming initial indentation measured from the first line: this is
+        // behavior common to Swift documentation comments.
+        // Indentation measuring point in the `source` below:
+        //    *
+        let source = """
+        //    An explanation\u{0020}\u{0020}
+        //    with high indentation
+        //        is trimmed
+        //       just enough
+        // but not too much.
+        foo()
+        """
+
+        // \u{0020}\u{0020} here is a hard line break in Markdown: included here to ensure it's preserved.
+
+        // "but not too much" shouldn't be trimmed just because the measurement point was beyond it:
+        // this is behavior common to Swift documentation comments.
+        let expectedExplanation = """
+        An explanation\u{0020}\u{0020}
+        with high indentation
+            is trimmed
+           just enough
+        but not too much.
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        XCTAssertEqual(expectedExplanation, snippet.explanation)
+    }
+
+    func testExplanationInterruptedByNonCommentLine() {
+        let sources = [
+            """
+            // This is
+            // the explanation
+            thisIsNot()
+            """,
+
+            """
+            // This is
+            // the explanation
+
+            // this is not
+            thisIsNot()
+            """,
+        ]
+        for source in sources {
+            let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+            XCTAssertEqual("This is\nthe explanation", snippet.explanation)
+        }
+    }
 }
 
 class VisibilityMarkTests: XCTestCase {
-    func testParseMarkShow() {
-        XCTAssertEqual(.shown, "// mark: show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// Mark: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// MARK: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      MARK: Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      MARK: Show    ".parsedVisibilityMark)
-        XCTAssertNil("MARK: Show".parsedVisibilityMark)
-    }
+    func testParseHideShow() {
+        XCTAssertEqual(.shown, "// snippet.show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "// Snippet.Show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "// SNIPPET.SHOW".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "//      snippet.show".parsedVisibilityMark)
+        XCTAssertEqual(.shown, "//      snippet.show      ".parsedVisibilityMark)
 
-    func testParseMarkHide() {
-        XCTAssertEqual(.hidden, "// mark: hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// Mark: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// MARK: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      MARK: Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      MARK: Hide   ".parsedVisibilityMark)
-        XCTAssertNil("MARK: Hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// snippet.hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// Snippet.Hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "// SNIPPET.HIDE".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "//      snippet.hide".parsedVisibilityMark)
+        XCTAssertEqual(.hidden, "//      snippet.hide   ".parsedVisibilityMark)
+
+        // Markers need to be a comment.
+        XCTAssertNil("snippet.show".parsedVisibilityMark)
+        XCTAssertNil("snippet.hide".parsedVisibilityMark)
     }
 }
