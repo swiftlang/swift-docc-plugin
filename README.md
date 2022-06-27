@@ -86,10 +86,23 @@ For details on how to best build documentation for hosting online and a specific
 tutorial for publishing to GitHub Pages, please see 
 [the plugin's documentation](https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/).
 
+## Bug Reports and Feature Requests
+
+### Submitting a Bug Report
+
+The Swift-DocC plugin tracks all bug reports with 
+[GitHub Issues](https://github.com/apple/swift-docc-plugin/issues).
+When you submit a bug report we ask that you follow the
+[provided template](https://github.com/apple/swift-docc-plugin/issues/new?template=BUG_REPORT.md)
+and provide as many details as possible.
+
+If you can confirm that the bug occurs when using the latest commit of the Swift-DocC plugin
+from the `main` branch, that will help us track down the bug faster.
+
 ### Submitting a Feature Request
 
-For feature requests, please feel free to create an issue
-on [Swift JIRA](https://bugs.swift.org/) with the `New Feature` type
+For feature requests, please feel free to file a
+[GitHub issue](https://github.com/apple/swift-docc-plugin/issues/new?template=FEATURE_REQUEST.md)
 or start a discussion on the [Swift Forums](https://forums.swift.org/c/development/swift-docc).
 
 Don't hesitate to submit a feature request if you see a way
