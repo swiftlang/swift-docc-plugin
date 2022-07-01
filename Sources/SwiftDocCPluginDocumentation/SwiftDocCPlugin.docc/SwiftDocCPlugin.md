@@ -2,6 +2,10 @@
 
 Produce Swift-DocC documentation for Swift Package libraries and executables.
 
+@Metadata {
+    @DisplayName("Swift-DocC Plugin")
+}
+
 ## Overview
 
 The Swift-DocC plugin is a Swift Package Manager command plugin that supports building
