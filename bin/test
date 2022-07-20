@@ -20,6 +20,41 @@ filepath() {
 # absolute file path to the Swift-DocC-Plugin root source dir.
 SWIFT_DOCC_PLUGIN_ROOT="$(dirname $(dirname $(filepath $0)))"
 
+SWIFT_DOCC_ROOT="$SWIFT_DOCC_PLUGIN_ROOT/swift-docc"
+SWIFT_DOCC_RENDER_ARTIFACT_ROOT="$SWIFT_DOCC_PLUGIN_ROOT/swift-docc-render-artifact"
+export DOCC_HTML_DIR="$SWIFT_DOCC_RENDER_ARTIFACT_ROOT/dist"
+
+SWIFT_DOCC_REPO=${SWIFT_DOCC_REPO:="https://github.com/apple/swift-docc.git"}
+SWIFT_DOCC_RENDER_ARTIFACT_REPO=${SWIFT_DOCC_RENDER_ARTIFACT_REPO:="https://github.com/apple/swift-docc-render-artifact.git"}
+
+SWIFT_DOCC_BRANCH=${SWIFT_DOCC_BRANCH:="main"}
+SWIFT_DOCC_RENDER_ARTIFACT_BRANCH=${SWIFT_DOCC_RENDER_ARTIFACT_BRANCH:="main"}
+
+# The script will clone swift-docc and swift-docc-render-artifact at the
+# branches pulled from the environment above.  The tests will then run using
+# that built DocC. This can be useful for testing interdependent changes that
+# need to land together and make it possible to test multiple pull requests
+# together.
+
+echo "Cloning docc..."
+rm -rf "$SWIFT_DOCC_ROOT"
+git clone -b "$SWIFT_DOCC_BRANCH" "${SWIFT_DOCC_REPO}" "$SWIFT_DOCC_ROOT" || exit 1
+
+echo "Cloning docc-render-artifact..."
+rm -rf "$SWIFT_DOCC_RENDER_ARTIFACT_ROOT"
+git clone -b "${SWIFT_DOCC_RENDER_ARTIFACT_BRANCH}" "${SWIFT_DOCC_RENDER_ARTIFACT_REPO}" "$SWIFT_DOCC_RENDER_ARTIFACT_ROOT" || exit 1
+
+echo "Building docc..."
+swift build --package-path "$SWIFT_DOCC_ROOT" --configuration release || exit 1
+
+export DOCC_EXEC="$(swift build --package-path "$SWIFT_DOCC_ROOT" --show-bin-path --configuration release)/docc"
+if [[ ! -f "$DOCC_EXEC" ]]; then
+  echo "docc executable not found, expected at $SWIFT_DOCC_EXEC"
+  exit 1
+else
+  echo "Using docc executable: $DOCC_EXEC"
+fi
+
 # Build and test Swift-DocC Plugin
 swift test --parallel --package-path "$SWIFT_DOCC_PLUGIN_ROOT"
 
