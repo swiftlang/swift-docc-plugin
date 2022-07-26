@@ -108,6 +108,8 @@ EOF
       \( \! -path '*/.build/*' -a \
       \! -name '.' -a \
       \( "${matching_files[@]}" \) -a \
+      \( \! -path './swift-docc/*' \) -a \
+      \( \! -path './swift-docc-render-artifact/*' \) -a \
       \( \! \( "${exceptions[@]}" \) \) \) | while read line; do
       if [[ "$(cat "$line" | replace_acceptable_years | $reader -n $expected_lines | $SHA_CMD)" != "$expected_sha" ]]; then
         printf "\033[0;31mmissing headers in file '$line'!\033[0m\n"
