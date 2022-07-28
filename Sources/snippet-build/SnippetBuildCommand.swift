@@ -37,9 +37,9 @@ struct SnippetBuildCommand {
     }
 
     func emitSymbolGraph(for snippets: [Snippet], to emitFilename: URL, moduleName: String) throws {
-        let snippetSymbols = snippets.map { SymbolGraph.Symbol($0, moduleName: moduleName) }
+        let snippetSymbols = snippets.map { SymbolGraph.Symbol($0, moduleName: moduleName, inDirectory: URL(fileURLWithPath: snippetsDir).absoluteURL) }
         let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "swift-docc-plugin/snippet-build")
-        let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil))
+        let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil), isVirtual: true)
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: snippetSymbols, relationships: [])
         try FileManager.default.createDirectory(atPath: emitFilename.deletingLastPathComponent().path, withIntermediateDirectories: true, attributes: nil)
         let encoder = JSONEncoder()

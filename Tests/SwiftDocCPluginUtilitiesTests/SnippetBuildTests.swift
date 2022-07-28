@@ -11,15 +11,15 @@ import Foundation
 import XCTest
 
 class SnippetBuildTests: XCTestCase {
-    let fakeSourceFilename = URL(fileURLWithPath: "/tmp/test.swift")
+    static let fakeSnippetsDir = URL(fileURLWithPath: "/tmp/MyPackage/Snippets")
+    static let fakeSourceFilename = fakeSnippetsDir.appendingPathComponent("Something").appendingPathComponent("Test.swift")
     func testParseEmpty() {
         let source = ""
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
 
-        XCTAssertEqual(fakeSourceFilename, snippet.sourceFile)
+        XCTAssertEqual(SnippetBuildTests.fakeSourceFilename, snippet.sourceFile)
         XCTAssertTrue(snippet.explanation.isEmpty)
-        XCTAssertTrue(snippet.presentationCode.isEmpty)
-        XCTAssertEqual("test", snippet.identifier)
+        XCTAssertTrue(snippet.presentationLines.isEmpty)
     }
 
     func testParseFull() {
@@ -39,7 +39,7 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
 
         let expectedCode = """
         func shown() {
@@ -49,12 +49,12 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        XCTAssertEqual(fakeSourceFilename, snippet.sourceFile)
+        XCTAssertEqual(SnippetBuildTests.fakeSourceFilename, snippet.sourceFile)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
         XCTAssertEqual(expectedCode, snippet.presentationCode)
-        XCTAssertEqual("test", snippet.identifier)
     }
 
+    /// Using a hide marker inside a hidden region has no effect except that the redundant hide markers are still not included.
     func testParseRedundantMarkers() {
         let source = """
         // This is a snippet
@@ -79,11 +79,12 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
 
         XCTAssertEqual(expectedCode, snippet.presentationCode)
     }
 
+    /// Empty or whitespace-only leading and trailing lines are removed from both the explanation and presentation code.
     func testParseRemoveLeadingAndTrailingNewlines() {
         let source = """
 
@@ -97,12 +98,14 @@ class SnippetBuildTests: XCTestCase {
 
 
         """
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
         XCTAssertEqual("This is a snippet.", snippet.explanation)
         XCTAssertEqual("func foo()", snippet.presentationCode)
     }
 
-    func testExplanationParseRemoveExtraIndentationBeforeCommentMarker() {
+    /// The parser removes some equal amount of indentation from the final presentation code lines
+    /// enough to ensure that at least one line has no indentation. This ensures that the code isn't needlessly indented.
+    func testParseRemoveMinimumIndentation() {
         do {
             let source = """
             // snippet.hide
@@ -112,7 +115,7 @@ class SnippetBuildTests: XCTestCase {
             // snippet.hide
             }
             """
-            let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
             XCTAssertEqual("func foo()", snippet.presentationCode)
         }
         
@@ -128,7 +131,7 @@ class SnippetBuildTests: XCTestCase {
             }
             """
 
-            let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
 
             XCTAssertEqual("""
             struct Inner {
@@ -138,6 +141,8 @@ class SnippetBuildTests: XCTestCase {
         }
     }
 
+    /// Although snippet markers use the same comment `"//"` prefix as the explanation, the parser should
+    /// stop collecting explanation heading lines when encountering a snippet marker.
     func testExplanationInterruptedByVisibilityMark() {
         let source = """
         // This is
@@ -148,7 +153,7 @@ class SnippetBuildTests: XCTestCase {
         // Just a regular comment.
         Foo.foo()
         """
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
         XCTAssertEqual("This is\nthe explanation.", snippet.explanation)
         XCTAssertEqual("""
         // Just a regular comment.
@@ -156,11 +161,11 @@ class SnippetBuildTests: XCTestCase {
         """, snippet.presentationCode)
     }
 
+    /// Only trimming initial indentation measured from the first line: this is
+    /// behavior common to Swift documentation comments.
+    /// Indentation measuring point in the `source` below:
+    ///    *
     func testExplanationRemoveMinimumIndentation() {
-        // Only trimming initial indentation measured from the first line: this is
-        // behavior common to Swift documentation comments.
-        // Indentation measuring point in the `source` below:
-        //    *
         let source = """
         //    An explanation\u{0020}\u{0020}
         //    with high indentation
@@ -182,10 +187,11 @@ class SnippetBuildTests: XCTestCase {
         but not too much.
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
     }
 
+    /// A blank line will terminate the explanation heading.
     func testExplanationInterruptedByNonCommentLine() {
         let sources = [
             """
@@ -203,28 +209,297 @@ class SnippetBuildTests: XCTestCase {
             """,
         ]
         for source in sources {
-            let snippet = Snippet(parsing: source, sourceFile: fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
             XCTAssertEqual("This is\nthe explanation", snippet.explanation)
+        }
+    }
+    
+    // MARK: Slice Tests
+    
+    func testSliceBasic() {
+        let expectedExplanation = "This is the explanation"
+        let source = """
+        // \(expectedExplanation)
+        
+        // snippet.foo
+        func foo()
+        // snippet.end
+        """
+        
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedExplanation, snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["foo"], "func foo()")
+        XCTAssertEqual("func foo()", snippet.presentationCode)
+    }
+    
+    func testSliceMultiple() {
+        let source = """
+        // snippet.foo
+        func foo() {}
+        // snippet.end
+        
+        other()
+        
+        // snippet.bar
+        func bar() {}
+        // snippet.end
+        
+        other()
+        """
+        
+        let expectedPresentationCode = """
+        func foo() {}
+        
+        other()
+        
+        func bar() {}
+        
+        other()
+        """
+        
+        let expectedSlices = [
+            "foo": "func foo() {}",
+            "bar": "func bar() {}",
+        ]
+        
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        for (identifier, code) in expectedSlices {
+            XCTAssertEqual(snippet[identifier], code)
+        }
+    }
+    
+    /// Starting a new slice ends the previous slice before starting another. Slices do not overlap.
+    func testSliceEndsPreviousSlice() {
+        let source = """
+        // snippet.foo
+        func foo() {}
+        
+        // snippet.bar
+        func bar() {}
+        """
+        
+        let expectedPresentationCode = """
+        func foo() {}
+        
+        func bar() {}
+        """
+        
+        let expectedSlices = [
+            "foo": "func foo() {}",
+            "bar": "func bar() {}",
+        ]
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        for (identifier, code) in expectedSlices {
+            XCTAssertEqual(snippet[identifier], code)
+        }
+    }
+    
+    /// The start and end lines of slices are always non-empty.
+    func testSliceOmitsLeadingAndTrailingBlankLines() {
+        let source = """
+        // This is the explanation.
+        
+        // snippet.foo
+        
+        func foo() {}
+        
+        // snippet.end
+        foo()
+        """
+        
+        let expectedPresentationCode = """
+        func foo() {}
+        
+        foo()
+        """
+        
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        
+        XCTAssertEqual(snippet["foo"], "func foo() {}")
+    }
+    
+    /// Slices inside hidden regions are not kept.
+    func testSliceInHiddenRegion() {
+        let source = """
+        // This is the explanation.
+        
+        // snippet.hide
+        
+        // snippet.foo
+        func foo() {}
+        // snippet.end
+        
+        // snippet.show
+        foo()
+        """
+        
+        let expectedPresentationCode = "foo()"
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        XCTAssertTrue(snippet.slices.isEmpty)
+    }
+    
+    /// Slices started inside hidden regions are not kept, even if they end outside them.
+    func testSliceStartsInsideHiddenRegionButEndsOutsideIt() {
+        let source = """
+        // This is the explanation.
+        
+        // snippet.hide
+        
+        // snippet.foo
+        func foo() {}
+        // snippet.show
+        foo()
+        // snippet.end
+        """
+        
+        let expectedPresentationCode = "foo()"
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        XCTAssertTrue(snippet.slices.isEmpty)
+    }
+    
+    /// Slices can hide regions within them.
+    func testSliceContainsHiddenRegion() {
+        let source = """
+        // This is the explanation.
+        
+        // snippet.foo
+        func foo() {
+            let x = 1
+            // snippet.hide
+            debugPrint(x)
+            // snippet.show
+        }
+        // snippet.end
+        foo()
+        """
+        
+        let expectedPresentationCode = """
+        func foo() {
+            let x = 1
+        }
+        foo()
+        """
+        
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["foo"], """
+        func foo() {
+            let x = 1
+        }
+        """)
+    }
+    
+    /// If a snippet.end marker is encountered in a hidden region,
+    /// still end the slice with whatever non-hidden content it collected before the hidden region started.
+    func testSliceEndInsideHiddenRegion() {
+        let source = """
+        // This is the explanation.
+        
+        // snippet.foo
+        func foo() {
+            let x = 1
+            // snippet.hide
+            debugPrint(x)
+        }
+        // snippet.end
+        // snippet.show
+        foo()
+        """
+        
+        let expectedPresentationCode = """
+        func foo() {
+            let x = 1
+        foo()
+        """
+        
+        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["foo"], """
+        func foo() {
+            let x = 1
+        """)
+    }
+    
+    /// Empty slices are not kept.
+    func testSliceEmpty() {
+        do {
+            let source = """
+            // This is the explanation.
+            
+            // snippet.foo
+            // snippet.end
+            
+            func foo() {}
+            """
+            
+            let expectedPresentationCode = """
+            func foo() {}
+            """
+            
+            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+            XCTAssertTrue(snippet.slices.isEmpty)
+        }
+        
+        do {
+            let source = """
+            // This is the explanation.
+            
+            // snippet.foo
+            // snippet.hide
+            func foo() {}
+            // snippet.show
+            // snippet.end
+            func bar() {}
+            """
+            
+            let expectedPresentationCode = """
+            func bar() {}
+            """
+            
+            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
+            XCTAssertTrue(snippet.slices.isEmpty)
         }
     }
 }
 
-class VisibilityMarkTests: XCTestCase {
+class SnippetParseMarkerTests: XCTestCase {
     func testParseHideShow() {
-        XCTAssertEqual(.shown, "// snippet.show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// Snippet.Show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "// SNIPPET.SHOW".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      snippet.show".parsedVisibilityMark)
-        XCTAssertEqual(.shown, "//      snippet.show      ".parsedVisibilityMark)
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// snippet.show"))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Show"))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.SHOW"))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show"))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show      "))
 
-        XCTAssertEqual(.hidden, "// snippet.hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// Snippet.Hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "// SNIPPET.HIDE".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      snippet.hide".parsedVisibilityMark)
-        XCTAssertEqual(.hidden, "//      snippet.hide   ".parsedVisibilityMark)
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// snippet.hide"))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Hide"))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.HIDE"))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide"))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide   "))
 
         // Markers need to be a comment.
-        XCTAssertNil("snippet.show".parsedVisibilityMark)
-        XCTAssertNil("snippet.hide".parsedVisibilityMark)
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.show"))
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.hide"))
+    }
+    
+    func testParseSliceStartAndEnd() {
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "// snippet.foo"))
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo"))
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo    "))
+        
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.end"))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.END"))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//   snippet.end"))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//    snippet.end  "))
     }
 }

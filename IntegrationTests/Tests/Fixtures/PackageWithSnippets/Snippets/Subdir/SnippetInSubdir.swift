@@ -6,10 +6,6 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-/// This is BestStruct's documentation.
-///
-/// Is best.
-public struct BestStruct {
-    public init() {}
-    public func best() {}
-}
+// This snippet is in a subdirectory.
+
+func foo() {}

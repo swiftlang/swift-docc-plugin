@@ -24,11 +24,10 @@ final class SnippetBuilderTests: XCTestCase {
     func testSnippetGeneration() throws {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
-            "/my/package/_Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         let existingFilePaths: Set<String> = [
-            "/my/package/_Snippets",
+            "/my/package/Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         snippetBuilder._fileExists = { path in
@@ -46,7 +45,7 @@ final class SnippetBuilderTests: XCTestCase {
                 XCTAssertEqual(
                     process.arguments,
                     [
-                        "/my/package/_Snippets",
+                        "/my/package/Snippets",
                         "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]
@@ -78,7 +77,6 @@ final class SnippetBuilderTests: XCTestCase {
     func testSnippetGenerationForNonSnippetPackage() throws {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
-            "/my/package/_Snippets",
         ]
         
         snippetBuilder._fileExists = { path in
@@ -108,14 +106,12 @@ final class SnippetBuilderTests: XCTestCase {
     func testSnippetGenerationForMultiplePackages() throws {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
-            "/my/package/_Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
             "/my/other/package/Snippets",
-            "/my/other/package/_Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
         ]
         let existingFilePaths: Set<String> = [
-            "/my/package/_Snippets",
+            "/my/package/Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
             "/my/other/package/Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
@@ -135,7 +131,7 @@ final class SnippetBuilderTests: XCTestCase {
                 XCTAssertEqual(
                     process.arguments,
                     [
-                        "/my/package/_Snippets",
+                        "/my/package/Snippets",
                         "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]
@@ -187,13 +183,12 @@ final class SnippetBuilderTests: XCTestCase {
     func testSnippetGenerationForPackageWithSnippetsDirectoryButNoSnippets() throws {
         let expectedFilePaths: Set<String> = [
             "/my/package/Snippets",
-            "/my/package/_Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
         let existingFilePaths: Set<String> = [
-            "/my/package/_Snippets",
+            "/my/package/Snippets",
             // Don't include the .build directory here to simulate the situation
-            // where we have a `_Snippets` directory but running the snippet-build tool
+            // where we have a `Snippets` directory but running the snippet-build tool
             // on them doesn't produce snippets.
         ]
         snippetBuilder._fileExists = { path in
@@ -211,7 +206,7 @@ final class SnippetBuilderTests: XCTestCase {
                 XCTAssertEqual(
                     process.arguments,
                     [
-                        "/my/package/_Snippets",
+                        "/my/package/Snippets",
                         "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
                         "MyPackage",
                     ]

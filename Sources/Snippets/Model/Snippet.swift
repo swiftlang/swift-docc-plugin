@@ -17,19 +17,23 @@ public struct Snippet {
 
     /// A short abstract explaining what the snippet does.
     public var explanation: String
-
-    /// The code to display as the snippet.
-    public var presentationCode: String
-
-    /// The identifier of the snippet.
-    public var identifier: String {
-        return sourceFile.deletingPathExtension().lastPathComponent
+    
+    /// The ``presentationLines`` joined with a newline `"\n"` separator.
+    public var presentationCode: String {
+        return presentationLines.joined(separator: "\n")
     }
 
+    /// The code to display as the snippet.
+    public var presentationLines: [String]
+    
+    /// Named line ranges in the snippet.
+    public var slices: [String: Range<Int>]
+
     init(parsing source: String, sourceFile: URL) {
-        let extractor = PlainTextSnippetExtractor(source: source)
-        self.explanation = extractor.explanation
-        self.presentationCode = extractor.presentationCode
+        let extractor = SnippetParser(source: source)
+        self.explanation = extractor.explanationLines.joined(separator: "\n")
+        self.presentationLines = extractor.presentationLines.map(String.init)
+        self.slices = extractor.slices
         self.sourceFile = sourceFile
     }
 
@@ -40,5 +44,12 @@ public struct Snippet {
     public init(parsing sourceFile: URL) throws {
         let source = try String(contentsOf: sourceFile)
         self.init(parsing: source, sourceFile: sourceFile)
+    }
+    
+    subscript(sliceIdentifier: String) -> String? {
+        guard let slice = slices[sliceIdentifier] else {
+            return nil
+        }
+        return presentationLines[slice].joined(separator: "\n")
     }
 }

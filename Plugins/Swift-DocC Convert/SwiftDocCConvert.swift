@@ -31,10 +31,6 @@ import PackagePlugin
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
         
-        let experimentalSnippetSupportIsEnabled = argumentExtractor.extractFlag(
-            named: "enable-experimental-snippet-support"
-        ) > 0
-        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
@@ -50,16 +46,16 @@ import PackagePlugin
             return
         }
         
-        let snippetBuilder: SnippetBuilder?
-        if experimentalSnippetSupportIsEnabled {
-            let snippetBuildTool = try context.tool(named: "snippet-build")
-            snippetBuilder = SnippetBuilder(
-                snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
-                workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
-            )
-        } else {
-            snippetBuilder = nil
-        }
+#if swift(>=5.7)
+        let snippetBuildTool = try context.tool(named: "snippet-build")
+        let snippetBuilder = SnippetBuilder(
+            snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
+            workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
+        )
+#else
+        let snippetBuilder: SnippetBuilder? = nil
+#endif
+        
         
         // Iterate over the Swift source module targets we were given.
         for (index, target) in swiftSourceModuleTargets.enumerated() {

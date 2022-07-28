@@ -9,8 +9,10 @@
 // Create a foo.
 import Library
 
+// snippet.best
 let best = BestStruct()
 best.best()
+// snippet.end
 
 // snippet.hide
 

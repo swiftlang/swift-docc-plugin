@@ -11,7 +11,8 @@ import XCTest
 final class SnippetDocumentationGenerationTests: XCTestCase {
     func testGenerateDocumentationForPackageWithSnippets() throws {
         let result = try swiftPackage(
-            "generate-documentation", "--enable-experimental-snippet-support",
+            "generate-documentation",
+            "--target", "Library",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithSnippets")
         )
 
@@ -25,12 +26,9 @@ final class SnippetDocumentationGenerationTests: XCTestCase {
         XCTAssertEqual(
             Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
             [
-                // REMOVEME: "documentation/packagewithsnippets.json"
-                // should disappear once the fix for 
-                // https://github.com/apple/swift-docc/pull/116 is available in CI.
-                "documentation/packagewithsnippets.json",
                 "documentation/library.json",
                 "library/beststruct.json",
+                "beststruct/init().json",
                 "beststruct/best().json",
             ]
         )
@@ -49,34 +47,6 @@ final class SnippetDocumentationGenerationTests: XCTestCase {
         )
     }
 
-    func testGenerateDocumentationForPackageWithSnippetsWithoutExperimentalFlag() throws {
-        let result = try swiftPackage(
-            "generate-documentation",
-            workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithSnippets")
-        )
-
-        result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1)
-
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
-
-        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
-
-        XCTAssertEqual(
-            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                "library/beststruct.json",
-                "beststruct/best().json",
-            ]
-        )
-
-        XCTAssertFalse(
-            FileManager.default.fileExists(atPath: result.symbolGraphsDirectory.path),
-            "Unified symbol graph directory created when experimental snippet support flag was not passed."
-        )
-    }
-
     func testPreviewDocumentationWithSnippets() throws {
         let outputDirectory = try temporaryDirectory().appendingPathComponent("output")
 
@@ -87,9 +57,9 @@ final class SnippetDocumentationGenerationTests: XCTestCase {
                 "--disable-sandbox",
                 "--allow-writing-to-directory", outputDirectory.path,
                 "preview-documentation",
+                "--target", "Library",
                 "--port", port,
                 "--output-path", outputDirectory.path,
-                "--enable-experimental-snippet-support"
             ],
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithSnippets")
         )

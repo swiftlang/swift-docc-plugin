@@ -32,18 +32,11 @@ public class SnippetBuilder {
     
     private func snippetsDirectory(in packageDirectory: URL) -> URL? {
         let snippetsDirectory = packageDirectory.appendingPathComponent("Snippets")
-        if _fileExists(snippetsDirectory.path) {
-            return snippetsDirectory
+        guard _fileExists(snippetsDirectory.path) else {
+            return nil
         }
         
-        // SwiftPM's plugin infrastructure is currently incompatible with Snippet support
-        // so allow for an underscored Snippets directory to workaround this. (rdar://89773759)
-        let underscoredSnippetsDirectory = packageDirectory.appendingPathComponent("_Snippets")
-        if _fileExists(underscoredSnippetsDirectory.path) {
-            return underscoredSnippetsDirectory
-        }
-        
-        return nil
+        return snippetsDirectory
     }
     
     private func snippetsOutputDirectory(
