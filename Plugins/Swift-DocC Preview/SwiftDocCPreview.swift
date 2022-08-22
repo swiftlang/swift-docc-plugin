@@ -6,6 +6,9 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
+#if os(Windows)
+import WinSDK
+#endif
 import Foundation
 import PackagePlugin
 
@@ -125,6 +128,8 @@ import PackagePlugin
         func stopPreviewProcess() {
             #if os(macOS) && os(iOS) && os(tvOS) && os(watchOS)
             previewProcess.interrupt()
+            #elseif os(Windows)
+            _ = TerminateProcess(previewProcess.processHandle, 0)
             #else
             // On non-Darwin systems, `docc` doesn't properly exit with just an interrupt signal
             // so send a SIGKILL instead.
