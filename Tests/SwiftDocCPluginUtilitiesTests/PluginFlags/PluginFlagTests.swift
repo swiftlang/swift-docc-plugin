@@ -76,4 +76,34 @@ final class PluginFlagTests: XCTestCase {
             ]
         )
     }
+    
+    func testEquatableConformance() {
+        let examplePluginFlag1 = PluginFlag(
+            parsedValues: ["--example1", "--other-example1"],
+            abstract: "",
+            description: "",
+            argumentTransformation: { $0 }
+        )
+        let examplePluginFlag2 = PluginFlag(
+            parsedValues: ["--example2", "--other-example2"],
+            abstract: "",
+            description: "",
+            argumentTransformation: { $0 }
+        )
+        let examplePluginFlag3 = PluginFlag(
+            parsedValues: ["--example1", "--other-example1"],
+            abstract: "abstract",
+            description: "description",
+            argumentTransformation: { $0 }
+        )
+        let examplePluginFlag4 = PluginFlag(
+            parsedValues: ["--example"],
+            abstract: "",
+            description: "",
+            argumentTransformation: { $0 }
+        )
+        XCTAssertFalse(examplePluginFlag1 == examplePluginFlag2)
+        XCTAssertTrue(examplePluginFlag1 == examplePluginFlag3)
+        XCTAssertFalse(examplePluginFlag1 == examplePluginFlag4)
+    }
 }

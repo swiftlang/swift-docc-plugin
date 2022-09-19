@@ -45,6 +45,7 @@ public enum HelpInformation {
         
         let supportedPluginFlags = [
             PluginFlag.disableIndex,
+            PluginFlag.skipSynthesizedSymbols
         ]
         
         for flag in supportedPluginFlags {

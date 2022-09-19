@@ -153,6 +153,9 @@ public struct ParsedArguments {
     /// Creates a new set of parsed arguments with the given arguments.
     public init(_ arguments: [String]) {
         self.arguments = arguments
+        symbolGraphArguments = customSymbolGraphOptions.filter { option in
+            option.parsedValues.contains(where: arguments.contains)
+        }
     }
     
     /// The command-line options required by the `docc` tool.
@@ -169,7 +172,18 @@ public struct ParsedArguments {
         "--index",
     ]
     
+    /// The plugin-flag options to customize the Symbol Graph generation
+    let customSymbolGraphOptions: [PluginFlag] = [
+        .skipSynthesizedSymbols
+    ]
+    
+    // Build array with plugin flags that modify the symbol graph generation,
+    // filtering from the available custom symbol graph options those
+    // that correspond to the received flags
+    var symbolGraphArguments: [PluginFlag]
+    
     private static let argumentsTransformers: [ArgumentsTransforming] = [
-        PluginFlag.disableIndex
+        PluginFlag.disableIndex,
+        PluginFlag.skipSynthesizedSymbols
     ]
 }

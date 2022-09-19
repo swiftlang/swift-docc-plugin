@@ -40,6 +40,9 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --skip-synthesized-symbols
+                                      Excludes synthesized symbols from the generated documentation
+                    Produces a DocC archive with a reduced file size when converted by omitting synthesized symbols.
 
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -129,6 +132,9 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --skip-synthesized-symbols
+                                      Excludes synthesized symbols from the generated documentation
+                    Produces a DocC archive with a reduced file size when converted by omitting synthesized symbols.
             
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
