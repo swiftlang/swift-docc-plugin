@@ -42,7 +42,7 @@ extension Array where Element == Substring {
     }
     
     mutating func trimEmptyOrWhitespaceLines() {
-        while let last, last.isEmptyOrWhiteSpace {
+        while let last = last , last.isEmptyOrWhiteSpace {
             removeLast()
         }
         self = Array(drop { $0.isEmptyOrWhiteSpace })
@@ -89,7 +89,7 @@ struct SnippetParser {
     }
     
     mutating func endSlice() {
-        guard let currentSlice else {
+        guard let currentSlice = currentSlice else {
             return
         }
         guard currentSlice.startLine < presentationLines.count else {
