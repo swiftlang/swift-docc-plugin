@@ -28,7 +28,7 @@
   "metadata" : {
     "modules" : [
       {
-        "name" : "SwiftDocCPlugin"
+        "name" : "Swift-DocC Plugin"
       }
     ],
     "role" : "article",
@@ -796,7 +796,7 @@
   "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
   "kind" : "symbol",
   "role" : "collection",
-  "title" : "SwiftDocCPlugin",
+  "title" : "Swift-DocC Plugin",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin"
 },

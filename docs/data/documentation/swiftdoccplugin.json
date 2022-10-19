@@ -21,13 +21,13 @@
     "externalID" : "SwiftDocCPlugin",
     "modules" : [
       {
-        "name" : "SwiftDocCPlugin"
+        "name" : "Swift-DocC Plugin"
       }
     ],
     "role" : "collection",
     "roleHeading" : "Command Plugin",
     "symbolKind" : "module",
-    "title" : "SwiftDocCPlugin"
+    "title" : "Swift-DocC Plugin"
   },
   "primaryContentSections" : [
     {
@@ -201,7 +201,7 @@
   "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
   "kind" : "symbol",
   "role" : "collection",
-  "title" : "SwiftDocCPlugin",
+  "title" : "Swift-DocC Plugin",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin"
 },

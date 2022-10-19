@@ -33,7 +33,7 @@
           }
         ],
         "path" : "\/documentation\/swiftdoccplugin",
-        "title" : "SwiftDocCPlugin",
+        "title" : "Swift-DocC Plugin",
         "type" : "module"
       }
     ]
