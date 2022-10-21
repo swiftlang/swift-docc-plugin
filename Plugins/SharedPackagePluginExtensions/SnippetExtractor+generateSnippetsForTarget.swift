@@ -9,7 +9,7 @@
 import Foundation
 import PackagePlugin
 
-extension SnippetBuilder {
+extension SnippetExtractor {
     func generateSnippets(
         for target: SwiftSourceModuleTarget,
         context: PluginContext

@@ -30,7 +30,7 @@ let package = Package(
                 intent: .documentationGeneration()
             ),
             dependencies: [
-                "snippet-build",
+                "snippet-extract",
             ],
             path: "Plugins/Swift-DocC Convert",
             exclude: ["Symbolic Links/README.md"]
@@ -45,7 +45,7 @@ let package = Package(
                 )
             ),
             dependencies: [
-                "snippet-build",
+                "snippet-extract",
             ],
             exclude: ["Symbolic Links/README.md"]
         ),
@@ -72,7 +72,7 @@ let package = Package(
         ),
         .target(name: "Snippets"),
         .executableTarget(
-            name: "snippet-build",
+            name: "snippet-extract",
             dependencies: [
                 "Snippets",
                 .product(name: "SymbolKit", package: "swift-docc-symbolkit"),

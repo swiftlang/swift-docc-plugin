@@ -10,13 +10,13 @@ import Foundation
 @testable import SwiftDocCPluginUtilities
 import XCTest
 
-final class SnippetBuilderTests: XCTestCase {
+final class SnippetExtractTests: XCTestCase {
     lazy var workingDirectory = URL(
         fileURLWithPath: "/test-working-directory",
         isDirectory: true
     )
     
-    lazy var snippetBuilder = SnippetBuilder(
+    lazy var snippetExtractor = SnippetExtractor(
         snippetTool: URL(fileURLWithPath: "/snippet-tool", isDirectory: false),
         workingDirectory: workingDirectory
     )
@@ -30,7 +30,7 @@ final class SnippetBuilderTests: XCTestCase {
             "/my/package/Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id",
         ]
-        snippetBuilder._fileExists = { path in
+        snippetExtractor._fileExists = { path in
             XCTAssertTrue(
                 expectedFilePaths.contains(path),
                 "Unexpected file path: '\(path)'"
@@ -39,9 +39,9 @@ final class SnippetBuilderTests: XCTestCase {
             return existingFilePaths.contains(path)
         }
         
-        var snippetBuilderRunProcessCount = 0
-        snippetBuilder._runProcess = { process in
-            if snippetBuilderRunProcessCount == 0 {
+        var snippetExtractorRunProcessCount = 0
+        snippetExtractor._runProcess = { process in
+            if snippetExtractorRunProcessCount == 0 {
                 XCTAssertEqual(
                     process.arguments,
                     [
@@ -51,22 +51,22 @@ final class SnippetBuilderTests: XCTestCase {
                     ]
                 )
             } else {
-                XCTFail("Snippet build process ran unexpectedly.")
+                XCTFail("Snippet extract process ran unexpectedly.")
             }
             
-            snippetBuilderRunProcessCount += 1
+            snippetExtractorRunProcessCount += 1
         }
         
         // Assert that generating snippets for the same package multiple times
-        // only invokes the snippet-build process once
+        // only invokes the snippet-extract process once
         for _ in 1...10 {
-            let snippetDirectory = try snippetBuilder.generateSnippets(
+            let snippetDirectory = try snippetExtractor.generateSnippets(
                 for: "package-id",
                 packageDisplayName: "MyPackage",
                 packageDirectory: URL(fileURLWithPath: "/my/package")
             )
             
-            XCTAssertEqual(snippetBuilderRunProcessCount, 1)
+            XCTAssertEqual(snippetExtractorRunProcessCount, 1)
             XCTAssertEqual(
                 snippetDirectory?.path,
                 "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id"
@@ -79,22 +79,22 @@ final class SnippetBuilderTests: XCTestCase {
             "/my/package/Snippets",
         ]
         
-        snippetBuilder._fileExists = { path in
+        snippetExtractor._fileExists = { path in
             XCTAssertTrue(
                 expectedFilePaths.contains(path),
                 "Unexpected file path: '\(path)'"
             )
             
-            // Return false when the snippet builder checks for the existence
+            // Return false when the snippet extract checks for the existence
             // of a snippets directory
             return false
         }
         
-        snippetBuilder._runProcess = { process in
-            XCTFail("Snippet builder process ran for package that does not contain snippets.")
+        snippetExtractor._runProcess = { process in
+            XCTFail("Snippet extract process ran for package that does not contain snippets.")
         }
         
-        let snippetDirectory = try snippetBuilder.generateSnippets(
+        let snippetDirectory = try snippetExtractor.generateSnippets(
             for: "package-id",
             packageDisplayName: "MyPackage",
             packageDirectory: URL(fileURLWithPath: "/my/package")
@@ -116,7 +116,7 @@ final class SnippetBuilderTests: XCTestCase {
             "/my/other/package/Snippets",
             "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id",
         ]
-        snippetBuilder._fileExists = { path in
+        snippetExtractor._fileExists = { path in
             XCTAssertTrue(
                 expectedFilePaths.contains(path),
                 "Unexpected file path: '\(path)'"
@@ -125,9 +125,9 @@ final class SnippetBuilderTests: XCTestCase {
             return existingFilePaths.contains(path)
         }
         
-        var snippetBuilderRunProcessCount = 0
-        snippetBuilder._runProcess = { process in
-            if snippetBuilderRunProcessCount == 0 {
+        var snippetExtractorRunProcessCount = 0
+        snippetExtractor._runProcess = { process in
+            if snippetExtractorRunProcessCount == 0 {
                 XCTAssertEqual(
                     process.arguments,
                     [
@@ -136,7 +136,7 @@ final class SnippetBuilderTests: XCTestCase {
                         "MyPackage",
                     ]
                 )
-            } else if snippetBuilderRunProcessCount == 1 {
+            } else if snippetExtractorRunProcessCount == 1 {
                 XCTAssertEqual(
                     process.arguments,
                     [
@@ -146,19 +146,19 @@ final class SnippetBuilderTests: XCTestCase {
                     ]
                 )
             } else {
-                XCTFail("Snippet build process ran unexpectedly.")
+                XCTFail("Snippet extract process ran unexpectedly.")
             }
-            snippetBuilderRunProcessCount += 1
+            snippetExtractorRunProcessCount += 1
         }
         
         for _ in 1...10 {
-            let snippetDirectory = try snippetBuilder.generateSnippets(
+            let snippetDirectory = try snippetExtractor.generateSnippets(
                 for: "package-id",
                 packageDisplayName: "MyPackage",
                 packageDirectory: URL(fileURLWithPath: "/my/package")
             )
             
-            XCTAssertEqual(snippetBuilderRunProcessCount, 1)
+            XCTAssertEqual(snippetExtractorRunProcessCount, 1)
             XCTAssertEqual(
                 snippetDirectory?.path,
                 "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id"
@@ -166,13 +166,13 @@ final class SnippetBuilderTests: XCTestCase {
         }
         
         for _ in 1...10 {
-            let snippetDirectory = try snippetBuilder.generateSnippets(
+            let snippetDirectory = try snippetExtractor.generateSnippets(
                 for: "other-package-id",
                 packageDisplayName: "MyOtherPackage",
                 packageDirectory: URL(fileURLWithPath: "/my/other/package")
             )
             
-            XCTAssertEqual(snippetBuilderRunProcessCount, 2)
+            XCTAssertEqual(snippetExtractorRunProcessCount, 2)
             XCTAssertEqual(
                 snippetDirectory?.path,
                 "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyOtherPackage-other-package-id"
@@ -188,10 +188,10 @@ final class SnippetBuilderTests: XCTestCase {
         let existingFilePaths: Set<String> = [
             "/my/package/Snippets",
             // Don't include the .build directory here to simulate the situation
-            // where we have a `Snippets` directory but running the snippet-build tool
+            // where we have a `Snippets` directory but running the snippet-extract tool
             // on them doesn't produce snippets.
         ]
-        snippetBuilder._fileExists = { path in
+        snippetExtractor._fileExists = { path in
             XCTAssertTrue(
                 expectedFilePaths.contains(path),
                 "Unexpected file path: '\(path)'"
@@ -200,9 +200,9 @@ final class SnippetBuilderTests: XCTestCase {
             return existingFilePaths.contains(path)
         }
         
-        var snippetBuilderRunProcessCount = 0
-        snippetBuilder._runProcess = { process in
-            if snippetBuilderRunProcessCount == 0 {
+        var snippetExtractorRunProcessCount = 0
+        snippetExtractor._runProcess = { process in
+            if snippetExtractorRunProcessCount == 0 {
                 XCTAssertEqual(
                     process.arguments,
                     [
@@ -212,22 +212,22 @@ final class SnippetBuilderTests: XCTestCase {
                     ]
                 )
             } else {
-                XCTFail("Snippet build process ran unexpectedly.")
+                XCTFail("Snippet extract process ran unexpectedly.")
             }
             
-            snippetBuilderRunProcessCount += 1
+            snippetExtractorRunProcessCount += 1
         }
         
         // Assert that generating snippets for the same package multiple times
-        // only invokes the snippet-build process once
+        // only invokes the snippet-extract process once
         for _ in 1...10 {
-            let snippetDirectory = try snippetBuilder.generateSnippets(
+            let snippetDirectory = try snippetExtractor.generateSnippets(
                 for: "package-id",
                 packageDisplayName: "MyPackage",
                 packageDirectory: URL(fileURLWithPath: "/my/package")
             )
             
-            XCTAssertEqual(snippetBuilderRunProcessCount, 1)
+            XCTAssertEqual(snippetExtractorRunProcessCount, 1)
             XCTAssertNil(snippetDirectory)
         }
     }
