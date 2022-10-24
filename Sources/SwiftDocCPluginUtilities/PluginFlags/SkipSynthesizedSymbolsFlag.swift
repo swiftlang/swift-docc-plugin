@@ -7,18 +7,16 @@
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
 extension PluginFlag {
-    /// Excludes synthesized symbols from the generated documentation.
+    /// Exclude synthesized symbols from the generated documentation.
     ///
-    /// If `--skip-synthesized-symbols` is found, pages for synthesized symbols
-    /// will not be generated, reducing the archive file size by not emitting any `view-implementations`
-    /// folder.
+    /// `--experimental-skip-synthesized-symbols` produces a DocC archive without compiler synthesized symbols.
     static let skipSynthesizedSymbols = PluginFlag(
         parsedValues: [
-            "--skip-synthesized-symbols"
+            "--experimental-skip-synthesized-symbols"
         ],
-        abstract: "Excludes synthesized symbols from the generated documentation",
+        abstract: "Exclude synthesized symbols from the generated documentation",
         description: """
-            Produces a DocC archive with a reduced file size when converted by omitting synthesized symbols.
+            Experimental feature that produces a DocC archive without compiler synthesized symbols.
             """,
         argumentTransformation: { $0 }
     )

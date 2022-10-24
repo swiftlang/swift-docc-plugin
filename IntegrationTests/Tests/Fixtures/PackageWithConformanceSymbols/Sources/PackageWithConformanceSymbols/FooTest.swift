@@ -6,11 +6,5 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-import SwiftUI
-
-public struct Bar: View {
-    @available(macOS 10.15.0, *)
-    public var body: some View {
-        Text("Bar")
-    }
+public struct Foo: Hashable {
 }

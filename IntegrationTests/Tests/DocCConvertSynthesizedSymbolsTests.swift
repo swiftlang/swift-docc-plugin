@@ -11,7 +11,7 @@ import XCTest
 final class DocCConvertSynthesizedSymbolsTests: XCTestCase {
     func testGenerateDocumentationWithSkipSynthesizedSymbolsEnabled() throws {
         let result = try swiftPackage(
-            "generate-documentation", "--skip-synthesized-symbols",
+            "generate-documentation", "--experimental-skip-synthesized-symbols",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithConformanceSymbols")
         )
         
@@ -22,8 +22,27 @@ final class DocCConvertSynthesizedSymbolsTests: XCTestCase {
             Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
             [
                 "documentation/packagewithconformancesymbols.json",
-                "packagewithconformancesymbols/bar.json",
-                "bar/body.json"
+                "packagewithconformancesymbols/foo.json"
+            ]
+        )
+    }
+    
+    func testGenerateDocumentationWithSynthesizedSymbols() throws {
+        let result = try swiftPackage(
+            "generate-documentation",
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithConformanceSymbols")
+        )
+        
+        result.assertExitStatusEquals(0)
+        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
+        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
+        XCTAssertEqual(
+            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
+            [
+                "documentation/packagewithconformancesymbols.json",
+                "packagewithconformancesymbols/foo.json",
+                "foo/equatable-implementations.json",
+                "foo/!=(_:_:).json"
             ]
         )
     }

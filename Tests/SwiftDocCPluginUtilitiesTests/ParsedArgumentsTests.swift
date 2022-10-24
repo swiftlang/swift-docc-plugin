@@ -445,7 +445,7 @@ final class ParsedArgumentsTests: XCTestCase {
     
     func testDocCSymbolGraphArgumentsForSynthesizedSymbols() {
         let excludeSynthesizedSymbolsArguments = ParsedArguments(
-            ["--skip-synthesized-symbols"]
+            ["--experimental-skip-synthesized-symbols"]
         )
         XCTAssertEqual(
             excludeSynthesizedSymbolsArguments.symbolGraphArguments,
