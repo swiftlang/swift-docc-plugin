@@ -11,14 +11,14 @@ import Snippets
 import SymbolKit
 
 @main
-struct SnippetBuildCommand {
+struct SnippetExtractCommand {
     var snippetsDir: String
     var outputDir: String
     var moduleName: String
 
     static func printUsage() {
         let usage = """
-            USAGE: snippet-build <snippet directory> <output directory> <module name>
+            USAGE: snippet-extract <snippet directory> <output directory> <module name>
 
             ARGUMENTS:
                 <snippet directory> - The directory containing Swift snippets
@@ -38,7 +38,7 @@ struct SnippetBuildCommand {
 
     func emitSymbolGraph(for snippets: [Snippet], to emitFilename: URL, moduleName: String) throws {
         let snippetSymbols = snippets.map { SymbolGraph.Symbol($0, moduleName: moduleName, inDirectory: URL(fileURLWithPath: snippetsDir).absoluteURL) }
-        let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "swift-docc-plugin/snippet-build")
+        let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "snippet-extract")
         let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil), isVirtual: true)
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: snippetSymbols, relationships: [])
         try FileManager.default.createDirectory(atPath: emitFilename.deletingLastPathComponent().path, withIntermediateDirectories: true, attributes: nil)
@@ -91,9 +91,9 @@ struct SnippetBuildCommand {
             printUsage()
             exit(0)
         }
-        let snippetBuild = SnippetBuildCommand(snippetsDir: CommandLine.arguments[1],
-                                               outputDir: CommandLine.arguments[2],
-                                               moduleName: CommandLine.arguments[3])
-        try snippetBuild.run()
+        let snippetExtract = SnippetExtractCommand(snippetsDir: CommandLine.arguments[1],
+                                                   outputDir: CommandLine.arguments[2],
+                                                   moduleName: CommandLine.arguments[3])
+        try snippetExtract.run()
     }
 }

@@ -8,12 +8,12 @@
 
 import Foundation
 
-/// Manages snippet symbol graph building.
-public class SnippetBuilder {
+/// Manages snippet symbol graph extraction.
+public class SnippetExtractor {
     /// Uniquely identifies a Swift Package Manager package.
     public typealias PackageIdentifier = String
     
-    enum SymbolGraphBuildResult {
+    enum SymbolGraphExtractionResult {
         case packageDoesNotProduceSnippets
         case packageContainsSnippets(symbolGraphDirectory: URL)
     }
@@ -21,9 +21,9 @@ public class SnippetBuilder {
     private let snippetTool: URL
     private let workingDirectory: URL
     
-    private var snippetSymbolGraphBuildResults = [PackageIdentifier : SymbolGraphBuildResult]()
+    private var snippetSymbolGraphExtractionResults = [PackageIdentifier : SymbolGraphExtractionResult]()
     
-    /// Create a new snippet builder with the given snippet building tool
+    /// Create a new snippet extractor with the given tool
     /// and working directory.
     public init(snippetTool: URL, workingDirectory: URL) {
         self.snippetTool = snippetTool
@@ -68,7 +68,7 @@ public class SnippetBuilder {
     
     /// Generate snippets for the given package.
     ///
-    /// The snippet builder has an internal cache so it's safe to call this
+    /// The snippet extractor has an internal cache so it's safe to call this
     /// function multiple times with the same package identifier.
     ///
     /// - Parameters:
@@ -76,7 +76,7 @@ public class SnippetBuilder {
     ///   - packageDisplayName: A display name for the package.
     ///   - packageDirectory: The root directory for this package.
     ///
-    ///     The snippet builder will look for a `Snippets` subdirectory
+    ///     The snippet extractor will look for a `Snippets` subdirectory
     ///     within this directory.
     ///
     /// - Returns: A URL for the directory containing the generated snippets or nil if
@@ -86,7 +86,7 @@ public class SnippetBuilder {
         packageDisplayName: String,
         packageDirectory: URL
     ) throws -> URL? {
-        switch snippetSymbolGraphBuildResults[packageIdentifier] {
+        switch snippetSymbolGraphExtractionResults[packageIdentifier] {
         case .packageContainsSnippets(symbolGraphDirectory: let symbolGraphDirectory):
             return symbolGraphDirectory
         case .packageDoesNotProduceSnippets:
@@ -97,7 +97,7 @@ public class SnippetBuilder {
         }
         
         guard let snippetsDirectory = snippetsDirectory(in: packageDirectory) else {
-            snippetSymbolGraphBuildResults[packageIdentifier] = .packageDoesNotProduceSnippets
+            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageDoesNotProduceSnippets
             return nil
         }
         
@@ -118,10 +118,10 @@ public class SnippetBuilder {
         try _runProcess(process)
         
         if _fileExists(outputDirectory.path) {
-            snippetSymbolGraphBuildResults[packageIdentifier] = .packageContainsSnippets(symbolGraphDirectory: outputDirectory)
+            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageContainsSnippets(symbolGraphDirectory: outputDirectory)
             return outputDirectory
         } else {
-            snippetSymbolGraphBuildResults[packageIdentifier] = .packageDoesNotProduceSnippets
+            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageDoesNotProduceSnippets
             return nil
         }
     }

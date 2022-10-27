@@ -47,13 +47,13 @@ import PackagePlugin
         }
         
 #if swift(>=5.7)
-        let snippetBuildTool = try context.tool(named: "snippet-build")
-        let snippetBuilder = SnippetBuilder(
-            snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
+        let snippetExtractTool = try context.tool(named: "snippet-extract")
+        let snippetExtractor = SnippetExtractor(
+            snippetTool: URL(fileURLWithPath: snippetExtractTool.path.string, isDirectory: false),
             workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
         )
 #else
-        let snippetBuilder: SnippetBuilder? = nil
+        let snippetExtractor: SnippetBuilder? = nil
 #endif
         
         
@@ -70,7 +70,7 @@ import PackagePlugin
                 for: target,
                 context: context,
                 verbose: verbose,
-                snippetBuilder: snippetBuilder
+                snippetExtractor: snippetExtractor
             )
             
             if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {

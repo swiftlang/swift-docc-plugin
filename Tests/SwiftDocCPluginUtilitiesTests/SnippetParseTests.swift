@@ -10,14 +10,14 @@ import Foundation
 @testable import Snippets
 import XCTest
 
-class SnippetBuildTests: XCTestCase {
+class SnippetParseTests: XCTestCase {
     static let fakeSnippetsDir = URL(fileURLWithPath: "/tmp/MyPackage/Snippets")
     static let fakeSourceFilename = fakeSnippetsDir.appendingPathComponent("Something").appendingPathComponent("Test.swift")
     func testParseEmpty() {
         let source = ""
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
 
-        XCTAssertEqual(SnippetBuildTests.fakeSourceFilename, snippet.sourceFile)
+        XCTAssertEqual(SnippetParseTests.fakeSourceFilename, snippet.sourceFile)
         XCTAssertTrue(snippet.explanation.isEmpty)
         XCTAssertTrue(snippet.presentationLines.isEmpty)
     }
@@ -39,7 +39,7 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
 
         let expectedCode = """
         func shown() {
@@ -49,7 +49,7 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        XCTAssertEqual(SnippetBuildTests.fakeSourceFilename, snippet.sourceFile)
+        XCTAssertEqual(SnippetParseTests.fakeSourceFilename, snippet.sourceFile)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
         XCTAssertEqual(expectedCode, snippet.presentationCode)
     }
@@ -79,7 +79,7 @@ class SnippetBuildTests: XCTestCase {
         shown()
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
 
         XCTAssertEqual(expectedCode, snippet.presentationCode)
     }
@@ -98,7 +98,7 @@ class SnippetBuildTests: XCTestCase {
 
 
         """
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual("This is a snippet.", snippet.explanation)
         XCTAssertEqual("func foo()", snippet.presentationCode)
     }
@@ -115,7 +115,7 @@ class SnippetBuildTests: XCTestCase {
             // snippet.hide
             }
             """
-            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
             XCTAssertEqual("func foo()", snippet.presentationCode)
         }
         
@@ -131,7 +131,7 @@ class SnippetBuildTests: XCTestCase {
             }
             """
 
-            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
 
             XCTAssertEqual("""
             struct Inner {
@@ -153,7 +153,7 @@ class SnippetBuildTests: XCTestCase {
         // Just a regular comment.
         Foo.foo()
         """
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual("This is\nthe explanation.", snippet.explanation)
         XCTAssertEqual("""
         // Just a regular comment.
@@ -187,7 +187,7 @@ class SnippetBuildTests: XCTestCase {
         but not too much.
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
     }
 
@@ -209,7 +209,7 @@ class SnippetBuildTests: XCTestCase {
             """,
         ]
         for source in sources {
-            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
             XCTAssertEqual("This is\nthe explanation", snippet.explanation)
         }
     }
@@ -226,7 +226,7 @@ class SnippetBuildTests: XCTestCase {
         // snippet.end
         """
         
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedExplanation, snippet.explanation)
         XCTAssertEqual(1, snippet.slices.count)
         XCTAssertEqual(snippet["foo"], "func foo()")
@@ -263,7 +263,7 @@ class SnippetBuildTests: XCTestCase {
             "bar": "func bar() {}",
         ]
         
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         for (identifier, code) in expectedSlices {
             XCTAssertEqual(snippet[identifier], code)
@@ -291,7 +291,7 @@ class SnippetBuildTests: XCTestCase {
             "bar": "func bar() {}",
         ]
 
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         for (identifier, code) in expectedSlices {
             XCTAssertEqual(snippet[identifier], code)
@@ -317,7 +317,7 @@ class SnippetBuildTests: XCTestCase {
         foo()
         """
         
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         
         XCTAssertEqual(snippet["foo"], "func foo() {}")
@@ -339,7 +339,7 @@ class SnippetBuildTests: XCTestCase {
         """
         
         let expectedPresentationCode = "foo()"
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         XCTAssertTrue(snippet.slices.isEmpty)
     }
@@ -359,7 +359,7 @@ class SnippetBuildTests: XCTestCase {
         """
         
         let expectedPresentationCode = "foo()"
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         XCTAssertTrue(snippet.slices.isEmpty)
     }
@@ -387,7 +387,7 @@ class SnippetBuildTests: XCTestCase {
         foo()
         """
         
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         XCTAssertEqual(1, snippet.slices.count)
         XCTAssertEqual(snippet["foo"], """
@@ -420,7 +420,7 @@ class SnippetBuildTests: XCTestCase {
         foo()
         """
         
-        let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
         XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
         XCTAssertEqual(1, snippet.slices.count)
         XCTAssertEqual(snippet["foo"], """
@@ -445,7 +445,7 @@ class SnippetBuildTests: XCTestCase {
             func foo() {}
             """
             
-            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
             XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
             XCTAssertTrue(snippet.slices.isEmpty)
         }
@@ -466,7 +466,7 @@ class SnippetBuildTests: XCTestCase {
             func bar() {}
             """
             
-            let snippet = Snippet(parsing: source, sourceFile: SnippetBuildTests.fakeSourceFilename)
+            let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
             XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
             XCTAssertTrue(snippet.slices.isEmpty)
         }
