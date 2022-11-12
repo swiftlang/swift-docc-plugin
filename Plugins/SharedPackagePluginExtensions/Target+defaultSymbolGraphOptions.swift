@@ -27,7 +27,21 @@ extension SwiftSourceModuleTarget {
         return PackageManager.SymbolGraphOptions(
             minimumAccessLevel: targetMinimumAccessLevel,
             includeSynthesized: true,
-            includeSPI: false
+            includeSPI: false,
+            emitExtensionBlocks: false
         )
     }
 }
+
+
+#if swift(<5.8)
+private extension PackageManager.SymbolGraphOptions {
+    /// A copatibility layer for lower Swift versions which discards unknown parameters.
+    init(minimumAccessLevel: PackagePlugin.PackageManager.SymbolGraphOptions.AccessLevel = .public,
+         includeSynthesized: Bool = false,
+         includeSPI: Bool = false,
+         emitExtensionBlocks: Bool) {
+        self.init(minimumAccessLevel: minimumAccessLevel, includeSynthesized: includeSynthesized, includeSPI: includeSPI)
+    }
+}
+#endif

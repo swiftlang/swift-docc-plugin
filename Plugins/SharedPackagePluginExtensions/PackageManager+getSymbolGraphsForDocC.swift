@@ -38,12 +38,14 @@ extension PackageManager {
         for target: SwiftSourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
-        snippetExtractor: SnippetExtractor?
+        snippetExtractor: SnippetExtractor?,
+        arguments: Arguments
     ) throws -> DocCSymbolGraphResult {
         // First generate the primary symbol graphs containing information about the
         // symbols defined in the target itself.
         
-        let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+        var symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+        symbolGraphOptions.override(with: arguments)
         
         if verbose {
             print("symbol graph options: '\(symbolGraphOptions)'")

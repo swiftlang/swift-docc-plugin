@@ -19,10 +19,25 @@ public struct ParsedArguments {
         return arguments.contains("--help") || arguments.contains("-h")
     }
     
+    /// Returns the arguments that could be passed to `swift package dump-symbol-graph`.
+    ///
+    /// In practice, however we won't invoke the `dump-symbol-graph` command via the command line,
+    /// but via the `PackagePlugin` API. Thus, these arguments have to be parsed later on and converted to
+    /// `PackageManager.SymbolGraphOptions`.
+    public func dumpSymbolGraphArguments() -> Arguments {
+        var dumpSymbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
+        
+        for argumentsTransformer in Self.argumentsTransformers {
+            dumpSymbolGraphArguments = argumentsTransformer.transform(dumpSymbolGraphArguments)
+        }
+        
+        return dumpSymbolGraphArguments
+    }
+    
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
-    /// Merges the arguments provided upon initialization of the parsed arguments
-    /// with default fallback values for required options that were not provided.
+    /// Merges the arguments provided upon initialization of the parsed arguments that are relevant
+    /// to `docc` with default fallback values for required options that were not provided.
     ///
     /// For example, if ParsedArguments is initialized like so:
     ///
@@ -90,7 +105,7 @@ public struct ParsedArguments {
         symbolGraphDirectoryPath: String,
         outputPath: String
     ) -> Arguments {
-        var doccArguments = arguments
+        var doccArguments = arguments.filter(for: .docc)
         
         // Iterate through the flags required for the `docc` invocation
         // and append any that are not already present.
@@ -170,6 +185,51 @@ public struct ParsedArguments {
     ]
     
     private static let argumentsTransformers: [ArgumentsTransforming] = [
-        PluginFlag.disableIndex
+        PluginFlag.disableIndex,
+        PluginFlag.extendedTypes
     ]
+}
+
+private extension ParsedArguments {
+    enum ArgumentConsumer: CaseIterable {
+        /// The `docc` command
+        case docc
+        /// The `swift package dump-symbol-graph` command
+        case dumpSymbolGraph
+        
+        /// Returns the flags applicable to an `ArgumentConsumer`.
+        ///
+        /// If `flags` is `nil`, this `ArgumentConsumer` is assumed to
+        /// consume all flags not consumed by any of the other `ArgumentConsumer`s.
+        var flags: [PluginFlag]? {
+            switch self {
+            case .dumpSymbolGraph:
+                return [
+                    PluginFlag.extendedTypes
+                ]
+            case .docc:
+                return nil
+            }
+        }
+    }
+}
+
+private extension Arguments {
+    /// Returns the subset of arguments which are applicable to the given `consumer`.
+    func filter(for consumer: ParsedArguments.ArgumentConsumer) -> Arguments {
+        if let flagsToInclude = consumer.flags {
+            return self.filter { argument in
+                flagsToInclude.contains(where: { flag in
+                    flag.parsedValues.contains(argument)
+                })
+            }
+        } else {
+            let flagsToExclude = ParsedArguments.ArgumentConsumer.allCases.compactMap(\.flags).flatMap { $0 }
+            return self.filter { argument in
+                !flagsToExclude.contains(where: { flag in
+                    flag.parsedValues.contains(argument)
+                })
+            }
+        }
+    }
 }

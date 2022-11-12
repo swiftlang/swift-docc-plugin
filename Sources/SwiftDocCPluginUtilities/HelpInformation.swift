@@ -43,9 +43,13 @@ public enum HelpInformation {
             helpText = previewPluginHelpOverview
         }
         
-        let supportedPluginFlags = [
+        var supportedPluginFlags = [
             PluginFlag.disableIndex,
         ]
+        
+#if swift(>=5.8)
+        supportedPluginFlags += [PluginFlag.extendedTypes]
+#endif
         
         for flag in supportedPluginFlags {
             helpText += """

@@ -83,7 +83,8 @@ import PackagePlugin
             for: target,
             context: context,
             verbose: verbose,
-            snippetExtractor: snippetExtractor
+            snippetExtractor: snippetExtractor,
+            arguments: parsedArguments.dumpSymbolGraphArguments()
         )
         
         if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
