@@ -38,7 +38,7 @@ extension PackageManager {
         for target: SwiftSourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
-        snippetBuilder: SnippetBuilder?,
+        snippetExtractor: SnippetExtractor?,
         customSymbolGraphOptions: [PluginFlag]
     ) throws -> DocCSymbolGraphResult {
         // First generate the primary symbol graphs containing information about the
@@ -70,18 +70,18 @@ extension PackageManager {
             print("target symbol graph directory path: '\(targetSymbolGraphsDirectory.path)'")
         }
         
-        // Then, check to see if we were provided a snippet builder. If so,
+        // Then, check to see if we were provided a snippet extractor. If so,
         // we should attempt to generate symbol graphs for any snippets included in the
         // target's containing package.
-        guard let snippetBuilder = snippetBuilder else {
+        guard let snippetExtractor = snippetExtractor else {
             return DocCSymbolGraphResult(targetSymbolGraphsDirectory: targetSymbolGraphsDirectory)
         }
         
         if verbose {
-            print("snippet builder provided, attempting to generate snippet symbol graph")
+            print("snippet extractor provided, attempting to generate snippet symbol graph")
         }
         
-        guard let snippetSymbolGraphsDirectory = try snippetBuilder.generateSnippets(
+        guard let snippetSymbolGraphsDirectory = try snippetExtractor.generateSnippets(
             for: target,
             context: context
         ) else {

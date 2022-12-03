@@ -70,20 +70,20 @@ import PackagePlugin
         }
         
 #if swift(>=5.7)
-        let snippetBuildTool = try context.tool(named: "snippet-build")
-        let snippetBuilder = SnippetBuilder(
-            snippetTool: URL(fileURLWithPath: snippetBuildTool.path.string, isDirectory: false),
+        let snippetExtractTool = try context.tool(named: "snippet-extract")
+        let snippetExtractor = SnippetExtractor(
+            snippetTool: URL(fileURLWithPath: snippetExtractTool.path.string, isDirectory: false),
             workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
         )
 #else
-        let snippetBuilder: SnippetBuilder? = nil
+        let snippetExtractor: SnippetExtractor? = nil
 #endif
         
         let symbolGraphs = try packageManager.doccSymbolGraphs(
             for: target,
             context: context,
             verbose: verbose,
-            snippetBuilder: snippetBuilder,
+            snippetExtractor: snippetExtractor,
             customSymbolGraphOptions: parsedArguments.symbolGraphArguments
         )
         
