@@ -12,32 +12,92 @@ import SymbolKit
 
 @main
 struct SnippetExtractCommand {
-    var snippetsDir: String
-    var outputDir: String
+    enum OptionName: String {
+        case moduleName = "--module-name"
+        case outputFile = "--output"
+    }
+
+    enum Argument {
+        case moduleName(String)
+        case outputFile(String)
+        case inputFile(String)
+    }
+
+    enum ArgumentError: Error, CustomStringConvertible {
+        case missingOption(OptionName)
+        case missingOptionValue(OptionName)
+        case snippetNotContainedInSnippetsDirectory(URL)
+
+        var description: String {
+            switch self {
+            case .missingOption(let optionName):
+                return "Missing required option \(optionName.rawValue)"
+            case .missingOptionValue(let optionName):
+                return "Missing required option value for \(optionName.rawValue)"
+            case .snippetNotContainedInSnippetsDirectory(let snippetFileURL):
+                return "Snippet file '\(snippetFileURL.path)' is not contained in a directory called 'Snippets' at any level, so this tool is not able to compute the path components that would be used for linking to the snippet. It may exist in a subdirectory, but one of its parent directories must be named 'Snippets'."
+            }
+        }
+    }
+
+    var snippetFiles = [String]()
+    var outputFile: String
     var moduleName: String
 
     static func printUsage() {
         let usage = """
-            USAGE: snippet-extract <snippet directory> <output directory> <module name>
+            USAGE: snippet-extract --output <output file> --module-name <module name> <input files>
 
             ARGUMENTS:
-                <snippet directory> - The directory containing Swift snippets
-                <output directory> - The diretory in which to place Symbol Graph JSON file(s) representing the snippets
-                <module name> - The module name to use for the Symbol Graph (typically should be the package name)
+                <output file> (Required)
+                    The path of the output Symbol Graph JSON file representing the snippets for the a module or package
+                <module name> (Required)
+                    The module name to use for the Symbol Graph (typically should be the package name)
+                <input files>
+                    One or more absolute paths to snippet files to interpret as snippets
             """
         print(usage)
     }
 
+    init(arguments: [String]) throws {
+        var arguments = arguments
+
+        var parsedOutputFile: String? = nil
+        var parsedModuleName: String? = nil
+
+        while let argument = try arguments.parseSnippetArgument() {
+            switch argument {
+            case .inputFile(let inputFile):
+                snippetFiles.append(inputFile)
+            case .moduleName(let moduleName):
+                parsedModuleName = moduleName
+            case .outputFile(let outputFile):
+                parsedOutputFile = outputFile
+            }
+        }
+
+        guard let parsedOutputFile else {
+            throw ArgumentError.missingOption(.outputFile)
+        }
+        self.outputFile = parsedOutputFile
+
+        guard let parsedModuleName else {
+            throw ArgumentError.missingOption(.moduleName)
+        }
+        self.moduleName = parsedModuleName
+    }
+
     func run() throws {
-        let snippets = try loadSnippets(from: URL(fileURLWithPath: snippetsDir))
+        let snippets = try snippetFiles.map {
+            try Snippet(parsing: URL(fileURLWithPath: $0))
+        }
         guard snippets.count > 0 else { return }
-        let symbolGraphFilename = URL(fileURLWithPath: outputDir)
-            .appendingPathComponent("\(moduleName)-snippets.symbols.json")
+        let symbolGraphFilename = URL(fileURLWithPath: outputFile)
         try emitSymbolGraph(for: snippets, to: symbolGraphFilename, moduleName: moduleName)
     }
 
     func emitSymbolGraph(for snippets: [Snippet], to emitFilename: URL, moduleName: String) throws {
-        let snippetSymbols = snippets.map { SymbolGraph.Symbol($0, moduleName: moduleName, inDirectory: URL(fileURLWithPath: snippetsDir).absoluteURL) }
+        let snippetSymbols = try snippets.map { try SymbolGraph.Symbol($0, moduleName: moduleName) }
         let metadata = SymbolGraph.Metadata(formatVersion: .init(major: 0, minor: 1, patch: 0), generator: "snippet-extract")
         let module = SymbolGraph.Module(name: moduleName, platform: .init(architecture: nil, vendor: nil, operatingSystem: nil, environment: nil), isVirtual: true)
         let symbolGraph = SymbolGraph(metadata: metadata, module: module, symbols: snippetSymbols, relationships: [])
@@ -72,28 +132,42 @@ struct SnippetExtractCommand {
             .filter { $0.isDirectory }
     }
 
-    func loadSnippets(from snippetsDirectory: URL) throws -> [Snippet] {
-        guard snippetsDirectory.isDirectory else {
-            return []
-        }
-
-        let snippetFiles = try files(in: snippetsDirectory, withExtension: "swift") +
-            subdirectories(in: snippetsDirectory)
-                .flatMap { subdirectory -> [URL] in
-                    try files(in: subdirectory, withExtension: "swift")
-                }
-
-        return try snippetFiles.map { try Snippet(parsing: $0) }
-    }
-
     static func main() throws {
-        if CommandLine.arguments.count < 4 {
+        if CommandLine.arguments.count == 1 || CommandLine.arguments.contains("-h") || CommandLine.arguments.contains("--help") {
             printUsage()
             exit(0)
         }
-        let snippetExtract = SnippetExtractCommand(snippetsDir: CommandLine.arguments[1],
-                                                   outputDir: CommandLine.arguments[2],
-                                                   moduleName: CommandLine.arguments[3])
-        try snippetExtract.run()
+        do {
+            let snippetExtract = try SnippetExtractCommand(arguments: Array(CommandLine.arguments.dropFirst(1)))
+            try snippetExtract.run()
+        } catch let error as ArgumentError {
+            printUsage()
+            throw error
+        }
+    }
+}
+
+extension Array where Element == String {
+    mutating func parseSnippetArgument() throws -> SnippetExtractCommand.Argument? {
+        guard let thisArgument = first else {
+            return nil
+        }
+        removeFirst()
+        switch thisArgument {
+        case "--module-name":
+            guard let nextArgument = first else {
+                throw SnippetExtractCommand.ArgumentError.missingOptionValue(.moduleName)
+            }
+            removeFirst()
+            return .moduleName(nextArgument)
+        case "--output":
+            guard let nextArgument = first else {
+                throw SnippetExtractCommand.ArgumentError.missingOptionValue(.outputFile)
+            }
+            removeFirst()
+            return .outputFile(nextArgument)
+        default:
+            return .inputFile(thisArgument)
+        }
     }
 }

@@ -56,6 +56,7 @@ let package = Package(
             dependencies: [
                 "Snippets",
                 "SwiftDocCPluginUtilities",
+                "snippet-extract",
             ],
             resources: [
                 .copy("Test Fixtures"),
