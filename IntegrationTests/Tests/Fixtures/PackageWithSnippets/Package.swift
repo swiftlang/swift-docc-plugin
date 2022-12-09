@@ -13,6 +13,9 @@ import PackageDescription
 
 let package = Package(
     name: "PackageWithSnippets",
+    products: [
+        .library(name: "Library", targets: ["Library"])
+    ],
     targets: [
         .target(name: "Library"),
     ]
