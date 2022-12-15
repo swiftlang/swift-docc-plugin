@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class SwiftPMSandboxTests: XCTestCase {
+final class SwiftPMSandboxTests: ConcurrencyRequiringTestCase {
     func testEnableAdditionalSandboxedDirectories() throws {
         let outputDirectory = try temporaryDirectory()
         
