@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class SnippetDocumentationGenerationTests: XCTestCase {
+final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentationForPackageWithSnippets() throws {
         let result = try swiftPackage(
             "generate-documentation",

@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class DocCArchiveIndexGenerationTests: XCTestCase {
+final class DocCArchiveIndexGenerationTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentationWithIndexingEnabled() throws {
         let result = try swiftPackage(
             "generate-documentation",

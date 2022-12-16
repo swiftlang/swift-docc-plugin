@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class MixedTargetsTests: XCTestCase {
+final class MixedTargetsTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentationForSpecificTarget() throws {
         let result = try swiftPackage(
             "generate-documentation", "--target", "Executable",
