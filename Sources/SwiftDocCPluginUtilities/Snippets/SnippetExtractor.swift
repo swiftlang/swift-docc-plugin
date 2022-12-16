@@ -15,7 +15,7 @@ public class SnippetExtractor {
     
     enum SymbolGraphExtractionResult {
         case packageDoesNotProduceSnippets
-        case packageContainsSnippets(symbolGraphDirectory: URL)
+        case packageContainsSnippets(symbolGraphFile: URL)
     }
     
     private let snippetTool: URL
@@ -65,6 +65,27 @@ public class SnippetExtractor {
     var _fileExists: (_ path: String) -> Bool = { path in
         return FileManager.default.fileExists(atPath: path)
     }
+
+    /// Returns all of the `.swift` files under a directory recursively.
+    ///
+    /// Provided for testing.
+    var _findSnippetFilesInDirectory: (_ directory: URL) -> [String] = { directory -> [String] in
+        guard let snippetEnumerator = FileManager.default.enumerator(at: directory,
+                                                                     includingPropertiesForKeys: nil,
+                                                                     options: [.skipsHiddenFiles]) else {
+            return []
+
+        }
+        var snippetInputFiles = [String]()
+        for case let potentialSnippetURL as URL in snippetEnumerator {
+            guard potentialSnippetURL.pathExtension.lowercased() == "swift" else {
+                continue
+            }
+            snippetInputFiles.append(potentialSnippetURL.path)
+        }
+
+        return snippetInputFiles
+    }
     
     /// Generate snippets for the given package.
     ///
@@ -79,16 +100,15 @@ public class SnippetExtractor {
     ///     The snippet extractor will look for a `Snippets` subdirectory
     ///     within this directory.
     ///
-    /// - Returns: A URL for the directory containing the generated snippets or nil if
-    ///   no snippets were produced.
+    /// - Returns: A URL for the output file of the generated snippets symbol graph JSON file.
     public func generateSnippets(
         for packageIdentifier: PackageIdentifier,
         packageDisplayName: String,
         packageDirectory: URL
     ) throws -> URL? {
         switch snippetSymbolGraphExtractionResults[packageIdentifier] {
-        case .packageContainsSnippets(symbolGraphDirectory: let symbolGraphDirectory):
-            return symbolGraphDirectory
+        case .packageContainsSnippets(symbolGraphFile: let symbolGraphFile):
+            return symbolGraphFile
         case .packageDoesNotProduceSnippets:
             return nil
         case .none:
@@ -100,26 +120,34 @@ public class SnippetExtractor {
             snippetSymbolGraphExtractionResults[packageIdentifier] = .packageDoesNotProduceSnippets
             return nil
         }
+
+        let snippetInputFiles = _findSnippetFilesInDirectory(snippetsDirectory)
+
+        guard !snippetInputFiles.isEmpty else {
+            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageDoesNotProduceSnippets
+            return nil
+        }
         
         let outputDirectory = snippetsOutputDirectory(
             in: workingDirectory,
             packageIdentifier: packageIdentifier,
             packageDisplayName: packageDisplayName
         )
+
+        let outputFile = outputDirectory.appendingPathComponent("\(packageDisplayName)-snippets.symbols.json")
         
         let process = Process()
         process.executableURL = snippetTool
         process.arguments = [
-            snippetsDirectory.path,
-            outputDirectory.path,
-            packageDisplayName,
-        ]
-        
+            "--output", outputFile.path,
+            "--module-name", packageDisplayName,
+        ] + snippetInputFiles
+
         try _runProcess(process)
         
-        if _fileExists(outputDirectory.path) {
-            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageContainsSnippets(symbolGraphDirectory: outputDirectory)
-            return outputDirectory
+        if _fileExists(outputFile.path) {
+            snippetSymbolGraphExtractionResults[packageIdentifier] = .packageContainsSnippets(symbolGraphFile: outputFile)
+            return outputFile
         } else {
             snippetSymbolGraphExtractionResults[packageIdentifier] = .packageDoesNotProduceSnippets
             return nil
