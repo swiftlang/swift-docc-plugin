@@ -30,4 +30,15 @@ class SnippetSymbolTests: XCTestCase {
             }
         })
     }
+
+    func testPathComponentsForSnippetSymbol() throws {
+        let source = """
+        // A snippet.
+        foo() {}
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/ASnippet.swift"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "ASnippet"], symbol.pathComponents)
+    }
 }
