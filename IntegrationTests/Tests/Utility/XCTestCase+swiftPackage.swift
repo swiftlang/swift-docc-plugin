@@ -110,7 +110,7 @@ extension XCTestCase {
         }
     }
     
-    private var swiftExecutableURL: URL {
+    var swiftExecutableURL: URL {
         get throws {
             let whichProcess = Process.shell("which swift")
             

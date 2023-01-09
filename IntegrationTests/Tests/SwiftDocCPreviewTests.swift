@@ -9,7 +9,7 @@
 import Foundation
 import XCTest
 
-final class SwiftDocCPreview: XCTestCase {
+final class SwiftDocCPreview: ConcurrencyRequiringTestCase {
     func testRunPreviewServerOnSamePortRepeatedly() throws {
         // Because only a single server can bind to a given port at a time,
         // this test ensures that the preview server running in the `docc`
