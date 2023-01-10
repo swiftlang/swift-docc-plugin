@@ -53,7 +53,7 @@ import PackagePlugin
             workingDirectory: URL(fileURLWithPath: context.pluginWorkDirectory.string, isDirectory: true)
         )
 #else
-        let snippetExtractor: SnippetBuilder? = nil
+        let snippetExtractor: SnippetExtractor? = nil
 #endif
         
         
