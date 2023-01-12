@@ -76,12 +76,12 @@ struct SnippetExtractCommand {
             }
         }
 
-        guard let parsedOutputFile else {
+        guard let parsedOutputFile = parsedOutputFile else {
             throw ArgumentError.missingOption(.outputFile)
         }
         self.outputFile = parsedOutputFile
 
-        guard let parsedModuleName else {
+        guard let parsedModuleName = parsedModuleName else {
             throw ArgumentError.missingOption(.moduleName)
         }
         self.moduleName = parsedModuleName
