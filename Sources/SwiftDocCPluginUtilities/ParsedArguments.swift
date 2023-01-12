@@ -19,21 +19,6 @@ public struct ParsedArguments {
         return arguments.contains("--help") || arguments.contains("-h")
     }
     
-    /// Returns the arguments that could be passed to `swift package dump-symbol-graph`.
-    ///
-    /// In practice, however we won't invoke the `dump-symbol-graph` command via the command line,
-    /// but via the `PackagePlugin` API. Thus, these arguments have to be parsed later on and converted to
-    /// `PackageManager.SymbolGraphOptions`.
-    public func dumpSymbolGraphArguments() -> Arguments {
-        var dumpSymbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
-        
-        for argumentsTransformer in Self.argumentsTransformers {
-            dumpSymbolGraphArguments = argumentsTransformer.transform(dumpSymbolGraphArguments)
-        }
-        
-        return dumpSymbolGraphArguments
-    }
-    
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
     /// Merges the arguments provided upon initialization of the parsed arguments that are relevant
@@ -168,7 +153,18 @@ public struct ParsedArguments {
     /// Creates a new set of parsed arguments with the given arguments.
     public init(_ arguments: [String]) {
         self.arguments = arguments
+        
+        let symbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
+        
+        self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.filter { option in
+            option.parsedValues.contains(where: symbolGraphArguments.contains)
+        }
     }
+    
+    // Build array with plugin flags that modify the symbol graph generation,
+    // filtering from the available custom symbol graph options those
+    // that correspond to the received flags
+    var symbolGraphArguments: [PluginFlag]
     
     /// The command-line options required by the `docc` tool.
     private static let requiredOptions: [CommandLineOption] = [
@@ -199,16 +195,16 @@ private extension ParsedArguments {
         
         /// Returns the flags applicable to an `ArgumentConsumer`.
         ///
-        /// If `flags` is `nil`, this `ArgumentConsumer` is assumed to
+        /// If `flags.isEmpty` is `true`, this `ArgumentConsumer` is assumed to
         /// consume all flags not consumed by any of the other `ArgumentConsumer`s.
-        var flags: [PluginFlag]? {
+        var flags: [PluginFlag] {
             switch self {
             case .dumpSymbolGraph:
                 return [
                     PluginFlag.extendedTypes
                 ]
             case .docc:
-                return nil
+                return []
             }
         }
     }
@@ -217,14 +213,22 @@ private extension ParsedArguments {
 private extension Arguments {
     /// Returns the subset of arguments which are applicable to the given `consumer`.
     func filter(for consumer: ParsedArguments.ArgumentConsumer) -> Arguments {
-        if let flagsToInclude = consumer.flags {
+        if !consumer.flags.isEmpty {
+            // If the consumer can provide a complete list of valid flags,
+            // we only include elements that are included in one of these flags'
+            // `parsedValues`, i.e. if one of these flags can be applied to the
+            // element.
+            let flagsToInclude = consumer.flags
             return self.filter { argument in
                 flagsToInclude.contains(where: { flag in
                     flag.parsedValues.contains(argument)
                 })
             }
         } else {
-            let flagsToExclude = ParsedArguments.ArgumentConsumer.allCases.compactMap(\.flags).flatMap { $0 }
+            // If the consumer cannot provide a complete list of valid flags, (which
+            // should only happen for the `.docc` case) we return all elements
+            // that are not applicable to any of the other `ArgumentConsumer`s.
+            let flagsToExclude = ParsedArguments.ArgumentConsumer.allCases.flatMap(\.flags)
             return self.filter { argument in
                 !flagsToExclude.contains(where: { flag in
                     flag.parsedValues.contains(argument)

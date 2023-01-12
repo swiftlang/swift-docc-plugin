@@ -456,19 +456,18 @@ final class ParsedArgumentsTests: XCTestCase {
         )
         
         XCTAssertFalse(doccArguments.contains("--include-extended-types"))
-        XCTAssertFalse(doccArguments.contains("--emit-extension-block-symbols"))
     }
     
     func testDumpSymbolGraphArguments() {
         let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
         
-        XCTAssertEqual(dumpSymbolGraphArguments.dumpSymbolGraphArguments(), ["--emit-extension-block-symbols"])
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes])
     }
     
     func testDumpSymbolGraphArgumentsWithDocCArguments() {
         let dumpSymbolGraphArguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
         
         
-        XCTAssertTrue(dumpSymbolGraphArguments.dumpSymbolGraphArguments().isEmpty)
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [])
     }
 }

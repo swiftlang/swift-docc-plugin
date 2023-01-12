@@ -16,7 +16,7 @@ final class ExtendedTypesFlagTests: XCTestCase {
             PluginFlag.extendedTypes.transform(
                 ["--include-extended-types", "--other-flag"]
             ),
-            ["--other-flag", "--emit-extension-block-symbols"]
+            ["--other-flag"]
         )
     }
     

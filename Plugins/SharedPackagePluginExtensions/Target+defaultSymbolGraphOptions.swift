@@ -36,7 +36,7 @@ extension SwiftSourceModuleTarget {
 
 #if swift(<5.8)
 private extension PackageManager.SymbolGraphOptions {
-    /// A copatibility layer for lower Swift versions which discards unknown parameters.
+    /// A compatibility layer for lower Swift versions which discards unknown parameters.
     init(minimumAccessLevel: PackagePlugin.PackageManager.SymbolGraphOptions.AccessLevel = .public,
          includeSynthesized: Bool = false,
          includeSPI: Bool = false,

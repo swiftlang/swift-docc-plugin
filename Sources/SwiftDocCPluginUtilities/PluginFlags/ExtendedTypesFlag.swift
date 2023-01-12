@@ -24,6 +24,6 @@ extension PluginFlag {
         description: """
             Allows documenting symbols that a target adds to its dependencies.
             """,
-        argumentTransformation: { $0 + ["--emit-extension-block-symbols"] }
+        argumentTransformation: { $0 }
     )
 }
