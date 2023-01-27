@@ -21,7 +21,7 @@ let package = Package(
         .plugin(name: "Swift-DocC Preview", targets: ["Swift-DocC Preview"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-docc-symbolkit", branch: "main"),
+        .package(url: "https://github.com/apple/swift-docc-symbolkit", from: "1.0.0"),
     ],
     targets: [
         .plugin(
