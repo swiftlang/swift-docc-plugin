@@ -38,12 +38,27 @@ extension PackageManager {
         for target: SwiftSourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
-        snippetExtractor: SnippetExtractor?
+        snippetExtractor: SnippetExtractor?,
+        customSymbolGraphOptions: [PluginFlag]
     ) throws -> DocCSymbolGraphResult {
         // First generate the primary symbol graphs containing information about the
         // symbols defined in the target itself.
         
-        let symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+        var symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
+
+        // Modify the symbol graph options with the custom ones
+        for customSymbolGraphOption in customSymbolGraphOptions {
+            switch customSymbolGraphOption {
+            case .extendedTypes:
+#if swift(>=5.8)
+                symbolGraphOptions.emitExtensionBlocks = true
+#else
+                print("warning: detected '--include-extended-types' option, which is incompatible with your swift version (required: 5.8)")
+#endif
+            default:
+                fatalError("error: unknown PluginFlag (\(customSymbolGraphOption.parsedValues.joined(separator: ", "))) detected in symbol graph generation - please create an issue at https://github.com/apple/swift-docc-plugin")
+         }
+        }
         
         if verbose {
             print("symbol graph options: '\(symbolGraphOptions)'")

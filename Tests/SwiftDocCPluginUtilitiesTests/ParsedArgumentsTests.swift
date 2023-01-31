@@ -442,4 +442,32 @@ final class ParsedArgumentsTests: XCTestCase {
             ]
         )
     }
+    
+    func testDocCArgumentsWithDumpSymbolGraphArguments() {
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        
+        let doccArguments = dumpSymbolGraphArguments.doccArguments(
+            action: .convert,
+            targetKind: .executable,
+            doccCatalogPath: "/my/catalog.docc",
+            targetName: "MyTarget",
+            symbolGraphDirectoryPath: "/my/symbol-graph",
+            outputPath: "/my/output-path"
+        )
+        
+        XCTAssertFalse(doccArguments.contains("--include-extended-types"))
+    }
+    
+    func testDumpSymbolGraphArguments() {
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes])
+    }
+    
+    func testDumpSymbolGraphArgumentsWithDocCArguments() {
+        let dumpSymbolGraphArguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
+        
+        
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [])
+    }
 }

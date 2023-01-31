@@ -21,8 +21,8 @@ public struct ParsedArguments {
     
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
-    /// Merges the arguments provided upon initialization of the parsed arguments
-    /// with default fallback values for required options that were not provided.
+    /// Merges the arguments provided upon initialization of the parsed arguments that are relevant
+    /// to `docc` with default fallback values for required options that were not provided.
     ///
     /// For example, if ParsedArguments is initialized like so:
     ///
@@ -90,7 +90,7 @@ public struct ParsedArguments {
         symbolGraphDirectoryPath: String,
         outputPath: String
     ) -> Arguments {
-        var doccArguments = arguments
+        var doccArguments = arguments.filter(for: .docc)
         
         // Iterate through the flags required for the `docc` invocation
         // and append any that are not already present.
@@ -153,7 +153,18 @@ public struct ParsedArguments {
     /// Creates a new set of parsed arguments with the given arguments.
     public init(_ arguments: [String]) {
         self.arguments = arguments
+        
+        let symbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
+        
+        self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.filter { option in
+            option.parsedValues.contains(where: symbolGraphArguments.contains)
+        }
     }
+    
+    // Build array with plugin flags that modify the symbol graph generation,
+    // filtering from the available custom symbol graph options those
+    // that correspond to the received flags
+    var symbolGraphArguments: [PluginFlag]
     
     /// The command-line options required by the `docc` tool.
     private static let requiredOptions: [CommandLineOption] = [
@@ -170,6 +181,59 @@ public struct ParsedArguments {
     ]
     
     private static let argumentsTransformers: [ArgumentsTransforming] = [
-        PluginFlag.disableIndex
+        PluginFlag.disableIndex,
+        PluginFlag.extendedTypes
     ]
+}
+
+private extension ParsedArguments {
+    enum ArgumentConsumer: CaseIterable {
+        /// The `docc` command
+        case docc
+        /// The `swift package dump-symbol-graph` command
+        case dumpSymbolGraph
+        
+        /// Returns the flags applicable to an `ArgumentConsumer`.
+        ///
+        /// If `flags.isEmpty` is `true`, this `ArgumentConsumer` is assumed to
+        /// consume all flags not consumed by any of the other `ArgumentConsumer`s.
+        var flags: [PluginFlag] {
+            switch self {
+            case .dumpSymbolGraph:
+                return [
+                    PluginFlag.extendedTypes
+                ]
+            case .docc:
+                return []
+            }
+        }
+    }
+}
+
+private extension Arguments {
+    /// Returns the subset of arguments which are applicable to the given `consumer`.
+    func filter(for consumer: ParsedArguments.ArgumentConsumer) -> Arguments {
+        if !consumer.flags.isEmpty {
+            // If the consumer can provide a complete list of valid flags,
+            // we only include elements that are included in one of these flags'
+            // `parsedValues`, i.e. if one of these flags can be applied to the
+            // element.
+            let flagsToInclude = consumer.flags
+            return self.filter { argument in
+                flagsToInclude.contains(where: { flag in
+                    flag.parsedValues.contains(argument)
+                })
+            }
+        } else {
+            // If the consumer cannot provide a complete list of valid flags, (which
+            // should only happen for the `.docc` case) we return all elements
+            // that are not applicable to any of the other `ArgumentConsumer`s.
+            let flagsToExclude = ParsedArguments.ArgumentConsumer.allCases.flatMap(\.flags)
+            return self.filter { argument in
+                !flagsToExclude.contains(where: { flag in
+                    flag.parsedValues.contains(argument)
+                })
+            }
+        }
+    }
 }

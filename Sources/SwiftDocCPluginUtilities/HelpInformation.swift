@@ -43,9 +43,16 @@ public enum HelpInformation {
             helpText = previewPluginHelpOverview
         }
         
-        let supportedPluginFlags = [
+        var supportedPluginFlags = [
             PluginFlag.disableIndex,
         ]
+        
+        // stops 'not mutated' warning for Swift 5.7 and lower
+        supportedPluginFlags += []
+        
+#if swift(>=5.8)
+        supportedPluginFlags += [PluginFlag.extendedTypes]
+#endif
         
         for flag in supportedPluginFlags {
             helpText += """
