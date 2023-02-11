@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class SingleExecutableTargetTests: XCTestCase {
+final class SingleExecutableTargetTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentation() throws {
         let result = try swiftPackage(
             "generate-documentation",

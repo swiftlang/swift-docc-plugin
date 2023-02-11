@@ -43,6 +43,7 @@ final class HelpInformationTests: XCTestCase {
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.
+                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
 
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -135,6 +136,7 @@ final class HelpInformationTests: XCTestCase {
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.
+                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
             
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -190,3 +192,13 @@ final class HelpInformationTests: XCTestCase {
     }
 }
 
+#if swift(>=5.8)
+private let includeExtendedTypesSection = """
+
+  --include-extended-types
+                          Include extended types from other modules in the produced DocC archive.
+        Allows documenting symbols that a target adds to its dependencies.
+"""
+#else
+private let includeExtendedTypesSection = ""
+#endif

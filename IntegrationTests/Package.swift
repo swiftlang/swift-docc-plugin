@@ -31,6 +31,7 @@ let package = Package(
                 .copy("Fixtures/TargetWithDocCCatalog"),
                 .copy("Fixtures/PackageWithSnippets"),
                 .copy("Fixtures/PackageWithConformanceSymbols"),
+                .copy("Fixtures/LibraryTargetWithExtensionSymbols"),
             ]
         ),
     ]

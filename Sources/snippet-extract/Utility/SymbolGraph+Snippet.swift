@@ -14,18 +14,23 @@ extension SymbolGraph.Symbol {
     /// Create a ``SymbolGraph.Symbol`` from a ``Snippet``.
     ///
     /// - parameter moduleName: The name to use for the package name in the snippet symbol's precise identifier.
-    public init(_ snippet: Snippets.Snippet, moduleName: String, inDirectory snippetsDirectory: URL) {
+    public init(_ snippet: Snippets.Snippet, moduleName: String) throws {
         let basename = snippet.sourceFile.deletingPathExtension().lastPathComponent
         let identifier = SymbolGraph.Symbol.Identifier(precise: "$snippet__\(moduleName).\(basename)", interfaceLanguage: "swift")
         let names = SymbolGraph.Symbol.Names.init(title: basename, navigator: nil, subHeading: nil, prose: nil)
         
-        var pathComponents = snippet.sourceFile.absoluteURL.deletingPathExtension().pathComponents[...]
-        for component in snippetsDirectory.absoluteURL.pathComponents {
-            guard pathComponents.first == component else {
-                break
-            }
-            pathComponents = pathComponents.dropFirst(1)
+        var pathComponents = Array(snippet.sourceFile.absoluteURL.deletingPathExtension().pathComponents[...])
+
+        guard let snippetsPathComponentIndex = pathComponents.firstIndex(where: {
+            $0 == "Snippets"
+        }) else {
+            throw SnippetExtractCommand.ArgumentError.snippetNotContainedInSnippetsDirectory(snippet.sourceFile)
         }
+
+        // In theory, there may be differently named snippet root directories in the future.
+        // Replace that path component with the standardized `Snippets`.
+        pathComponents.replaceSubrange(pathComponents.startIndex...snippetsPathComponentIndex,
+                                       with: CollectionOfOne("Snippets"))
         
         let docComment = SymbolGraph.LineList(snippet.explanation
                                     .split(separator: "\n", maxSplits: Int.max, omittingEmptySubsequences: false)
@@ -38,7 +43,7 @@ extension SymbolGraph.Symbol {
         
         self.init(identifier: identifier,
                   names: names,
-                  pathComponents: ["Snippets"] + Array(pathComponents),
+                  pathComponents: pathComponents,
                   docComment: docComment,
                   accessLevel: accessLevel,
                   kind: kind,

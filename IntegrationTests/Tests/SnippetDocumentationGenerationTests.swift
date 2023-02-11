@@ -8,12 +8,13 @@
 
 import XCTest
 
-final class SnippetDocumentationGenerationTests: XCTestCase {
+final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentationForPackageWithSnippets() throws {
+        let packageName = "PackageWithSnippets"
         let result = try swiftPackage(
             "generate-documentation",
             "--target", "Library",
-            workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithSnippets")
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: packageName)
         )
 
         result.assertExitStatusEquals(0)
@@ -45,6 +46,19 @@ final class SnippetDocumentationGenerationTests: XCTestCase {
                 "symbol-graphs/unified-symbol-graphs",
             ]
         )
+
+        let unifiedSymbolGraphDirectory = subDirectoriesOfSymbolGraphDirectory.first {
+            $0.pathComponents.last == "unified-symbol-graphs"
+        }!
+
+        let symbolGraphEnumerator = FileManager.default.enumerator(at: unifiedSymbolGraphDirectory,
+                                                                   includingPropertiesForKeys: [.isRegularFileKey])!
+        let symbolGraphPaths = try (symbolGraphEnumerator.allObjects as! [URL]).filter {
+            try $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile!
+        }
+        XCTAssertNotNil(symbolGraphPaths.first {
+            $0.pathComponents.last == "\(packageName)-snippets.symbols.json"
+        })
     }
 
     func testPreviewDocumentationWithSnippets() throws {
