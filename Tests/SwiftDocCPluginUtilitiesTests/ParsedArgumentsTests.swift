@@ -444,7 +444,7 @@ final class ParsedArgumentsTests: XCTestCase {
     }
     
     func testDocCArgumentsWithDumpSymbolGraphArguments() {
-        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols"])
         
         let doccArguments = dumpSymbolGraphArguments.doccArguments(
             action: .convert,
@@ -455,30 +455,14 @@ final class ParsedArgumentsTests: XCTestCase {
             outputPath: "/my/output-path"
         )
         
-        XCTAssertFalse(doccArguments.contains("--include-extended-types"))
+        XCTAssertFalse(doccArguments.contains("--experimental-skip-synthesized-symbols"))
     }
     
     func testDumpSymbolGraphArguments() {
-        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols"])
         
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes])
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes, .skipSynthesizedSymbols])
     }
-    
-    func testDocCSymbolGraphArgumentsForSynthesizedSymbols() {
-        let excludeSynthesizedSymbolsArguments = ParsedArguments(
-            ["--experimental-skip-synthesized-symbols"]
-        )
-        XCTAssertEqual(
-            excludeSynthesizedSymbolsArguments.symbolGraphArguments,
-            [.skipSynthesizedSymbols]
-        )
-        let emptyArguments = ParsedArguments(
-            []
-        )
-        XCTAssertNotEqual(
-            emptyArguments.symbolGraphArguments,
-            [.skipSynthesizedSymbols]
-        )
     func testDumpSymbolGraphArgumentsWithDocCArguments() {
         let dumpSymbolGraphArguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
         

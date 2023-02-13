@@ -21,6 +21,9 @@ final class HelpInformationTests: XCTestCase {
             doccExecutableURL: URL(fileURLWithPath: "/")
         )
         
+        print("includeExtendedTypesSection")
+        print(includeExtendedTypesSection)
+        
         XCTAssertEqual(
             convertHelpInformation,
             """
@@ -42,8 +45,7 @@ final class HelpInformationTests: XCTestCase {
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
-                    Experimental feature that produces a DocC archive without compiler synthesized symbols.
-                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
 
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -135,8 +137,7 @@ final class HelpInformationTests: XCTestCase {
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
-                    Experimental feature that produces a DocC archive without compiler synthesized symbols.
-                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
             
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
