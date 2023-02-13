@@ -21,9 +21,6 @@ final class HelpInformationTests: XCTestCase {
             doccExecutableURL: URL(fileURLWithPath: "/")
         )
         
-        print("includeExtendedTypesSection")
-        print(includeExtendedTypesSection)
-        
         XCTAssertEqual(
             convertHelpInformation,
             """

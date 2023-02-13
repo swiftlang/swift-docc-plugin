@@ -153,12 +153,18 @@ public struct ParsedArguments {
     /// Creates a new set of parsed arguments with the given arguments.
     public init(_ arguments: [String]) {
         self.arguments = arguments
+        
         let symbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
         
         self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.filter { option in
             option.parsedValues.contains(where: symbolGraphArguments.contains)
         }
     }
+    
+    // Build array with plugin flags that modify the symbol graph generation,
+    // filtering from the available custom symbol graph options those
+    // that correspond to the received flags
+    var symbolGraphArguments: [PluginFlag]
     
     /// The command-line options required by the `docc` tool.
     private static let requiredOptions: [CommandLineOption] = [
@@ -173,11 +179,6 @@ public struct ParsedArguments {
     private static let requiredFlags = [
         "--index",
     ]
-    
-    // Build array with plugin flags that modify the symbol graph generation,
-    // filtering from the available custom symbol graph options those
-    // that correspond to the received flags
-    var symbolGraphArguments: [PluginFlag]
     
     private static let argumentsTransformers: [ArgumentsTransforming] = [
         PluginFlag.disableIndex,

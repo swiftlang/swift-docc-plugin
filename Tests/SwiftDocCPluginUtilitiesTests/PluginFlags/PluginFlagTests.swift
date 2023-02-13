@@ -102,8 +102,8 @@ final class PluginFlagTests: XCTestCase {
             description: "",
             argumentTransformation: { $0 }
         )
-        XCTAssertFalse(examplePluginFlag1 == examplePluginFlag2)
-        XCTAssertTrue(examplePluginFlag1 == examplePluginFlag3)
-        XCTAssertFalse(examplePluginFlag1 == examplePluginFlag4)
+        XCTAssertNotEqual(examplePluginFlag1, examplePluginFlag2)
+        XCTAssertNotEqual(examplePluginFlag1, examplePluginFlag4)
+        XCTAssertEqual(examplePluginFlag1, examplePluginFlag3)
     }
 }

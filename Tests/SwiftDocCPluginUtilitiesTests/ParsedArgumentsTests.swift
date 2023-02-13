@@ -455,6 +455,7 @@ final class ParsedArgumentsTests: XCTestCase {
             outputPath: "/my/output-path"
         )
         
+        XCTAssertFalse(doccArguments.contains("--include-extended-types"))
         XCTAssertFalse(doccArguments.contains("--experimental-skip-synthesized-symbols"))
     }
     
@@ -463,6 +464,7 @@ final class ParsedArgumentsTests: XCTestCase {
         
         XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes, .skipSynthesizedSymbols])
     }
+    
     func testDumpSymbolGraphArgumentsWithDocCArguments() {
         let dumpSymbolGraphArguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
         

@@ -8,7 +8,7 @@
 
 import XCTest
 
-final class DocCConvertSynthesizedSymbolsTests: XCTestCase {
+final class DocCConvertSynthesizedSymbolsTests: ConcurrencyRequiringTestCase {
     func testGenerateDocumentationWithSkipSynthesizedSymbolsEnabled() throws {
         let result = try swiftPackage(
             "generate-documentation", "--experimental-skip-synthesized-symbols",
