@@ -182,7 +182,8 @@ public struct ParsedArguments {
     
     private static let argumentsTransformers: [ArgumentsTransforming] = [
         PluginFlag.disableIndex,
-        PluginFlag.extendedTypes
+        PluginFlag.extendedTypes,
+        PluginFlag.skipSynthesizedSymbols
     ]
 }
 
@@ -201,7 +202,8 @@ private extension ParsedArguments {
             switch self {
             case .dumpSymbolGraph:
                 return [
-                    PluginFlag.extendedTypes
+                    PluginFlag.extendedTypes,
+                    PluginFlag.skipSynthesizedSymbols
                 ]
             case .docc:
                 return []

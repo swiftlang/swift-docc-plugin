@@ -39,7 +39,10 @@ final class HelpInformationTests: XCTestCase {
               --product <product>     Generate documentation for the specified product.
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
-                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
+                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --experimental-skip-synthesized-symbols
+                                      Exclude synthesized symbols from the generated documentation
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
 
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -128,7 +131,10 @@ final class HelpInformationTests: XCTestCase {
               --product <product>     Preview documentation for the specified product.
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
-                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.\(includeExtendedTypesSection)
+                    Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --experimental-skip-synthesized-symbols
+                                      Exclude synthesized symbols from the generated documentation
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
             
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.

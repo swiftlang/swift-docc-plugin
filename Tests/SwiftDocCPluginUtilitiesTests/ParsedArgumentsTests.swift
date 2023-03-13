@@ -444,7 +444,7 @@ final class ParsedArgumentsTests: XCTestCase {
     }
     
     func testDocCArgumentsWithDumpSymbolGraphArguments() {
-        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols"])
         
         let doccArguments = dumpSymbolGraphArguments.doccArguments(
             action: .convert,
@@ -456,12 +456,13 @@ final class ParsedArgumentsTests: XCTestCase {
         )
         
         XCTAssertFalse(doccArguments.contains("--include-extended-types"))
+        XCTAssertFalse(doccArguments.contains("--experimental-skip-synthesized-symbols"))
     }
     
     func testDumpSymbolGraphArguments() {
-        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types"])
+        let dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols"])
         
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes])
+        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes, .skipSynthesizedSymbols])
     }
     
     func testDumpSymbolGraphArgumentsWithDocCArguments() {

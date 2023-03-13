@@ -45,6 +45,7 @@ public enum HelpInformation {
         
         var supportedPluginFlags = [
             PluginFlag.disableIndex,
+            PluginFlag.skipSynthesizedSymbols
         ]
         
         // stops 'not mutated' warning for Swift 5.7 and lower

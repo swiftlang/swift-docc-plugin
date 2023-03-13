@@ -55,6 +55,8 @@ extension PackageManager {
 #else
                 print("warning: detected '--include-extended-types' option, which is incompatible with your swift version (required: 5.8)")
 #endif
+            case .skipSynthesizedSymbols:
+                symbolGraphOptions.includeSynthesized = false
             default:
                 fatalError("error: unknown PluginFlag (\(customSymbolGraphOption.parsedValues.joined(separator: ", "))) detected in symbol graph generation - please create an issue at https://github.com/apple/swift-docc-plugin")
          }
