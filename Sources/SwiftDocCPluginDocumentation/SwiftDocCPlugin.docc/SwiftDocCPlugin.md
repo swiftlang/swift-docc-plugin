@@ -33,6 +33,10 @@ following from the command-line:
 
     $ swift package generate-documentation
 
+Use the `--help` flag to get a list of all supported arguments:
+
+    $ swift package plugin generate-documentation --help
+
 The documentation on this site is focused on the Swift-DocC plugin specifically. For more
 general documentation on how to use Swift-DocC, see the documentation 
 [here](https://www.swift.org/documentation/docc/).
@@ -43,6 +47,7 @@ general documentation on how to use Swift-DocC, see the documentation
 
 - <doc:Generating-Documentation-for-a-Specific-Target>
 - <doc:Previewing-Documentation>
+- <doc:Generating-Documentation-for-Extended-Types>
 
 ### Publishing Documentation
 
