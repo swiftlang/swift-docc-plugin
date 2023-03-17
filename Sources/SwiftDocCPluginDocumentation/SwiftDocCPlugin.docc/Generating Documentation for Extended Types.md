@@ -10,7 +10,7 @@ To include documentation for extended types, add the `--include-extended-types` 
 
     $ swift package generate-documentation --include-extended-types
 
-> Note: Swift 5.8 or higher and the Swift-DocC plugin version 1.2 or higher is required in order to use this flag.
+> Note: Extension support is available when using Swift 5.8 or later and the Swift-DocC plugin 1.2 or later.
 
 ## Understanding What is Included by Default
 
@@ -43,14 +43,12 @@ extension Collection where Element == Sloth {
 
 Extended Types are part of the documentation archive of the target that declares the extensions.
 
-Within that documentation archive, they are grouped by the Extended Module they belong to. You can find the latter on your documentation's landing page in a section called "Extended Modules". In our example from above, we'd have one Extended Module called "Swift" - the name of the standard library. This page can be referenced like this: ` ``SlothCreator/Swift`` `.
+![The rendered documentation for SlothCreator/Swift/Collection](extended-type-example)
 
-The Extended Type ` ``SlothCreator/Swift/Collection`` ` is a child of the Extended Module and will be listed under "Extended Protocols" on the ` ``SlothCreator/Swift`` ` page.
+Within that documentation archive, Extended Types are grouped by the Extended Module they belong to. You can find the latter on your documentation's landing page in a section called "Extended Modules". In our example from above, we have one Extended Module called "Swift" - the name of the standard library. This page can be referenced like this: ` ``SlothCreator/Swift`` `.
 
-> Note: The references above use the full path, including the name of the catalog's target `SlothCreator`. This should help to understand the symbol's exact location, but usually isn't necessary. 
+The Extended Type ` ``SlothCreator/Swift/Collection`` ` is a child of the Extended Module and is listed under "Extended Protocols" on the ` ``SlothCreator/Swift`` ` page.
 
-Here you can see how a documentation page for ` ``Swift/Collection`` ` could look like in our `SlothCreator` documentation.
-
-![The rendered documentation for Sloth/Swift/Collection](extended-type-example)
+> Note: The references above use the full path, including the name of the catalog's target, `SlothCreator`. This should help to understand the symbol's exact location, but usually isn't necessary.
 
 <!-- Copyright (c) 2023 Apple Inc and the Swift Project authors. All Rights Reserved. -->
