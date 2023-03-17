@@ -1,0 +1,327 @@
+{
+  "abstract" : [
+    {
+      "text" : "Generate documentation for the extensions you make to types from other modules.",
+      "type" : "text"
+    }
+  ],
+  "hierarchy" : {
+    "paths" : [
+      [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin"
+      ]
+    ]
+  },
+  "identifier" : {
+    "interfaceLanguage" : "swift",
+    "url" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Extended-Types"
+  },
+  "kind" : "article",
+  "metadata" : {
+    "modules" : [
+      {
+        "name" : "Swift-DocC Plugin"
+      }
+    ],
+    "role" : "article",
+    "roleHeading" : "Article",
+    "title" : "Generating Documentation for Extended Types"
+  },
+  "primaryContentSections" : [
+    {
+      "content" : [
+        {
+          "anchor" : "Overview",
+          "level" : 2,
+          "text" : "Overview",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "By default, the Swift-DocC plugin ignores extensions you make to types that are not from the module you’re generating documentation for.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "To include documentation for extended types, add the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--include-extended-types",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " flag to your invocations:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package generate-documentation --include-extended-types"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "Extension support is available when using Swift 5.8 or later and the Swift-DocC plugin 1.2 or later.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "name" : "Note",
+          "style" : "note",
+          "type" : "aside"
+        },
+        {
+          "anchor" : "Understanding-What-is-Included-by-Default",
+          "level" : 2,
+          "text" : "Understanding What is Included by Default",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Not everything that is declared in an extension is hidden behind the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--include-extended-types",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " flag. If the extension is declared in the same target as the type it is extending, the extension’s contents will be included in the documentation by default.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "public struct Sloth { }",
+            "",
+            "extension Sloth {",
+            "    \/\/ This function is included in the",
+            "    \/\/ documentation by default.",
+            "    public func wake() { \/* ... *\/ }",
+            "}",
+            "",
+            "\/\/ `Collection` is from the standard library,",
+            "\/\/ not the `SlothCreator` library, so this is",
+            "\/\/ what we call an \"extended type\".",
+            "extension Collection where Element == Sloth {",
+            "    \/\/ This property is not included in",
+            "    \/\/ the documentation by default.",
+            "    public func wake() {",
+            "        for sloth in self {",
+            "            sloth.wake()",
+            "        }",
+            "    }",
+            "}"
+          ],
+          "syntax" : "swift",
+          "type" : "codeListing"
+        },
+        {
+          "anchor" : "Finding-Extended-Types-in-your-Documentation",
+          "level" : 2,
+          "text" : "Finding Extended Types in your Documentation",
+          "type" : "heading"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Extended Types are part of the documentation archive of the target that declares the extensions.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "identifier" : "extended-type-example",
+              "type" : "image"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Within that documentation archive, Extended Types are grouped by the Extended Module they belong to. You can find the latter on your documentation’s landing page in a section called “Extended Modules”. In our example from above, we have one Extended Module called “Swift” - the name of the standard library. This page can be referenced like this: ",
+              "type" : "text"
+            },
+            {
+              "code" : "``SlothCreator\/Swift``",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : ".",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "The Extended Type ",
+              "type" : "text"
+            },
+            {
+              "code" : "``SlothCreator\/Swift\/Collection``",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " is a child of the Extended Module and is listed under “Extended Protocols” on the ",
+              "type" : "text"
+            },
+            {
+              "code" : "``SlothCreator\/Swift``",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " page.",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "content" : [
+            {
+              "inlineContent" : [
+                {
+                  "text" : "The references above use the full path, including the name of the catalog’s target, ",
+                  "type" : "text"
+                },
+                {
+                  "code" : "SlothCreator",
+                  "type" : "codeVoice"
+                },
+                {
+                  "text" : ". This should help to understand the symbol’s exact location, but usually isn’t necessary.",
+                  "type" : "text"
+                }
+              ],
+              "type" : "paragraph"
+            }
+          ],
+          "name" : "Note",
+          "style" : "note",
+          "type" : "aside"
+        }
+      ],
+      "kind" : "content"
+    }
+  ],
+  "schemaVersion" : {
+    "major" : 0,
+    "minor" : 3,
+    "patch" : 0
+  },
+  "sections" : [
+
+  ],
+  "seeAlsoSections" : [
+    {
+      "generated" : true,
+      "identifiers" : [
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+      ],
+      "title" : "Getting Started"
+    }
+  ],
+  "variants" : [
+    {
+      "paths" : [
+        "\/documentation\/swiftdoccplugin\/generating-documentation-for-extended-types"
+      ],
+      "traits" : [
+        {
+          "interfaceLanguage" : "swift"
+        }
+      ]
+    }
+  ]
+, 
+"references": {
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin": {
+  "abstract" : [
+    {
+      "text" : "Produce Swift-DocC documentation for Swift Package libraries and executables.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin",
+  "kind" : "symbol",
+  "role" : "collection",
+  "title" : "Swift-DocC Plugin",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-a-Specific-Target": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for a specific target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for a Specific Target",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-a-specific-target"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
+  "abstract" : [
+    {
+      "text" : "Use your web browser to preview the documentation for a target in your package.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Previewing Documentation",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/previewing-documentation"
+},
+"extended-type-example": {
+  "alt" : "The rendered documentation for SlothCreator\/Swift\/Collection",
+  "identifier" : "extended-type-example",
+  "type" : "image",
+  "variants" : [
+    {
+      "traits" : [
+        "1x",
+        "light"
+      ],
+      "url" : "\/images\/extended-type-example.png"
+    },
+    {
+      "traits" : [
+        "1x",
+        "dark"
+      ],
+      "url" : "\/images\/extended-type-example~dark.png"
+    }
+  ]
+}
+}
+}

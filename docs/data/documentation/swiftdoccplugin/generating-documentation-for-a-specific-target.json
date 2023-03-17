@@ -149,7 +149,8 @@
     {
       "generated" : true,
       "identifiers" : [
-        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Extended-Types"
       ],
       "title" : "Getting Started"
     }
@@ -181,6 +182,20 @@
   "title" : "Swift-DocC Plugin",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-Extended-Types": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for the extensions you make to types from other modules.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Extended-Types",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for Extended Types",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-extended-types"
 },
 "doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Previewing-Documentation": {
   "abstract" : [

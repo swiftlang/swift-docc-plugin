@@ -18,6 +18,11 @@
             "type" : "article"
           },
           {
+            "path" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-extended-types",
+            "title" : "Generating Documentation for Extended Types",
+            "type" : "article"
+          },
+          {
             "title" : "Publishing Documentation",
             "type" : "groupMarker"
           },
@@ -41,6 +46,6 @@
   "schemaVersion" : {
     "major" : 0,
     "minor" : 1,
-    "patch" : 0
+    "patch" : 1
   }
 }

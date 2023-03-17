@@ -92,6 +92,7 @@
               "type" : "paragraph"
             }
           ],
+          "name" : "Note",
           "style" : "note",
           "type" : "aside"
         },
@@ -115,6 +116,30 @@
         {
           "code" : [
             "$ swift package generate-documentation"
+          ],
+          "syntax" : "shell",
+          "type" : "codeListing"
+        },
+        {
+          "inlineContent" : [
+            {
+              "text" : "Use the ",
+              "type" : "text"
+            },
+            {
+              "code" : "--help",
+              "type" : "codeVoice"
+            },
+            {
+              "text" : " flag to get a list of all supported arguments:",
+              "type" : "text"
+            }
+          ],
+          "type" : "paragraph"
+        },
+        {
+          "code" : [
+            "$ swift package plugin generate-documentation --help"
           ],
           "syntax" : "shell",
           "type" : "codeListing"
@@ -165,7 +190,8 @@
     {
       "identifiers" : [
         "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-a-Specific-Target",
-        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation"
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Previewing-Documentation",
+        "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Extended-Types"
       ],
       "title" : "Getting Started"
     },
@@ -204,6 +230,20 @@
   "title" : "Swift-DocC Plugin",
   "type" : "topic",
   "url" : "\/documentation\/swiftdoccplugin"
+},
+"doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-Extended-Types": {
+  "abstract" : [
+    {
+      "text" : "Generate documentation for the extensions you make to types from other modules.",
+      "type" : "text"
+    }
+  ],
+  "identifier" : "doc:\/\/SwiftDocCPlugin\/documentation\/SwiftDocCPlugin\/Generating-Documentation-for-Extended-Types",
+  "kind" : "article",
+  "role" : "article",
+  "title" : "Generating Documentation for Extended Types",
+  "type" : "topic",
+  "url" : "\/documentation\/swiftdoccplugin\/generating-documentation-for-extended-types"
 },
 "doc://SwiftDocCPlugin/documentation/SwiftDocCPlugin/Generating-Documentation-for-Hosting-Online": {
   "abstract" : [
