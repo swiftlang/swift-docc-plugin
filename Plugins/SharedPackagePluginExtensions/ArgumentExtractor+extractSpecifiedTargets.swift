@@ -12,9 +12,9 @@ import PackagePlugin
 enum ArgumentParsingError: LocalizedError, CustomStringConvertible {
     case unknownProduct(_ productName: String, compatibleProducts: String)
     case unknownTarget(_ targetName: String, compatibleTargets: String)
-    case productDoesNotContainSwiftSourceModuleTargets(String)
-    case packageDoesNotContainSwiftSourceModuleTargets
-    case targetIsNotSwiftSourceModule(String)
+    case productDoesNotContainSourceModuleTargets(String)
+    case packageDoesNotContainSourceModuleTargets
+    case targetIsNotSourceModule(String)
     case testTarget(String)
     
     var description: String {
@@ -31,14 +31,14 @@ enum ArgumentParsingError: LocalizedError, CustomStringConvertible {
                 
                 compatible targets: \(compatibleTargets)
                 """
-        case .productDoesNotContainSwiftSourceModuleTargets(let string):
-            return "product '\(string)' does not contain any Swift source modules"
-        case .targetIsNotSwiftSourceModule(let string):
-            return "target '\(string)' is not a Swift source module"
+        case .productDoesNotContainSourceModuleTargets(let string):
+            return "product '\(string)' does not contain any Swift or Clang source modules"
+        case .targetIsNotSourceModule(let string):
+            return "target '\(string)' is not a Swift or Clang source module"
         case .testTarget(let string):
             return "target '\(string)' is a test target; only library and executable targets are supported by Swift-DocC"
-        case .packageDoesNotContainSwiftSourceModuleTargets:
-            return "the current package does not contain any compatible Swift source modules"
+        case .packageDoesNotContainSourceModuleTargets:
+            return "the current package does not contain any compatible Swift or Clang source modules"
         }
     }
     
@@ -48,11 +48,11 @@ enum ArgumentParsingError: LocalizedError, CustomStringConvertible {
 }
 
 extension ArgumentExtractor {
-    mutating func extractSpecifiedTargets(in package: Package) throws -> [SwiftSourceModuleTarget] {
+    mutating func extractSpecifiedTargets(in package: Package) throws -> [any SourceModuleTarget] {
         let specifiedProducts = extractOption(named: "product")
         let specifiedTargets = extractOption(named: "target")
         
-        let productTargets = try specifiedProducts.flatMap { specifiedProduct -> [SwiftSourceModuleTarget] in
+        let productTargets = try specifiedProducts.flatMap { specifiedProduct -> [any SourceModuleTarget] in
             let product = package.allProducts.first { product in
                 product.name == specifiedProduct
             }
@@ -64,21 +64,21 @@ extension ArgumentExtractor {
                 )
             }
             
-            let supportedSwiftSourceModuleTargets = product.targets.compactMap { target in
-                target as? SwiftSourceModuleTarget
+            let supportedSourceModuleTargets = product.targets.compactMap { target in
+                target as? SourceModuleTarget
             }
-            .filter { swiftSourceModuleTarget in
-                return swiftSourceModuleTarget.kind != .test
-            }
-            
-            guard !supportedSwiftSourceModuleTargets.isEmpty else {
-                throw ArgumentParsingError.productDoesNotContainSwiftSourceModuleTargets(specifiedProduct)
+            .filter { sourceModuleTarget in
+                return sourceModuleTarget.kind != .test
             }
             
-            return supportedSwiftSourceModuleTargets
+            guard !supportedSourceModuleTargets.isEmpty else {
+                throw ArgumentParsingError.productDoesNotContainSourceModuleTargets(specifiedProduct)
+            }
+            
+            return supportedSourceModuleTargets
         }
         
-        let targets = try specifiedTargets.map { specifiedTarget -> SwiftSourceModuleTarget in
+        let targets = try specifiedTargets.map { specifiedTarget -> any SourceModuleTarget in
             let target = package.allTargets.first { target in
                 target.name == specifiedTarget
             }
@@ -90,15 +90,15 @@ extension ArgumentExtractor {
                 )
             }
             
-            guard let swiftSourceModuleTarget = target as? SwiftSourceModuleTarget else {
-                throw ArgumentParsingError.targetIsNotSwiftSourceModule(specifiedTarget)
+            guard let sourceModuleTarget = target as? any SourceModuleTarget else {
+                throw ArgumentParsingError.targetIsNotSourceModule(specifiedTarget)
             }
             
-            guard swiftSourceModuleTarget.kind != .test else {
+            guard sourceModuleTarget.kind != .test else {
                 throw ArgumentParsingError.testTarget(specifiedTarget)
             }
             
-            return swiftSourceModuleTarget
+            return sourceModuleTarget
         }
         
         return productTargets + targets

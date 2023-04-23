@@ -21,7 +21,7 @@ import PackagePlugin
         var argumentExtractor = ArgumentExtractor(arguments)
         let specifiedTargets = try argumentExtractor.extractSpecifiedTargets(in: context.package)
         
-        let possibleTargets: [SwiftSourceModuleTarget]
+        let possibleTargets: [any SourceModuleTarget]
         if specifiedTargets.isEmpty {
             possibleTargets = context.package.topLevelDocumentableTargets
         } else {
