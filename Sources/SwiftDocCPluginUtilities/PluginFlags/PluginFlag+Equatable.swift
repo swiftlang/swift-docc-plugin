@@ -8,6 +8,7 @@
 
 extension PluginFlag: Equatable {
     static func ==(lhs: PluginFlag, rhs: PluginFlag) -> Bool {
-        return lhs.parsedValues == rhs.parsedValues
+        return lhs.positive.parsedValues == rhs.positive.parsedValues
+        && lhs.negative.parsedValues == rhs.negative.parsedValues
     }
 }

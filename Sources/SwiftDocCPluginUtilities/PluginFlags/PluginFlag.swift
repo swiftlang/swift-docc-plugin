@@ -13,7 +13,13 @@ struct PluginFlag: ArgumentsTransforming {
     /// The string values that will be parsed when detecting this flag.
     ///
     /// For example, this might be `["--disable-index"]`.
-    let parsedValues: Set<String>
+    var parsedValues: Set<String> {
+        positiveValues.union(negativeValues)
+    }
+    
+    private let positiveValues: Set<String>
+    
+    private let negativeValues: Set<String>
     
     /// A short, user-facing description of this flag.
     let abstract: String
@@ -22,6 +28,41 @@ struct PluginFlag: ArgumentsTransforming {
     let description: String
     
     let argumentTransformation: (Arguments) -> Arguments
+    
+    /// A version of this flag that only parses its positive values.
+    var positive: Self {
+        .init(positiveValues: positiveValues,
+              negativeValues: [],
+              abstract: abstract,
+              description: description,
+              argumentTransformation: argumentTransformation)
+    }
+    
+    /// A version of this flag that only parses its negative values.
+    var negative: Self {
+        .init(positiveValues: [],
+              negativeValues: negativeValues,
+              abstract: abstract,
+              description: description,
+              argumentTransformation: argumentTransformation)
+    }
+    
+    /// Returns either the ``positive`` or ``negative`` version
+    /// of this flag, depending on the last element in `arguments` that
+    /// triggers this flag.
+    func value(for arguments: Arguments) -> Self? {
+        guard let last = arguments
+            .filter({ parsedValues.contains($0) })
+            .last else {
+            return nil
+        }
+        
+        if positiveValues.contains(last) {
+            return positive
+        } else {
+            return negative
+        }
+    }
     
     /// Transforms the given set of arguments if they include any of this flag's
     /// parsed values.
@@ -49,6 +90,29 @@ struct PluginFlag: ArgumentsTransforming {
     /// Create a new command-line flag.
     ///
     /// - Parameters:
+    ///   - positiveValues: The string values that should be parsed to enable this flag.
+    ///   - negativeValues: The string values that should be parsed to disable this flag.
+    ///   - abstract: The user-facing description of this flag.
+    ///   - description: An expanded, user-facing description of this flag.
+    ///   - argumentTransformation: A closure that can be applied to a given
+    ///     set of parsed arguments if the arguments include any of the this flag's parsed values.
+    init(
+        positiveValues: Set<String>,
+        negativeValues: Set<String>,
+        abstract: String,
+        description: String,
+        argumentTransformation: @escaping (Arguments) -> Arguments
+    ) {
+        self.positiveValues = positiveValues
+        self.negativeValues = negativeValues
+        self.abstract = abstract
+        self.description = description
+        self.argumentTransformation = argumentTransformation
+    }
+    
+    /// Create a new command-line flag.
+    ///
+    /// - Parameters:
     ///   - parsedValues: The string values that should be parsed to detect this flag.
     ///   - abstract: The user-facing description of this flag.
     ///   - description: An expanded, user-facing description of this flag.
@@ -60,9 +124,10 @@ struct PluginFlag: ArgumentsTransforming {
         description: String,
         argumentTransformation: @escaping (Arguments) -> Arguments
     ) {
-        self.parsedValues = parsedValues
-        self.abstract = abstract
-        self.description = description
-        self.argumentTransformation = argumentTransformation
+        self.init(positiveValues: parsedValues,
+                  negativeValues: [],
+                  abstract: abstract,
+                  description: description,
+                  argumentTransformation: argumentTransformation)
     }
 }

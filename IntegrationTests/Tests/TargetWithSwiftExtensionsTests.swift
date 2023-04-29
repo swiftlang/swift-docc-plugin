@@ -25,31 +25,31 @@ final class TargetWithSwiftExtensionsTests: ConcurrencyRequiringTestCase {
         try super.setUpWithError()
     }
     
-    func testGenerateDocumentationWithoutEnablementFlag() throws {
+    func testGenerateDocumentationWithoutExtendedTypesFlag() throws {
         let result = try swiftPackage(
             "generate-documentation",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
         
-        result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1)
+        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
         
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
-        
-        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
-        
-        XCTAssertEqual(
-            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                
-                "library/foo.json",
-                "foo/foo().json",
-                
-                "library/customfooconvertible.json",
-                "customfooconvertible/asfoo.json",
-            ]
+        #if swift(>=5.9)
+        try assertDirectoryContentsWithExtendedTypes(dataDirectoryContents)
+        #else
+        try assertDirectoryContentsWithoutExtendedTypes(dataDirectoryContents)
+        #endif
+    }
+    
+    func testGenerateDocumentationWithDisablementFlag() throws {
+        let result = try swiftPackage(
+            "generate-documentation",
+            "--exclude-extended-types",
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
+        
+        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
+        
+        try assertDirectoryContentsWithoutExtendedTypes(dataDirectoryContents)
     }
     
     func testGenerateDocumentationWithEnablementFlag() throws {
@@ -59,15 +59,17 @@ final class TargetWithSwiftExtensionsTests: ConcurrencyRequiringTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
         
-        result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1)
+        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
         
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
-        
-        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
-        
+        try assertDirectoryContentsWithExtendedTypes(dataDirectoryContents)
+    }
+    
+    func assertDirectoryContentsWithExtendedTypes(_ contents: [URL],
+                                                  _ message: @autoclosure () -> String = "",
+                                                  file: StaticString = #filePath,
+                                                  line: UInt = #line) throws {
         XCTAssertEqual(
-            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
+            Set(contents.map(\.lastTwoPathComponents)),
             [
                 "documentation/library.json",
                 "library/swift.json",
@@ -85,7 +87,43 @@ final class TargetWithSwiftExtensionsTests: ConcurrencyRequiringTestCase {
                 
                 "library/customfooconvertible.json",
                 "customfooconvertible/asfoo.json",
-            ]
+            ],
+            message(),
+            file: file,
+            line: line
         )
+    }
+    
+    func assertDirectoryContentsWithoutExtendedTypes(_ contents: [URL],
+                                                     _ message: @autoclosure () -> String = "",
+                                                     file: StaticString = #filePath,
+                                                     line: UInt = #line) throws {
+        XCTAssertEqual(
+            Set(contents.map(\.lastTwoPathComponents)),
+            [
+                "documentation/library.json",
+                
+                "library/foo.json",
+                "foo/foo().json",
+                
+                "library/customfooconvertible.json",
+                "customfooconvertible/asfoo.json",
+            ],
+            message(),
+            file: file,
+            line: line
+        )
+    }
+    
+    func unwrapDataDirectoryContents(of result: SwiftInvocationResult,
+                                     _ message: @autoclosure () -> String = "",
+                                     file: StaticString = #filePath,
+                                     line: UInt = #line) throws -> [URL] {
+        result.assertExitStatusEquals(0)
+        XCTAssertEqual(result.referencedDocCArchives.count, 1, message(), file: file, line: line)
+        
+        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first, message(), file: file, line: line)
+        
+        return try filesIn(.dataSubdirectory, of: doccArchiveURL)
     }
 }

@@ -49,11 +49,17 @@ extension PackageManager {
         // Modify the symbol graph options with the custom ones
         for customSymbolGraphOption in customSymbolGraphOptions {
             switch customSymbolGraphOption {
-            case .extendedTypes:
+            case .extendedTypes.positive:
 #if swift(>=5.8)
                 symbolGraphOptions.emitExtensionBlocks = true
 #else
                 print("warning: detected '--include-extended-types' option, which is incompatible with your swift version (required: 5.8)")
+#endif
+            case .extendedTypes.negative:
+#if swift(>=5.8)
+                symbolGraphOptions.emitExtensionBlocks = false
+#else
+                print("warning: detected '--exclude-extended-types' option, which is incompatible with your swift version (required: 5.8)")
 #endif
             case .skipSynthesizedSymbols:
                 symbolGraphOptions.includeSynthesized = false

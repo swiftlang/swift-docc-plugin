@@ -56,8 +56,13 @@ public enum HelpInformation {
 #endif
         
         for flag in supportedPluginFlags {
+            var flagListText = flag.positive.parsedValues.sorted().joined(separator: ", ")
+            if !flag.negative.parsedValues.isEmpty {
+                flagListText += " / \(flag.negative.parsedValues.sorted().joined(separator: ", "))"
+            }
+            
             helpText += """
-                  \(flag.parsedValues.sorted().joined(separator: ", "))
+                  \(flagListText)
                                           \(flag.abstract)
                         \(flag.description)
                 
