@@ -7,9 +7,9 @@
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
 extension PluginFlag {
-    /// Include extended types in documentation archives.
+    /// Include or exclude extended types in documentation archives.
     ///
-    /// Enables the extension block symbol format when calling the
+    /// Enables/disables the extension block symbol format when calling the
     /// dump symbol graph API.
     ///
     /// - Note: This flag is only available starting from Swift 5.8. It should
@@ -17,13 +17,20 @@ extension PluginFlag {
     /// However, we do not hide the flag entirely, because this enables us to give
     /// a more precise warning when accidentally used with Swift 5.7 or lower.
     static let extendedTypes = PluginFlag(
-        parsedValues: [
+        positiveValues: [
             "--include-extended-types",
         ],
-        abstract: "Include extended types from other modules in the produced DocC archive.",
-        description: """
-            Allows documenting symbols that a target adds to its dependencies.
-            """,
+        negativeValues: [
+            "--exclude-extended-types",
+        ],
+        abstract: "Control whether extended types from other modules are shown in the produced DocC archive. (default: \(Self.default))",
+        description: "Allows documenting symbols that a target adds to its dependencies.",
         argumentTransformation: { $0 }
     )
+    
+#if swift(>=5.9)
+    private static let `default` = "--include-extended-types"
+#else
+    private static let `default` = "--exclude-extended-types"
+#endif
 }

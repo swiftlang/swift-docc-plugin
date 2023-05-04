@@ -156,8 +156,8 @@ public struct ParsedArguments {
         
         let symbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
         
-        self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.filter { option in
-            option.parsedValues.contains(where: symbolGraphArguments.contains)
+        self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.compactMap {
+            $0.value(for: symbolGraphArguments)
         }
     }
     

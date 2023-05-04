@@ -42,7 +42,7 @@ final class HelpInformationTests: XCTestCase {
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
-                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
 
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -134,7 +134,7 @@ final class HelpInformationTests: XCTestCase {
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
               --experimental-skip-synthesized-symbols
                                       Exclude synthesized symbols from the generated documentation
-                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(includeExtendedTypesSection)
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
             
             DOCC OPTIONS:
               --platform <platform>   Set the current release version of a platform.
@@ -191,12 +191,18 @@ final class HelpInformationTests: XCTestCase {
 }
 
 #if swift(>=5.8)
-private let includeExtendedTypesSection = """
+private let extendedTypesSection = """
 
-  --include-extended-types
-                          Include extended types from other modules in the produced DocC archive.
+  --include-extended-types / --exclude-extended-types
+                          Control whether extended types from other modules are shown in the produced DocC archive. (default: \(extendedTypesDefault))
         Allows documenting symbols that a target adds to its dependencies.
 """
 #else
-private let includeExtendedTypesSection = ""
+private let extendedTypesSection = ""
+#endif
+
+#if swift(>=5.9)
+private let extendedTypesDefault = "--include-extended-types"
+#else
+private let extendedTypesDefault = "--exclude-extended-types"
 #endif

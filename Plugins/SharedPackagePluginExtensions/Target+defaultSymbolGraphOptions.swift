@@ -24,11 +24,17 @@ extension SwiftSourceModuleTarget {
             targetMinimumAccessLevel = .public
         }
         
+#if swift(>=5.9)
+        let emitExtensionBlockSymbolDefault = true
+#else
+        let emitExtensionBlockSymbolDefault = false
+#endif
+        
         return PackageManager.SymbolGraphOptions(
             minimumAccessLevel: targetMinimumAccessLevel,
             includeSynthesized: true,
             includeSPI: false,
-            emitExtensionBlocks: false
+            emitExtensionBlocks: emitExtensionBlockSymbolDefault
         )
     }
 }

@@ -4,24 +4,26 @@ Generate documentation for the extensions you make to types from other modules.
 
 ## Overview
 
-By default, the Swift-DocC plugin ignores extensions you make to types that are not from the module you're generating documentation for.
+The Swift-DocC plugin allows you to document extensions you make to types that are not from the module you're generating documentation for.
 
-To include documentation for extended types, add the `--include-extended-types` flag to your invocations:
+As of Swift 5.9, extension support is enabled by default. If you're using an older version of Swift or would like to configure this behavior pass the `--include-extended-types` or `--exclude-extended-types` flag to enable or disable the feature, respectively:
 
     $ swift package generate-documentation --include-extended-types
 
-> Note: Extension support is available when using Swift 5.8 or later and the Swift-DocC plugin 1.2 or later.
+    $ swift package generate-documentation --exclude-extended-types
 
-## Understanding What is Included by Default
+> Note: Extension support is available when using Swift 5.8 or later and the Swift-DocC plugin 1.2 or later. Extension support is enabled by default starting with Swift 5.9 and the Swift-DocC plugin 1.3.
 
-Not everything that is declared in an extension is hidden behind the `--include-extended-types` flag. If the extension is declared in the same target as the type it is extending, the extension's contents will be included in the documentation by default.
+## Understanding What is an Extended Type
+
+Not every type you add an extension to is an extended type. If the extension is declared in the same target as the type it is extending, the extension's contents will always be included in the documentation. Only extensions you make to types from other targets are represented as an external type in your documentation archive.
 
 ```swift
 public struct Sloth { }
 
 extension Sloth {
-    // This function is included in the
-    // documentation by default.
+    // This method is always included
+    // in the documentation.
     public func wake() { /* ... */ }
 }
 
@@ -29,8 +31,9 @@ extension Sloth {
 // not the `SlothCreator` library, so this is
 // what we call an "extended type".
 extension Collection where Element == Sloth {
-    // This property is not included in
-    // the documentation by default.
+    // This property is only included in
+    // the documentation if extension
+    // support is enabled.
     public func wake() {
         for sloth in self {
             sloth.wake()
