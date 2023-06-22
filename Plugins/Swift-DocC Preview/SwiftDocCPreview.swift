@@ -127,7 +127,7 @@ import PackagePlugin
         
         
         func stopPreviewProcess() {
-            #if os(macOS) && os(iOS) && os(tvOS) && os(watchOS)
+            #if canImport(Darwin)
             previewProcess.interrupt()
             #elseif os(Windows)
             _ = TerminateProcess(previewProcess.processHandle, 0)

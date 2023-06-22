@@ -33,7 +33,7 @@ extension Package {
                     addTargets(product.targets)
                 case .target(let target):
                     addTargets([target])
-                #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+                #if canImport(Darwin)
                 @unknown default:
                     return
                 #endif
