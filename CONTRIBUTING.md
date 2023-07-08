@@ -35,7 +35,7 @@ from the community.
 ### Contributing Code and Documentation
 
 Before contributing code or documentation to the Swift-DocC plugin,
-we encourage you to first create an issue on [Swift JIRA](https://bugs.swift.org/).
+we encourage you to first open a [GitHub issue](https://github.com/apple/swift-docc-plugin/issues/new/choose).
 This will allow us to provide feedback on the proposed change.
 However, this is not a requirement. If your contribution is small in scope,
 feel free to open a PR without first creating an issue.
@@ -49,12 +49,12 @@ more details.
 
 ### Prerequisites
 
-The Swift-DocC plugin is a SwiftPM command plugin package. 
+The Swift-DocC plugin is a SwiftPM command plugin package.
 If you're new to Swift package manager,
 the [documentation here](https://swift.org/getting-started#using-the-package-manager)
 provides an explanation of how to get started and the software you'll need installed.
 
-Note that Swift 5.6 is required in order to run the plugin. 
+Note that Swift 5.6 is required in order to run the plugin.
 Development snapshots that include Swift 5.6 can be found
 on [Swift.org](https://www.swift.org/download/#snapshots).
 
@@ -94,7 +94,7 @@ on [Swift.org](https://www.swift.org/download/#snapshots).
 ### Overview
 
 - Do your best to keep the git history easy to understand.
-  
+
 - Use informative commit titles and descriptions.
   - Include a brief summary of changes as the first line.
   - Describe everything that was added, removed, or changed, and why.
@@ -121,11 +121,10 @@ requirements:
 When opening a pull request, please make sure to fill out the pull request template
 and complete all tasks mentioned there.
 
-Your PR should mention the number of the [Swift JIRA](https://bugs.swift.org/)
-issue your work is addressing (SR-NNNNN).
-  
-Most PRs should be against the `main` branch. If your change is intended 
-for a specific release, you should also create a separate branch 
+Your PR should mention the number of the GitHub issue your work is addressing.
+
+Most PRs should be against the `main` branch. If your change is intended
+for a specific release, you should also create a separate branch
 that cherry-picks your commit onto the associated release branch.
 
 ### Code Review Process
@@ -165,10 +164,10 @@ automated testing in CI as well.
 
 The Swift-DocC plugin maintains two test suites. Whenever possible, new code should be added
 to the `SwiftDocCPluginUtilities` library instead of directly to a plugin. This allows the logic to be
-unit tested within `SwiftDocCPluginUtilitiesTests`. 
+unit tested within `SwiftDocCPluginUtilitiesTests`.
 
-Integration tests can be added to the `IntegrationTests` sub-package that is a part of this repo. 
-This allows for writing end-to-end tests that invoke both the Swift Package Manager and Swift-DocC 
+Integration tests can be added to the `IntegrationTests` sub-package that is a part of this repo.
+This allows for writing end-to-end tests that invoke both the Swift Package Manager and Swift-DocC
 to ensure the plugin is functioning as expected.
 
 ### Using Docker to Test Swift-DocC Plugin for Linux
@@ -195,7 +194,7 @@ by running the test suite in a Docker environment that simulates Swift on Linux.
     ```bash
     docker run -v `pwd`:/swift-docc-plugin swift-docc-plugin sh -c "cd /swift-docc-plugin && ./bin/test"
     ```
-    
+
 ## Continuous Integration
 
 Swift-DocC plugin uses [swift-ci](https://ci.swift.org) infrastructure for its continuous integration
@@ -208,23 +207,23 @@ If you do not have commit access, please ask one of the code owners to trigger t
     ```
     @swift-ci Please test
     ```
-    
+
     <details>
      <summary>Platform specific instructions:</summary>
-     
+
      1. Run the project's unit tests on **macOS**, along with a selection of compatibility suite
         tests by commenting the following:
-     
+
          ```
          @swift-ci Please test macOS platform
          ```
-     
+
      2. Run the project's unit tests on **Linux** by commenting the following:
-     
+
          ```
          @swift-ci Please test Linux platform
          ```
-     
+
     </details>
-    
+
 <!-- Copyright (c) 2022 Apple Inc and the Swift Project authors. All Rights Reserved. -->
