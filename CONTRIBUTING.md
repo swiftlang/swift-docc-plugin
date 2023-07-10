@@ -89,11 +89,10 @@ on [Swift.org](https://www.swift.org/download/#snapshots).
     swift package generate-documentation
     ```
 
-### Using your local Swift-DocC Plugin as a Dependency
+### Using your local Swift-DocC plugin as a dependency
 
 If you want to debug a change, you can use your local development version of
-Swift-DocC plugin by specifying a local path in your project's `Package.swift`
-dependency:
+the Swift-DocC plugin by specifying a local path in your project's `Package.swift`:
 
 ```swift
 let package = Package(
@@ -111,12 +110,13 @@ let package = Package(
 ### Using your local Swift-DocC
 
 By default, Swift-DocC plugin will run `docc` from your Swift toolchain.
-However, if you're working on Swift-DocC, and want to test your `docc` with
+However, if you're working on Swift-DocC, and want to test your in-development `docc` with
 Swift-DocC plugin, you can set the `DOCC_EXEC` environment variable before
 invoking the plugin:
 
 ```bash
-DOCC_EXEC=path/to/swift-docc/.build/debug/docc swift package generate-documentation
+export DOCC_EXEC=path/to/swift-docc/.build/debug/docc
+swift package generate-documentation
 ```
 
 ## Code Contribution Guidelines
@@ -173,7 +173,7 @@ If you do not have commit access, please ask one of the code owners to trigger t
 For more details on Swift-DocC's continuous integration, see the
 [Continous Integration](#continuous-integration) section below.
 
-## Testing Swift-DocC Plugin
+## Testing the Swift-DocC plugin
 
 The Swift-DocC plugin is committed to maintaining a high level of code quality.
 Before opening a pull request, we ask that you:
