@@ -99,7 +99,7 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "path/to/local/swift-docc-plugin", from: "1.1.0"),
+        .package(path: "path/to/local/swift-docc-plugin"),
     ],
     targets: [
         // targets
