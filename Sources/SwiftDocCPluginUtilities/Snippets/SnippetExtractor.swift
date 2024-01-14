@@ -93,7 +93,7 @@ public class SnippetExtractor {
     /// function multiple times with the same package identifier.
     ///
     /// - Parameters:
-    ///   - packageIdentifier: A unique identifier for the packge.
+    ///   - packageIdentifier: A unique identifier for the package.
     ///   - packageDisplayName: A display name for the package.
     ///   - packageDirectory: The root directory for this package.
     ///
