@@ -79,7 +79,8 @@ import PackagePlugin
                 context: context,
                 verbose: verbose,
                 snippetExtractor: snippetExtractor,
-                customSymbolGraphOptions: parsedArguments.symbolGraphArguments
+                customSymbolGraphOptions: parsedArguments.symbolGraphArguments,
+                minimumAccessLevel: parsedArguments.arguments.symbolGraphMinimumAccessLevel.flatMap { .init(rawValue: $0) }
             )
             
             if target.doccCatalogPath == nil,
