@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -56,14 +56,9 @@ import PackagePlugin
         let snippetExtractor: SnippetExtractor? = nil
 #endif
         
-        
-        // Iterate over the Swift source module targets we were given.
-        for (index, target) in swiftSourceModuleTargets.enumerated() {
-            if index != 0 {
-                // Emit a line break if this is not the first target being built.
-                print()
-            }
-            
+        // An inner function that defines the work to build documentation for a given target.
+        func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws {
+            let target = task.target
             print("Generating documentation for '\(target.name)'...")
             
             let symbolGraphs = try packageManager.doccSymbolGraphs(
@@ -88,12 +83,11 @@ import PackagePlugin
                         // We're building multiple targets, just throw a warning for this
                         // one target that does not produce documentation.
                         Diagnostics.warning(message)
-                        continue
                     } else {
                         // This is the only target being built so throw an error
                         Diagnostics.error(message)
-                        return
                     }
+                    return
                 }
             }
             
@@ -138,15 +132,56 @@ import PackagePlugin
                 let describedOutputPath = doccArguments.outputPath ?? "unknown location"
                 print("Generated DocC archive at '\(describedOutputPath)'")
             } else {
-                Diagnostics.error("""
-                    'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'
-                    """
-                )
+                Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")
+            }
+            
+        }
+        
+        // Create a build graph for all the documentation build tasks.
+        let buildGraph = DocumentationBuildGraph(targets: swiftSourceModuleTargets)
+        // Create a serial queue to perform each documentation build task
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        
+        // Operations can't raise errors. Instead we catch the error from 'performBuildTask(_:)'
+        // and cancel the remaining tasks.
+        let errorLock = NSLock()
+        var caughtError: Error?
+        
+        let operations = buildGraph.makeOperations { [performBuildTask] task in
+            do {
+                try performBuildTask(task)
+            } catch {
+                errorLock.withLock {
+                    caughtError = error
+                    queue.cancelAllOperations()
+                }
             }
         }
+        // If any of the build tasks raised an error. Rethrow that error.
+        if let caughtError {
+            throw caughtError
+        }
+        
+        // Run all the documentation build tasks in reverse dependency order (dependencies before dependents).
+        queue.addOperations(operations, waitUntilFinished: true)
         
         if swiftSourceModuleTargets.count > 1 {
             print("\nMultiple DocC archives generated at '\(context.pluginWorkDirectory.string)'")
+        }
+    }
+}
+
+// We add the conformance here so that 'DocumentationBuildGraphTarget' doesn't need to know about 'SwiftSourceModuleTarget' or import 'PackagePlugin'.
+extension SwiftSourceModuleTarget: DocumentationBuildGraphTarget {
+    var dependencyIDs: [String] {
+        // List all the target dependencies in a flat list.
+        dependencies.flatMap {
+            switch $0 {
+            case .target(let target):   return [target.id]
+            case .product(let product): return product.targets.map { $0.id }
+            @unknown default:           return []
+            }
         }
     }
 }
