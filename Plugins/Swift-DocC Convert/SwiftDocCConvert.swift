@@ -69,26 +69,24 @@ import PackagePlugin
                 customSymbolGraphOptions: parsedArguments.symbolGraphArguments
             )
             
-            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
-                // This target did not produce any symbol graphs. Let's check if it has a
-                // DocC catalog.
+            if target.doccCatalogPath == nil,
+               try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty
+            {
+                // This target did not produce any symbol graphs and has no DocC catalog.
+                let message = """
+                    '\(target.name)' does not contain any documentable symbols or a \
+                    DocC catalog and will not produce documentation
+                    """
                 
-                guard target.doccCatalogPath != nil else {
-                    let message = """
-                        '\(target.name)' does not contain any documentable symbols or a \
-                        DocC catalog and will not produce documentation
-                        """
-                    
-                    if swiftSourceModuleTargets.count > 1 {
-                        // We're building multiple targets, just throw a warning for this
-                        // one target that does not produce documentation.
-                        Diagnostics.warning(message)
-                    } else {
-                        // This is the only target being built so throw an error
-                        Diagnostics.error(message)
-                    }
-                    return
+                if swiftSourceModuleTargets.count > 1 {
+                    // We're building multiple targets, just emit a warning for this
+                    // one target that does not produce documentation.
+                    Diagnostics.warning(message)
+                } else {
+                    // This is the only target being built so emit an error
+                    Diagnostics.error(message)
                 }
+                return
             }
             
             // Construct the output path for the generated DocC archive
