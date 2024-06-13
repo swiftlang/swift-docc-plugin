@@ -174,10 +174,9 @@ public struct ParsedArguments {
         .outputPath,
     ]
     
-    
     /// The command-line flags required by the `docc` tool.
     private static let requiredFlags = [
-        "--index",
+        "--emit-lmdb-index",
     ]
     
     private static let argumentsTransformers: [ArgumentsTransforming] = [

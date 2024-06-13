@@ -68,9 +68,9 @@ struct PluginFlag: ArgumentsTransforming {
     /// parsed values.
     ///
     /// For example, if the flag's ``parsedValues`` are `["--disable-index"]`,
-    /// and the given parsed arguments contain `["--disable-index", "--index"]`,
+    /// and the given parsed arguments contain `["--disable-index", "--emit-lmdb-index"]`,
     /// then the transformation would both consume the `"--disable-index"` flag
-    /// and remove the `"--index"` flag since indexing should be disabled.
+    /// and remove the `"--emit-lmdb-index"` flag since indexing should be disabled.
     func transform(_ arguments: Arguments) -> Arguments {
         guard !parsedValues.isDisjoint(with: arguments) else {
             // The given parsed arguments do not contain any of this flags

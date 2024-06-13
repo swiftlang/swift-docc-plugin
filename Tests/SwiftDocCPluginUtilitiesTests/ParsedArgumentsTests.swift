@@ -59,7 +59,7 @@ final class ParsedArgumentsTests: XCTestCase {
             ),
             [
                 "convert",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -78,7 +78,7 @@ final class ParsedArgumentsTests: XCTestCase {
             ),
             [
                 "preview",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -98,7 +98,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "/my/catalog.docc",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -124,7 +124,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "--fallback-display-name", "custom-display-name",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
                 "--output-path", "/my/output-path"
@@ -147,7 +147,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "--fallback-bundle-identifier", "custom-bundle-identifier",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
                 "--output-path", "/my/output-path"
@@ -170,7 +170,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "--additional-symbol-graph-dir", "/my/custom/symbol-graph",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--output-path", "/my/output-path",
@@ -193,7 +193,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "--output-path", "/my/custom/output-path",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -222,7 +222,7 @@ final class ParsedArgumentsTests: XCTestCase {
                 "convert",
                 "--fallback-display-name", "custom-display-name",
                 "--fallback-bundle-identifier", "custom-bundle-identifier",
-                "--index",
+                "--emit-lmdb-index",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
                 "--output-path", "/my/output-path",
             ]
@@ -252,7 +252,7 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--fallback-bundle-identifier", "custom-bundle-identifier",
                 "--additional-symbol-graph-dir", "/my/custom/symbol-graph",
                 "--output-path", "/my/custom/output-path",
-                "--index",
+                "--emit-lmdb-index",
             ]
         )
     }
@@ -349,7 +349,7 @@ final class ParsedArgumentsTests: XCTestCase {
                 "convert",
                 "/my/catalog.docc",
                 "--transform-for-static-hosting",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -384,7 +384,7 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--analyze",
                 "--fallback-display-name", "custom-display-name",
                 "--output-path", "/my/custom/output-path",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
             ]
@@ -408,7 +408,7 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "/my/catalog.docc",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
@@ -434,7 +434,7 @@ final class ParsedArgumentsTests: XCTestCase {
                 "convert",
                 "/my/catalog.docc",
                 "--fallback-default-module-kind", "Executable",
-                "--index",
+                "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",

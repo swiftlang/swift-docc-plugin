@@ -23,7 +23,7 @@ extension PluginFlag {
         argumentTransformation: { arguments in
             // Filter out any --index flags from the parsed arguments.
             return arguments.filter { argument in
-                argument != "--index"
+                argument != "--emit-lmdb-index"
             }
         }
     )
