@@ -32,6 +32,18 @@ import PackagePlugin
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
         let isCombinedDocumentationEnabled = argumentExtractor.extractFlag(named: PluginFlag.enableCombinedDocumentationSupportFlagName) > 0
         
+        if isCombinedDocumentationEnabled {
+            let doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
+            guard doccFeatures?.contains(.linkDependencies) == true else {
+                // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
+                Diagnostics.error("""
+                Unsupported use of '--\(PluginFlag.enableCombinedDocumentationSupportFlagName)'. \
+                DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
+                """)
+                return
+            }
+        }
+        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
