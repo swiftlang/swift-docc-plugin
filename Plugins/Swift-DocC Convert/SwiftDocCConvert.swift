@@ -57,7 +57,7 @@ import PackagePlugin
 #endif
         
         // An inner function that defines the work to build documentation for a given target.
-        func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws {
+        func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws -> URL? {
             let target = task.target
             print("Generating documentation for '\(target.name)'...")
             
@@ -86,7 +86,7 @@ import PackagePlugin
                     // This is the only target being built so emit an error
                     Diagnostics.error(message)
                 }
-                return
+                return nil
             }
             
             // Construct the output path for the generated DocC archive
@@ -133,6 +133,7 @@ import PackagePlugin
                 Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")
             }
             
+            return URL(fileURLWithPath: doccArchiveOutputPath)
         }
         
         // Create a build graph for all the documentation build tasks.
@@ -143,14 +144,19 @@ import PackagePlugin
         
         // Operations can't raise errors. Instead we catch the error from 'performBuildTask(_:)'
         // and cancel the remaining tasks.
-        let errorLock = NSLock()
+        let resultLock = NSLock()
         var caughtError: Error?
+        var documentationArchives: [URL] = []
         
         let operations = buildGraph.makeOperations { [performBuildTask] task in
             do {
-                try performBuildTask(task)
+                if let archive = try performBuildTask(task) {
+                    resultLock.withLock {
+                        documentationArchives.append(archive)
+                    }
+                }
             } catch {
-                errorLock.withLock {
+                resultLock.withLock {
                     caughtError = error
                     queue.cancelAllOperations()
                 }
@@ -163,9 +169,12 @@ import PackagePlugin
         
         // Run all the documentation build tasks in reverse dependency order (dependencies before dependents).
         queue.addOperations(operations, waitUntilFinished: true)
-        
-        if swiftSourceModuleTargets.count > 1 {
-            print("\nMultiple DocC archives generated at '\(context.pluginWorkDirectory.string)'")
+            
+        if documentationArchives.count > 1 {
+            print("""
+            Generated \(documentationArchives.count) DocC archives in '\(context.pluginWorkDirectory.string)':
+              \(documentationArchives.map(\.lastPathComponent).sorted().joined(separator: "\n  "))
+            """)
         }
     }
 }
