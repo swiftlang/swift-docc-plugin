@@ -30,6 +30,7 @@ import PackagePlugin
         }
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
+        let isCombinedDocumentationEnabled = argumentExtractor.extractFlag(named: PluginFlag.enableCombinedDocumentationSupportFlagName) > 0
         
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
@@ -100,7 +101,7 @@ import PackagePlugin
             // arguments to pass to `docc`. ParsedArguments will merge the flags provided
             // by the user with default fallback values for required flags that were not
             // provided.
-            let doccArguments = parsedArguments.doccArguments(
+            var doccArguments = parsedArguments.doccArguments(
                 action: .convert,
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
@@ -108,6 +109,14 @@ import PackagePlugin
                 symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
                 outputPath: doccArchiveOutputPath
             )
+            if isCombinedDocumentationEnabled {
+                doccArguments.append(CommandLineOption.enableExternalLinkSupport.defaultName)
+                
+                for taskDependency in task.dependencies {
+                    let dependencyArchivePath = taskDependency.target.doccArchiveOutputPath(in: context)
+                    doccArguments.append(contentsOf: [CommandLineOption.externalLinkDependency.defaultName, dependencyArchivePath])
+                }
+            }
             
             if verbose {
                 let arguments = doccArguments.joined(separator: " ")
@@ -171,9 +180,31 @@ import PackagePlugin
         queue.addOperations(operations, waitUntilFinished: true)
             
         if documentationArchives.count > 1 {
+            documentationArchives = documentationArchives.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+            
+            if isCombinedDocumentationEnabled {
+                // Merge the archives into a combined archive
+                let combinedArchiveName = "Combined \(context.package.displayName) Documentation.doccarchive"
+                let combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
+                
+                var mergeCommandArguments = ["merge"]
+                mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
+                mergeCommandArguments.append(contentsOf: ["--output-path", combinedArchiveOutput.path])
+                
+                // Remove the combined archive if it already exists
+                try? FileManager.default.removeItem(at: combinedArchiveOutput)
+                
+                // Create a new combined archive
+                let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
+                process.waitUntilExit()
+                
+                // Display the combined archive before the other generated archives
+                documentationArchives.insert(combinedArchiveOutput, at: 0)
+            }
+            
             print("""
             Generated \(documentationArchives.count) DocC archives in '\(context.pluginWorkDirectory.string)':
-              \(documentationArchives.map(\.lastPathComponent).sorted().joined(separator: "\n  "))
+              \(documentationArchives.map(\.lastPathComponent).joined(separator: "\n  "))
             """)
         }
     }

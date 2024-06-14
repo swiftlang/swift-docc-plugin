@@ -48,12 +48,17 @@ public enum HelpInformation {
             PluginFlag.skipSynthesizedSymbols
         ]
         
+        let doccFeatures = (try? DocCFeatures(doccExecutable: doccExecutableURL)) ?? .init()
+        
         // stops 'not mutated' warning for Swift 5.7 and lower
         supportedPluginFlags += []
         
 #if swift(>=5.8)
         supportedPluginFlags += [PluginFlag.extendedTypes]
 #endif
+        if doccFeatures.contains(.linkDependencies) {
+            supportedPluginFlags += [PluginFlag.enableCombinedDocumentationSupport]
+        }
         
         for flag in supportedPluginFlags {
             var flagListText = flag.positive.parsedValues.sorted().joined(separator: ", ")
