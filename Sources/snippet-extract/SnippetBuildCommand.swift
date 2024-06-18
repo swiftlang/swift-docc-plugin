@@ -50,7 +50,7 @@ struct SnippetExtractCommand {
 
             ARGUMENTS:
                 <output file> (Required)
-                    The path of the output Symbol Graph JSON file representing the snippets for the a module or package
+                    The path of the output Symbol Graph JSON file representing the snippets for the module or package
                 <module name> (Required)
                     The module name to use for the Symbol Graph (typically should be the package name)
                 <input files>
