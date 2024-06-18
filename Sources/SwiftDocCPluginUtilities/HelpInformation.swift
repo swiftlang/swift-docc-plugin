@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2023 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -69,14 +69,15 @@ public enum HelpInformation {
                 """
         }
         
-        let doccHelp = try _doccHelp(pluginAction, doccExecutableURL)
-        
-        if let doccOptions = doccHelp?.components(separatedBy: "OPTIONS:\n").last {
-            helpText += """
-
-                DOCC OPTIONS:
-                \(doccOptions)
-                """
+        if let doccHelp = try _doccHelp(pluginAction, doccExecutableURL) {
+            let doccHelpOptions = doccHelp.components(separatedBy: "\n\n")
+                .drop(while: { !$0.hasPrefix("USAGE: ")})
+                .dropFirst()
+            
+            helpText = helpText.trimmingCharacters(in: .newlines) + doccHelpOptions.map { 
+                // Join the DocC Options again and prefix each options group with DOCC to separate them from the plugin options
+                "\n\n" + ($0.first?.isLetter == true ? "DOCC " : "") + $0
+            }.joined()
         }
         
         return helpText.trimmingCharacters(in: .newlines) + "\n"
