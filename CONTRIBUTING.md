@@ -171,7 +171,7 @@ If you have commit access, you can run the required tests by commenting the foll
 
 If you do not have commit access, please ask one of the code owners to trigger them for you.
 For more details on Swift-DocC's continuous integration, see the
-[Continous Integration](#continuous-integration) section below.
+[Continuous Integration](#continuous-integration) section below.
 
 ## Testing the Swift-DocC plugin
 
@@ -256,4 +256,4 @@ If you do not have commit access, please ask one of the code owners to trigger t
 
     </details>
 
-<!-- Copyright (c) 2022 Apple Inc and the Swift Project authors. All Rights Reserved. -->
+<!-- Copyright (c) 2022-2023 Apple Inc and the Swift Project authors. All Rights Reserved. -->
