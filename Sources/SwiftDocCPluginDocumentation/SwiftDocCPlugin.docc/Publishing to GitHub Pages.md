@@ -62,7 +62,7 @@ Before running the `swift package generate-documentation` command, you'll need t
     
     Because these websites have their own unique subdomain, your website is published directly at the root and the `[hosting-base-path]` argument is not needed. 
     
-    > Tip: If your unsure what kind of GitHub Pages site you have, pay close attention to the URL listed on the GitHub Pages tab of your repository's settings after you've enabled the feature.
+    > Tip: If you're unsure what kind of GitHub Pages site you have, pay close attention to the URL listed on the GitHub Pages tab of your repository's settings after you've enabled the feature.
     
 
 2. Which **target** in your Swift Package would you like to publish documentation for?
