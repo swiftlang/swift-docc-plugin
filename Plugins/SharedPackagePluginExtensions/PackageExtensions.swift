@@ -68,7 +68,7 @@ extension Package {
     
     /// All targets defined in this package and its dependencies that
     /// can produce documentation.
-    var allDocumentableTargets: [SwiftSourceModuleTarget] {
+    var allDocumentableTargets: [SourceModuleTarget] {
         return allTargets.documentableTargets
     }
     
@@ -83,7 +83,7 @@ extension Package {
     /// All targets defined directly in this package that produce documentation.
     ///
     /// Excludes targets defined in dependencies.
-    var topLevelDocumentableTargets: [SwiftSourceModuleTarget] {
+    var topLevelDocumentableTargets: [SourceModuleTarget] {
         var insertedTargetIds = Set<Target.ID>()
         var topLevelTargets = [Target]()
         
@@ -125,7 +125,7 @@ extension Package {
         return allDocumentableProducts.map(\.name.singleQuoted).joined(separator: ", ")
     }
     
-    func package(for target: SwiftSourceModuleTarget) -> Package? {
+    func package(for target: SourceModuleTarget) -> Package? {
         let possiblePackages = dependencies.map(\.package) + [self]
         
         return possiblePackages.first { package in
@@ -133,7 +133,7 @@ extension Package {
         }
     }
     
-    func containsTarget(_ target: SwiftSourceModuleTarget) -> Bool {
+    func containsTarget(_ target: SourceModuleTarget) -> Bool {
         return targets.contains { packageTarget in
             packageTarget.id == target.id
         }
@@ -141,9 +141,9 @@ extension Package {
 }
 
 private extension Collection where Element == Target {
-    var documentableTargets: [SwiftSourceModuleTarget] {
+    var documentableTargets: [SourceModuleTarget] {
         return compactMap { target in
-            guard let swiftSourceModuleTarget = target as? SwiftSourceModuleTarget else {
+            guard let swiftSourceModuleTarget = target as? SourceModuleTarget else {
                 return nil
             }
             

@@ -39,7 +39,7 @@ extension PackageManager {
     
     /// Returns the relevant symbols graphs for Swift-DocC documentation generation for the given target.
     func doccSymbolGraphs(
-        for target: SwiftSourceModuleTarget,
+        for target: SourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
         snippetExtractor: SnippetExtractor?,

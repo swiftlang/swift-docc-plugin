@@ -8,7 +8,7 @@
 
 import PackagePlugin
 
-extension SwiftSourceModuleTarget {
+extension SourceModuleTarget {
     /// Returns the default options that should be used for generating a symbol graph for the
     /// current target in the given package.
     func defaultSymbolGraphOptions(in package: Package) -> PackageManager.SymbolGraphOptions {

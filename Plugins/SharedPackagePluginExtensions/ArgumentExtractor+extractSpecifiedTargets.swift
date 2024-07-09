@@ -48,11 +48,11 @@ enum ArgumentParsingError: LocalizedError, CustomStringConvertible {
 }
 
 extension ArgumentExtractor {
-    mutating func extractSpecifiedTargets(in package: Package) throws -> [SwiftSourceModuleTarget] {
+    mutating func extractSpecifiedTargets(in package: Package) throws -> [SourceModuleTarget] {
         let specifiedProducts = extractOption(named: "product")
         let specifiedTargets = extractOption(named: "target")
         
-        let productTargets = try specifiedProducts.flatMap { specifiedProduct -> [SwiftSourceModuleTarget] in
+        let productTargets = try specifiedProducts.flatMap { specifiedProduct -> [SourceModuleTarget] in
             let product = package.allProducts.first { product in
                 product.name == specifiedProduct
             }
@@ -65,7 +65,7 @@ extension ArgumentExtractor {
             }
             
             let supportedSwiftSourceModuleTargets = product.targets.compactMap { target in
-                target as? SwiftSourceModuleTarget
+                target as? SourceModuleTarget
             }
             .filter { swiftSourceModuleTarget in
                 return swiftSourceModuleTarget.kind != .test
@@ -78,7 +78,7 @@ extension ArgumentExtractor {
             return supportedSwiftSourceModuleTargets
         }
         
-        let targets = try specifiedTargets.map { specifiedTarget -> SwiftSourceModuleTarget in
+        let targets = try specifiedTargets.map { specifiedTarget -> SourceModuleTarget in
             let target = package.allTargets.first { target in
                 target.name == specifiedTarget
             }
@@ -90,7 +90,7 @@ extension ArgumentExtractor {
                 )
             }
             
-            guard let swiftSourceModuleTarget = target as? SwiftSourceModuleTarget else {
+            guard let swiftSourceModuleTarget = target as? SourceModuleTarget else {
                 throw ArgumentParsingError.targetIsNotSwiftSourceModule(specifiedTarget)
             }
             
