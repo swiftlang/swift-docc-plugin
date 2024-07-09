@@ -35,7 +35,7 @@ from the community.
 ### Contributing Code and Documentation
 
 Before contributing code or documentation to the Swift-DocC plugin,
-we encourage you to first open a [GitHub issue](https://github.com/apple/swift-docc-plugin/issues/new/choose).
+we encourage you to first open a [GitHub issue](https://github.com/swiftlang/swift-docc-plugin/issues/new/choose).
 This will allow us to provide feedback on the proposed change.
 However, this is not a requirement. If your contribution is small in scope,
 feel free to open a PR without first creating an issue.
@@ -63,7 +63,7 @@ on [Swift.org](https://www.swift.org/download/#snapshots).
 1. Checkout this repository using:
 
     ```bash
-    git clone git@github.com:apple/swift-docc-plugin.git
+    git clone git@github.com:swiftlang/swift-docc-plugin.git
     ```
 
 2. Navigate to the root of your cloned repository with:
