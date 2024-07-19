@@ -18,15 +18,15 @@ import PackagePlugin
         var argumentExtractor = ArgumentExtractor(arguments)
         let specifiedTargets = try argumentExtractor.extractSpecifiedTargets(in: context.package)
         
-        let swiftSourceModuleTargets: [SwiftSourceModuleTarget]
+        let sourceModuleTargets: [any SourceModuleTarget]
         if specifiedTargets.isEmpty {
-            swiftSourceModuleTargets = context.package.allDocumentableTargets
+            sourceModuleTargets = context.package.allDocumentableTargets
         } else {
-            swiftSourceModuleTargets = specifiedTargets
+            sourceModuleTargets = specifiedTargets
         }
         
-        guard !swiftSourceModuleTargets.isEmpty else {
-            throw ArgumentParsingError.packageDoesNotContainSwiftSourceModuleTargets
+        guard !sourceModuleTargets.isEmpty else {
+            throw ArgumentParsingError.packageDoesNotContainSourceModuleTargets
         }
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
@@ -58,7 +58,7 @@ import PackagePlugin
         
         
         // Iterate over the Swift source module targets we were given.
-        for (index, target) in swiftSourceModuleTargets.enumerated() {
+        for (index, target) in sourceModuleTargets.enumerated() {
             if index != 0 {
                 // Emit a line break if this is not the first target being built.
                 print()
@@ -84,7 +84,7 @@ import PackagePlugin
                         DocC catalog and will not produce documentation
                         """
                     
-                    if swiftSourceModuleTargets.count > 1 {
+                    if sourceModuleTargets.count > 1 {
                         // We're building multiple targets, just throw a warning for this
                         // one target that does not produce documentation.
                         Diagnostics.warning(message)
@@ -145,7 +145,7 @@ import PackagePlugin
             }
         }
         
-        if swiftSourceModuleTargets.count > 1 {
+        if sourceModuleTargets.count > 1 {
             print("\nMultiple DocC archives generated at '\(context.pluginWorkDirectory.string)'")
         }
     }

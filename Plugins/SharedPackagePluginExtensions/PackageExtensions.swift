@@ -68,7 +68,7 @@ extension Package {
     
     /// All targets defined in this package and its dependencies that
     /// can produce documentation.
-    var allDocumentableTargets: [SwiftSourceModuleTarget] {
+    var allDocumentableTargets: [any SourceModuleTarget] {
         return allTargets.documentableTargets
     }
     
@@ -83,7 +83,7 @@ extension Package {
     /// All targets defined directly in this package that produce documentation.
     ///
     /// Excludes targets defined in dependencies.
-    var topLevelDocumentableTargets: [SwiftSourceModuleTarget] {
+    var topLevelDocumentableTargets: [any SourceModuleTarget] {
         var insertedTargetIds = Set<Target.ID>()
         var topLevelTargets = [Target]()
         
@@ -141,17 +141,17 @@ extension Package {
 }
 
 private extension Collection where Element == Target {
-    var documentableTargets: [SwiftSourceModuleTarget] {
+    var documentableTargets: [any SourceModuleTarget] {
         return compactMap { target in
-            guard let swiftSourceModuleTarget = target as? SwiftSourceModuleTarget else {
+            guard let sourceModuleTarget = target as? any SourceModuleTarget else {
                 return nil
             }
             
-            guard swiftSourceModuleTarget.kind != .test else {
+            guard sourceModuleTarget.kind != .test else {
                 return nil
             }
             
-            return swiftSourceModuleTarget
+            return sourceModuleTarget
         }
     }
 }

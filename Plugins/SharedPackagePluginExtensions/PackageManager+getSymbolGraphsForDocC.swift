@@ -35,7 +35,7 @@ extension PackageManager {
     /// Returns the relevant symbols graphs for Swift-DocC documentation generation for
     /// the given target.
     func doccSymbolGraphs(
-        for target: SwiftSourceModuleTarget,
+        for target: any SourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
         snippetExtractor: SnippetExtractor?,
@@ -93,8 +93,9 @@ extension PackageManager {
             print("snippet extractor provided, attempting to generate snippet symbol graph")
         }
         
-        guard let snippetSymbolGraphFile = try snippetExtractor.generateSnippets(
-            for: target,
+        guard let swiftTarget = target as? SwiftSourceModuleTarget,
+              let snippetSymbolGraphFile = try snippetExtractor.generateSnippets (
+            for: swiftTarget,
             context: context
         ) else {
             if verbose {
