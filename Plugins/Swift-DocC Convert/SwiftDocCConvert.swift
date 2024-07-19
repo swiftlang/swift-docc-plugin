@@ -71,7 +71,8 @@ import PackagePlugin
                 context: context,
                 verbose: verbose,
                 snippetExtractor: snippetExtractor,
-                customSymbolGraphOptions: parsedArguments.symbolGraphArguments
+                customSymbolGraphOptions: parsedArguments.symbolGraphArguments,
+                minimumAccessLevel: parsedArguments.arguments.symbolGraphMinimumAccessLevel.flatMap { .init(rawValue: $0) }
             )
             
             if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
