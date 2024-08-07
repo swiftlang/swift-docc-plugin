@@ -22,7 +22,7 @@ the behavior was correct in addition to your current version.
 
 ### Checklist
 - [ ] If possible, I've reproduced the issue using the `main` branch of this package.
-- [ ] This issue hasn't been addressed in an [existing GitHub issue](https://github.com/apple/swift-docc-plugin/issues).
+- [ ] This issue hasn't been addressed in an [existing GitHub issue](https://github.com/swiftlang/swift-docc-plugin/issues).
 
 ### Expected behavior
 Describe what you expected to happen.

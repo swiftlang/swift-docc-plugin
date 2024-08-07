@@ -64,7 +64,7 @@ extension PackageManager {
             case .skipSynthesizedSymbols:
                 symbolGraphOptions.includeSynthesized = false
             default:
-                fatalError("error: unknown PluginFlag (\(customSymbolGraphOption.parsedValues.joined(separator: ", "))) detected in symbol graph generation - please create an issue at https://github.com/apple/swift-docc-plugin")
+                fatalError("error: unknown PluginFlag (\(customSymbolGraphOption.parsedValues.joined(separator: ", "))) detected in symbol graph generation - please create an issue at https://github.com/swiftlang/swift-docc-plugin")
          }
         }
         
