@@ -28,8 +28,8 @@ then
   SWIFT_DOCC_RENDER_ARTIFACT_ROOT="$SWIFT_DOCC_PLUGIN_ROOT/swift-docc-render-artifact"
   export DOCC_HTML_DIR="$SWIFT_DOCC_RENDER_ARTIFACT_ROOT/dist"
 
-  SWIFT_DOCC_REPO=${SWIFT_DOCC_REPO:="https://github.com/apple/swift-docc.git"}
-  SWIFT_DOCC_RENDER_ARTIFACT_REPO=${SWIFT_DOCC_RENDER_ARTIFACT_REPO:="https://github.com/apple/swift-docc-render-artifact.git"}
+  SWIFT_DOCC_REPO=${SWIFT_DOCC_REPO:="https://github.com/swiftlang/swift-docc.git"}
+  SWIFT_DOCC_RENDER_ARTIFACT_REPO=${SWIFT_DOCC_RENDER_ARTIFACT_REPO:="https://github.com/swiftlang/swift-docc-render-artifact.git"}
 
   SWIFT_DOCC_BRANCH=${SWIFT_DOCC_BRANCH:="main"}
   SWIFT_DOCC_RENDER_ARTIFACT_BRANCH=${SWIFT_DOCC_RENDER_ARTIFACT_BRANCH:="main"}

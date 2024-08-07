@@ -17,5 +17,5 @@ contact_links:
     url: https://forums.swift.org/c/development/swift-docc
     about: Ask and answer questions about Swift-DocC
   - name: Documentation
-    url: https://apple.github.io/swift-docc-plugin/documentation/swiftdoccplugin/
+    url: https://swiftlang.github.io/swift-docc-plugin/documentation/swiftdoccplugin/
     about: Read about how to use the Swift-DocC Plugin in your projects
