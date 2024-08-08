@@ -183,14 +183,15 @@ import PackagePlugin
                 }
             }
         }
+        
+        // Run all the documentation build tasks in reverse dependency order (dependencies before dependents).
+        queue.addOperations(operations, waitUntilFinished: true)
+          
         // If any of the build tasks raised an error. Rethrow that error.
         if let caughtError {
             throw caughtError
         }
         
-        // Run all the documentation build tasks in reverse dependency order (dependencies before dependents).
-        queue.addOperations(operations, waitUntilFinished: true)
-            
         if documentationArchives.count > 1 {
             documentationArchives = documentationArchives.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
             

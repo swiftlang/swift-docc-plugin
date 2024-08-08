@@ -39,7 +39,7 @@ struct DocumentationBuildGraph<Target: DocumentationBuildGraphTarget> {
     
     /// Creates a list of dependent operations to perform the given work for each task in the build graph.
     ///
-    /// You can add these operations to an `OperationQueue` to perform them in reverse dependency order
+    /// You can add these operations to an `OperationQueue` to perform them in dependency order
     /// (dependencies before dependents). The queue can run these operations concurrently.
     ///
     /// - Parameter work: The work to perform for each task in the build graph.
@@ -85,10 +85,14 @@ extension DocumentationBuildGraph {
         mutating func buildOperationHierarchy(for task: Task) {
             let operation = makeOperation(for: task)
             for dependency in task.dependencies {
+                let hasAlreadyVisitedTask = operationsByID[dependency.id] != nil
+                
                 let dependentOperation = makeOperation(for: dependency)
                 operation.addDependency(dependentOperation)
                 
-                buildOperationHierarchy(for: dependency)
+                if !hasAlreadyVisitedTask {
+                    buildOperationHierarchy(for: dependency)
+                }
             }
         }
         
