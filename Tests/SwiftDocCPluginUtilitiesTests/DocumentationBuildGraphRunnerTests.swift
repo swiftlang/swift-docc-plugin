@@ -1,4 +1,3 @@
-
 // This source file is part of the Swift.org open source project
 //
 // Copyright (c) 2024 Apple Inc. and the Swift project authors
