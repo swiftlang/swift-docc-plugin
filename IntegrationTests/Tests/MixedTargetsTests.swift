@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -16,22 +16,11 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
         )
         
         result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1)
+        let outputArchives = result.referencedDocCArchives
+        XCTAssertEqual(outputArchives.count, 1)
+        let executableArchiveURL = try XCTUnwrap(outputArchives.first)
         
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
-        
-        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
-        
-        XCTAssertEqual(
-            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/executable.json",
-                "executable/foo.json",
-                "foo/foo().json",
-                "foo/main().json",
-                "foo/init().json",
-            ]
-        )
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: executableArchiveURL), expectedExecutableDataFiles)
     }
     
     func testGenerateDocumentationForMultipleSpecificTargets() throws {
@@ -41,42 +30,31 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
         )
         
         result.assertExitStatusEquals(0)
+        let outputArchives = result.referencedDocCArchives
         XCTAssertEqual(result.referencedDocCArchives.count, 2)
         
-        let executableDoccArchiveURL = try XCTUnwrap(
-            result.referencedDocCArchives.first { archive in
-                archive.lastPathComponent.contains("Executable")
-            }
+        let executableArchiveURL = try XCTUnwrap(
+            outputArchives.first(where: { $0.lastPathComponent == "Executable.doccarchive" })
         )
-        
-        let libraryDoccArchiveURL = try XCTUnwrap(
-            result.referencedDocCArchives.first { archive in
-                archive.lastPathComponent.contains("Library")
-            }
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: executableArchiveURL), expectedExecutableDataFiles)
+       
+        let libraryArchiveURL = try XCTUnwrap(
+            outputArchives.first(where: { $0.lastPathComponent == "Library.doccarchive" })
         )
-        
-        let executableDataDirectoryContents = try filesIn(.dataSubdirectory, of: executableDoccArchiveURL)
-        
-        XCTAssertEqual(
-            Set(executableDataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/executable.json",
-                "executable/foo.json",
-                "foo/foo().json",
-                "foo/main().json",
-                "foo/init().json",
-            ]
-        )
-        
-        let libraryDataDirectoryContents = try filesIn(.dataSubdirectory, of: libraryDoccArchiveURL)
-        
-        XCTAssertEqual(
-            Set(libraryDataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                "library/foo.json",
-                "foo/foo().json",
-            ]
-        )
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: libraryArchiveURL), expectedLibraryDataFiles)
     }
 }
+
+private let expectedExecutableDataFiles = [
+    "documentation/executable.json",
+    "documentation/executable/foo.json",
+    "documentation/executable/foo/foo().json",
+    "documentation/executable/foo/init().json",
+    "documentation/executable/foo/main().json",
+]
+
+private let expectedLibraryDataFiles = [
+    "documentation/library.json",
+    "documentation/library/foo.json",
+    "documentation/library/foo/foo().json",
+]

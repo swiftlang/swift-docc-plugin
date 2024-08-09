@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -18,47 +18,32 @@ final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
         )
 
         result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1)
-
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first)
-
-        let dataDirectoryContents = try filesIn(.dataSubdirectory, of: doccArchiveURL)
-
-        XCTAssertEqual(
-            Set(dataDirectoryContents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                "library/beststruct.json",
-                "beststruct/init().json",
-                "beststruct/best().json",
-            ]
-        )
-
-        let subDirectoriesOfSymbolGraphDirectory = try FileManager.default.contentsOfDirectory(
+        let outputArchives = result.referencedDocCArchives
+        XCTAssertEqual(outputArchives.count, 1)
+        let archiveURL = try XCTUnwrap(outputArchives.first)
+        
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), [
+            "documentation/library.json",
+            "documentation/library/beststruct.json",
+            "documentation/library/beststruct/best().json",
+            "documentation/library/beststruct/init().json",
+        ])
+        
+        let symbolGraphSubDirectories = try FileManager.default.contentsOfDirectory(
             at: result.symbolGraphsDirectory,
-            includingPropertiesForKeys: nil
+            includingPropertiesForKeys: nil,
+            options: .producesRelativePathURLs
         )
-
-        XCTAssertEqual(
-            Set(subDirectoriesOfSymbolGraphDirectory.map(\.lastTwoPathComponents)),
-            [
-                "symbol-graphs/snippet-symbol-graphs",
-                "symbol-graphs/unified-symbol-graphs",
-            ]
-        )
-
-        let unifiedSymbolGraphDirectory = subDirectoriesOfSymbolGraphDirectory.first {
-            $0.pathComponents.last == "unified-symbol-graphs"
-        }!
-
-        let symbolGraphEnumerator = FileManager.default.enumerator(at: unifiedSymbolGraphDirectory,
-                                                                   includingPropertiesForKeys: [.isRegularFileKey])!
-        let symbolGraphPaths = try (symbolGraphEnumerator.allObjects as! [URL]).filter {
-            try $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile!
-        }
-        XCTAssertNotNil(symbolGraphPaths.first {
-            $0.pathComponents.last == "\(packageName)-snippets.symbols.json"
-        })
+        XCTAssertEqual(symbolGraphSubDirectories.map(\.relativePath).sorted(), [
+            "snippet-symbol-graphs",
+            "unified-symbol-graphs",
+        ])
+        
+        let unifiedSymbolGraphDirectory = try XCTUnwrap(symbolGraphSubDirectories.last)
+        let symbolGraphFileNames = try filesIn(unifiedSymbolGraphDirectory).map(\.lastPathComponent)
+        XCTAssert(symbolGraphFileNames.contains([
+            "\(packageName)-snippets.symbols.json"
+        ]))
     }
 
     func testPreviewDocumentationWithSnippets() throws {

@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -15,25 +15,40 @@ extension XCTestCase {
         case indexSubdirectory = "index"
     }
     
-    func filesIn(_ subdirectory: DocCArchiveSubdirectory, of doccArchive: URL) throws -> [URL] {
+    func filesIn(_ url: URL) throws -> [URL] {
         let enumerator = try XCTUnwrap(
             FileManager.default.enumerator(
-                at: doccArchive.appendingPathComponent(subdirectory.rawValue),
-                includingPropertiesForKeys: [.isDirectoryKey]
+                at: url,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: .producesRelativePathURLs
             )
         )
         
-        return try enumerator.compactMap { any in
-            guard let fileURL = any as? URL else {
+        return try enumerator.compactMap {
+            guard let url = $0 as? URL else {
                 return nil
             }
             
-            let resourceValues = try XCTUnwrap(fileURL.resourceValues(forKeys: [.isDirectoryKey]))
-            if try XCTUnwrap(resourceValues.isDirectory) {
-                return nil
-            } else {
-                return fileURL
-            }
+            let isDirectory = try XCTUnwrap(
+                url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory
+            )
+            return isDirectory ? nil : url
         }
+    }
+    
+    func filesIn(_ subdirectory: DocCArchiveSubdirectory, of doccArchive: URL) throws -> [URL] {
+        try filesIn(doccArchive.appendingPathComponent(subdirectory.rawValue))
+    }
+    
+    func relativeFilePathsIn(_ subdirectory: DocCArchiveSubdirectory, of doccArchive: URL) throws -> [String] {
+        try filesIn(subdirectory, of: doccArchive)
+            .map(\.relativePath)
+            .sorted()
+    }
+    
+    func relativeFilePathsIn(_ url: URL) throws -> [String] {
+        try filesIn(url)
+            .map(\.relativePath)
+            .sorted()
     }
 }
