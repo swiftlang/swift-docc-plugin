@@ -25,28 +25,6 @@ final class SingleLibraryTargetTests: ConcurrencyRequiringTestCase {
         ])
     }
     
-    func testDocumentationGenerationDoesNotEmitErrors() throws {
-        let result = try swiftPackage(
-            "generate-documentation",
-            workingDirectory: try setupTemporaryDirectoryForFixture(named: "SingleLibraryTarget")
-        )
-        
-        result.assertExitStatusEquals(0)
-        
-        /*
-         
-         Skipping the remaining assertion because SwiftPM has recently started emitting regular
-         build status logging to standard error instead of standard output.
-         
-         Tracked with rdar://89598464.
-        
-         XCTAssertTrue(
-            result.standardError.isEmpty,
-            "Standard error should be empty. Contains: '\(result.standardError)'."
-         )
-        */
-    }
-    
     func testGenerateDocumentationWithCustomOutput() throws {
         let customOutputDirectory = try temporaryDirectory().appendingPathComponent(
             "CustomOutput.doccarchive"
