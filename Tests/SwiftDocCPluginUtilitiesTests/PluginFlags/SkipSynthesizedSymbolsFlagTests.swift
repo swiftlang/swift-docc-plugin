@@ -14,9 +14,9 @@ final class SkipSynthesizedSymbolsFlagTests: XCTestCase {
     func testNotTransformExistingFlagsWhenPresent() {
         XCTAssertEqual(
             PluginFlag.skipSynthesizedSymbols.transform(
-                ["--index", "--other-flag"]
+                ["--emit-lmdb-index", "--other-flag"]
             ),
-            ["--index", "--other-flag"]
+            ["--emit-lmdb-index", "--other-flag"]
         )
     }
 }

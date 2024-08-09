@@ -14,21 +14,21 @@ final class DisableIndexFlagTests: XCTestCase {
     func testRemovesIndexFlagWhenPresent() {
         XCTAssertEqual(
             PluginFlag.disableIndex.transform(
-                ["--disable-indexing", "--index", "--other-flag"]
+                ["--disable-indexing", "--emit-lmdb-index", "--other-flag"]
             ),
             ["--other-flag"]
         )
         
         XCTAssertEqual(
             PluginFlag.disableIndex.transform(
-                ["--no-indexing", "--index", "--other-flag"]
+                ["--no-indexing", "--emit-lmdb-index", "--other-flag"]
             ),
             ["--other-flag"]
         )
         
         XCTAssertEqual(
             PluginFlag.disableIndex.transform(
-                ["--no-indexing", "--disable-indexing", "--index", "--other-flag"]
+                ["--no-indexing", "--disable-indexing", "--emit-lmdb-index", "--other-flag"]
             ),
             ["--other-flag"]
         )
@@ -37,9 +37,9 @@ final class DisableIndexFlagTests: XCTestCase {
     func testDoesNotRemoveIndexFlagWhenNotPresent() {
         XCTAssertEqual(
             PluginFlag.disableIndex.transform(
-                ["--index", "--other-flag"]
+                ["--emit-lmdb-index", "--other-flag"]
             ),
-            ["--index", "--other-flag"]
+            ["--emit-lmdb-index", "--other-flag"]
         )
     }
     

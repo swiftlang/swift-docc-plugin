@@ -59,4 +59,15 @@ extension CommandLineOption {
     static let fallbackDefaultModuleKind = CommandLineOption(
         defaultName: "--fallback-default-module-kind"
     )
+    
+    /// A DocC flag that enables support for linking to other DocC archives and enables 
+    /// other documentation builds to link to the generated DocC archive.
+    static let enableExternalLinkSupport = CommandLineOption(
+        defaultName: "--enable-experimental-external-link-support"
+    )
+    
+    /// A DocC flag that specifies a dependency DocC archive that the current build can link to.
+    static let externalLinkDependency = CommandLineOption(
+        defaultName: "--dependency"
+    )
 }

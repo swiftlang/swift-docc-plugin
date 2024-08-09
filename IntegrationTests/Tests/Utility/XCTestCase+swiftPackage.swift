@@ -144,14 +144,20 @@ struct SwiftInvocationResult {
     
     var referencedDocCArchives: [URL] {
         return standardOutput
-            .components(separatedBy: .whitespacesAndNewlines)
-            .map { component in
-                return component.trimmingCharacters(in: CharacterSet(charactersIn: "'."))
+            .components(separatedBy: .newlines)
+            .filter { line in
+                line.hasPrefix("Generated DocC archive at")
             }
-            .filter { component in
-                return component.hasSuffix(".doccarchive")
+            .flatMap { line in
+                line.components(separatedBy: .whitespaces)
+                    .map { component in
+                        return component.trimmingCharacters(in: CharacterSet(charactersIn: "'."))
+                    }
+                    .filter { component in
+                        return component.hasSuffix(".doccarchive")
+                    }
+                    .compactMap(URL.init(fileURLWithPath:))
             }
-            .compactMap(URL.init(fileURLWithPath:))
     }
 
     var pluginOutputsDirectory: URL {

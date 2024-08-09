@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -30,6 +30,19 @@ import PackagePlugin
         }
         
         let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
+        let isCombinedDocumentationEnabled = argumentExtractor.extractFlag(named: PluginFlag.enableCombinedDocumentationSupportFlagName) > 0
+        
+        if isCombinedDocumentationEnabled {
+            let doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
+            guard doccFeatures?.contains(.linkDependencies) == true else {
+                // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
+                Diagnostics.error("""
+                Unsupported use of '--\(PluginFlag.enableCombinedDocumentationSupportFlagName)'. \
+                DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
+                """)
+                return
+            }
+        }
         
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
@@ -56,14 +69,9 @@ import PackagePlugin
         let snippetExtractor: SnippetExtractor? = nil
 #endif
         
-        
-        // Iterate over the Swift source module targets we were given.
-        for (index, target) in swiftSourceModuleTargets.enumerated() {
-            if index != 0 {
-                // Emit a line break if this is not the first target being built.
-                print()
-            }
-            
+        // An inner function that defines the work to build documentation for a given target.
+        func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws -> URL? {
+            let target = task.target
             print("Generating documentation for '\(target.name)'...")
             
             let symbolGraphs = try packageManager.doccSymbolGraphs(
@@ -74,27 +82,24 @@ import PackagePlugin
                 customSymbolGraphOptions: parsedArguments.symbolGraphArguments
             )
             
-            if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {
-                // This target did not produce any symbol graphs. Let's check if it has a
-                // DocC catalog.
+            if target.doccCatalogPath == nil,
+               try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty
+            {
+                // This target did not produce any symbol graphs and has no DocC catalog.
+                let message = """
+                    '\(target.name)' does not contain any documentable symbols or a \
+                    DocC catalog and will not produce documentation
+                    """
                 
-                guard target.doccCatalogPath != nil else {
-                    let message = """
-                        '\(target.name)' does not contain any documentable symbols or a \
-                        DocC catalog and will not produce documentation
-                        """
-                    
-                    if swiftSourceModuleTargets.count > 1 {
-                        // We're building multiple targets, just throw a warning for this
-                        // one target that does not produce documentation.
-                        Diagnostics.warning(message)
-                        continue
-                    } else {
-                        // This is the only target being built so throw an error
-                        Diagnostics.error(message)
-                        return
-                    }
+                if swiftSourceModuleTargets.count > 1 {
+                    // We're building multiple targets, just emit a warning for this
+                    // one target that does not produce documentation.
+                    Diagnostics.warning(message)
+                } else {
+                    // This is the only target being built so emit an error
+                    Diagnostics.error(message)
                 }
+                return nil
             }
             
             // Construct the output path for the generated DocC archive
@@ -108,7 +113,7 @@ import PackagePlugin
             // arguments to pass to `docc`. ParsedArguments will merge the flags provided
             // by the user with default fallback values for required flags that were not
             // provided.
-            let doccArguments = parsedArguments.doccArguments(
+            var doccArguments = parsedArguments.doccArguments(
                 action: .convert,
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
@@ -116,6 +121,14 @@ import PackagePlugin
                 symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
                 outputPath: doccArchiveOutputPath
             )
+            if isCombinedDocumentationEnabled {
+                doccArguments.append(CommandLineOption.enableExternalLinkSupport.defaultName)
+                
+                for taskDependency in task.dependencies {
+                    let dependencyArchivePath = taskDependency.target.doccArchiveOutputPath(in: context)
+                    doccArguments.append(contentsOf: [CommandLineOption.externalLinkDependency.defaultName, dependencyArchivePath])
+                }
+            }
             
             if verbose {
                 let arguments = doccArguments.joined(separator: " ")
@@ -138,15 +151,57 @@ import PackagePlugin
                 let describedOutputPath = doccArguments.outputPath ?? "unknown location"
                 print("Generated DocC archive at '\(describedOutputPath)'")
             } else {
-                Diagnostics.error("""
-                    'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'
-                    """
-                )
+                Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")
             }
+            
+            return URL(fileURLWithPath: doccArchiveOutputPath)
         }
         
-        if swiftSourceModuleTargets.count > 1 {
-            print("\nMultiple DocC archives generated at '\(context.pluginWorkDirectory.string)'")
+        let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
+        var documentationArchives = try buildGraphRunner.perform(performBuildTask)
+            .compactMap { $0 }
+        
+        if documentationArchives.count > 1 {
+            documentationArchives = documentationArchives.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+            
+            if isCombinedDocumentationEnabled {
+                // Merge the archives into a combined archive
+                let combinedArchiveName = "Combined \(context.package.displayName) Documentation.doccarchive"
+                let combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
+                
+                var mergeCommandArguments = ["merge"]
+                mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
+                mergeCommandArguments.append(contentsOf: ["--output-path", combinedArchiveOutput.path])
+                
+                // Remove the combined archive if it already exists
+                try? FileManager.default.removeItem(at: combinedArchiveOutput)
+                
+                // Create a new combined archive
+                let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
+                process.waitUntilExit()
+                
+                // Display the combined archive before the other generated archives
+                documentationArchives.insert(combinedArchiveOutput, at: 0)
+            }
+            
+            print("""
+            Generated \(documentationArchives.count) DocC archives in '\(context.pluginWorkDirectory.string)':
+              \(documentationArchives.map(\.lastPathComponent).joined(separator: "\n  "))
+            """)
+        }
+    }
+}
+
+// We add the conformance here so that 'DocumentationBuildGraphTarget' doesn't need to know about 'SwiftSourceModuleTarget' or import 'PackagePlugin'.
+extension SwiftSourceModuleTarget: DocumentationBuildGraphTarget {
+    var dependencyIDs: [String] {
+        // List all the target dependencies in a flat list.
+        dependencies.flatMap {
+            switch $0 {
+            case .target(let target):   return [target.id]
+            case .product(let product): return product.targets.map { $0.id }
+            @unknown default:           return []
+            }
         }
     }
 }
