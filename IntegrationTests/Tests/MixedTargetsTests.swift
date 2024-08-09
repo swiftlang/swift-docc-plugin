@@ -16,11 +16,9 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
         )
         
         result.assertExitStatusEquals(0)
-        let outputArchives = result.referencedDocCArchives
-        XCTAssertEqual(outputArchives.count, 1)
-        let executableArchiveURL = try XCTUnwrap(outputArchives.first)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
         
-        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: executableArchiveURL), expectedExecutableDataFiles)
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), expectedExecutableDataFiles)
     }
     
     func testGenerateDocumentationForMultipleSpecificTargets() throws {

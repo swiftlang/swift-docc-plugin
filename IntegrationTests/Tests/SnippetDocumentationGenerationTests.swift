@@ -18,9 +18,7 @@ final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
         )
 
         result.assertExitStatusEquals(0)
-        let outputArchives = result.referencedDocCArchives
-        XCTAssertEqual(outputArchives.count, 1)
-        let archiveURL = try XCTUnwrap(outputArchives.first)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
         
         XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), [
             "documentation/library.json",
