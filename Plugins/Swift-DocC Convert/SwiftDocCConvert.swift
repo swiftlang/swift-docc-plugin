@@ -157,40 +157,9 @@ import PackagePlugin
             return URL(fileURLWithPath: doccArchiveOutputPath)
         }
         
-        // Create a build graph for all the documentation build tasks.
-        let buildGraph = DocumentationBuildGraph(targets: swiftSourceModuleTargets)
-        // Create a serial queue to perform each documentation build task
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
-        
-        // Operations can't raise errors. Instead we catch the error from 'performBuildTask(_:)'
-        // and cancel the remaining tasks.
-        let resultLock = NSLock()
-        var caughtError: Error?
-        var documentationArchives: [URL] = []
-        
-        let operations = buildGraph.makeOperations { [performBuildTask] task in
-            do {
-                if let archive = try performBuildTask(task) {
-                    resultLock.withLock {
-                        documentationArchives.append(archive)
-                    }
-                }
-            } catch {
-                resultLock.withLock {
-                    caughtError = error
-                    queue.cancelAllOperations()
-                }
-            }
-        }
-        
-        // Run all the documentation build tasks in reverse dependency order (dependencies before dependents).
-        queue.addOperations(operations, waitUntilFinished: true)
-          
-        // If any of the build tasks raised an error. Rethrow that error.
-        if let caughtError {
-            throw caughtError
-        }
+        let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
+        var documentationArchives = try buildGraphRunner.perform(performBuildTask)
+            .compactMap { $0 }
         
         if documentationArchives.count > 1 {
             documentationArchives = documentationArchives.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
