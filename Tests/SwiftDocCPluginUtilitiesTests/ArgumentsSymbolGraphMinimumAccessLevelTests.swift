@@ -13,12 +13,12 @@ import XCTest
 final class ArgumentsSymbolGraphMinimumAccessLevelTests: XCTestCase {
     func testArgumentsThatContainAccessLevel() {
         XCTAssertEqual(
-            Arguments(["--experimental-symbol-graph-minimum-access-level", "internal"]).symbolGraphMinimumAccessLevel,
+            Arguments(["--symbol-graph-minimum-access-level", "internal"]).symbolGraphMinimumAccessLevel,
             "internal"
         )
         
         XCTAssertEqual(
-            Arguments(["other-arg", "--experimental-symbol-graph-minimum-access-level", "internal", "--other-flag"]).symbolGraphMinimumAccessLevel,
+            Arguments(["other-arg", "--symbol-graph-minimum-access-level", "internal", "--other-flag"]).symbolGraphMinimumAccessLevel,
             "internal"
         )
     }
@@ -35,12 +35,12 @@ final class ArgumentsSymbolGraphMinimumAccessLevelTests: XCTestCase {
     
     func testArgumentsThatContainTrailingAccessLevelFlag() {
         XCTAssertNil(
-            Arguments(["--experimental-symbol-graph-minimum-access-level"]).symbolGraphMinimumAccessLevel
+            Arguments(["--symbol-graph-minimum-access-level"]).symbolGraphMinimumAccessLevel
         )
         
         
         XCTAssertNil(
-            Arguments(["other-arg", "--experimental-symbol-graph-minimum-access-level"]).symbolGraphMinimumAccessLevel
+            Arguments(["other-arg", "--symbol-graph-minimum-access-level"]).symbolGraphMinimumAccessLevel
         )
     }
 }

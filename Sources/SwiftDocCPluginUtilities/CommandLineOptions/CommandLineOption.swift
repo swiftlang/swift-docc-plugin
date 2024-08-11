@@ -73,6 +73,6 @@ extension CommandLineOption {
 
     /// Specifies the symbol graph minimum access level.
     static let symbolGraphMinimumAccessLevel = CommandLineOption(
-        defaultName: "--experimental-symbol-graph-minimum-access-level"
+        defaultName: "--symbol-graph-minimum-access-level"
     )
 }
