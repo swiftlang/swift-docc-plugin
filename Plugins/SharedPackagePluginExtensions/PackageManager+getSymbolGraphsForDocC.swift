@@ -39,13 +39,17 @@ extension PackageManager {
         context: PluginContext,
         verbose: Bool,
         snippetExtractor: SnippetExtractor?,
-        customSymbolGraphOptions: [PluginFlag]
+        customSymbolGraphOptions: [PluginFlag],
+        minimumAccessLevel: SymbolGraphOptions.AccessLevel? = nil
     ) throws -> DocCSymbolGraphResult {
         // First generate the primary symbol graphs containing information about the
         // symbols defined in the target itself.
         
         var symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
-
+        if let minimumAccessLevel {
+            symbolGraphOptions.minimumAccessLevel = minimumAccessLevel
+        }
+        
         // Modify the symbol graph options with the custom ones
         for customSymbolGraphOption in customSymbolGraphOptions {
             switch customSymbolGraphOption {
