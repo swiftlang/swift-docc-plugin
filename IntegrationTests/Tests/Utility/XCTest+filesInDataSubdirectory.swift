@@ -24,6 +24,12 @@ extension XCTestCase {
             )
         )
         
+#if os(Linux)
+        // The implementation in Linux CI doesn't produce relative URLs despite the `producesRelativePathURLs` option.
+        // Pre-compute how many components the base URL has
+        let urlPrefixComponentCount = url.standardizedFileURL.pathComponents.count
+#endif
+        
         return try enumerator.compactMap {
             guard let url = $0 as? URL else {
                 return nil
@@ -32,7 +38,21 @@ extension XCTestCase {
             let isDirectory = try XCTUnwrap(
                 url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory
             )
-            return isDirectory ? nil : url
+            guard !isDirectory else {
+                return nil
+            }
+            
+#if os(Linux)
+            // The implementation in Linux CI doesn't produce relative URLs despite the `producesRelativePathURLs` option.
+            // Use the pre-computed number of base URL components to manually create a relative URL.
+            // Since this is only a test helper, a simplified implantation like this is sufficient. 
+            return URL(
+                fileURLWithPath: url.standardizedFileURL.pathComponents.dropFirst(urlPrefixComponentCount).joined(separator: "/"),
+                relativeTo: url
+            )
+#else
+            return url
+#endif
         }
     }
     
