@@ -29,10 +29,9 @@ final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
         
         let symbolGraphSubDirectories = try FileManager.default.contentsOfDirectory(
             at: result.symbolGraphsDirectory,
-            includingPropertiesForKeys: nil,
-            options: .producesRelativePathURLs
+            includingPropertiesForKeys: nil
         )
-        XCTAssertEqual(symbolGraphSubDirectories.map(\.relativePath).sorted(), [
+        XCTAssertEqual(symbolGraphSubDirectories.map(\.lastPathComponent).sorted(), [
             "snippet-symbol-graphs",
             "unified-symbol-graphs",
         ])
