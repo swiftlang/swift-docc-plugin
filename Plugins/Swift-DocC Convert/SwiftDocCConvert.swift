@@ -29,34 +29,29 @@ import PackagePlugin
             throw ArgumentParsingError.packageDoesNotContainSwiftSourceModuleTargets
         }
         
-        let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
-        let isCombinedDocumentationEnabled = argumentExtractor.extractFlag(named: PluginFlag.enableCombinedDocumentationSupportFlagName) > 0
+        // Parse the given command-line arguments
+        let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
+        
+        // If the `--help` or `-h` flag was passed, print the plugin's help information and exit.
+        guard !parsedArguments.pluginArguments.help else {
+            let helpInfo = try HelpInformation.forAction(.convert, doccExecutableURL: doccExecutableURL)
+            print(helpInfo)
+            return
+        }
+        
+        let verbose = parsedArguments.pluginArguments.verbose
+        let isCombinedDocumentationEnabled = parsedArguments.pluginArguments.enableCombinedDocumentation
         
         if isCombinedDocumentationEnabled {
             let doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
             guard doccFeatures?.contains(.linkDependencies) == true else {
                 // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
                 Diagnostics.error("""
-                Unsupported use of '--\(PluginFlag.enableCombinedDocumentationSupportFlagName)'. \
+                Unsupported use of '--\(ParsedPluginArguments.enableCombinedDocumentation)'. \
                 DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
                 """)
                 return
             }
-        }
-        
-        // Parse the given command-line arguments
-        let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
-        
-        // If the `--help` or `-h` flag was passed, print the plugin's help information
-        // and exit.
-        guard !parsedArguments.help else {
-            let helpInformation = try HelpInformation.forAction(
-                .convert,
-                doccExecutableURL: doccExecutableURL
-            )
-            
-            print(helpInformation)
-            return
         }
         
 #if swift(>=5.7)
@@ -79,8 +74,7 @@ import PackagePlugin
                 context: context,
                 verbose: verbose,
                 snippetExtractor: snippetExtractor,
-                customSymbolGraphOptions: parsedArguments.symbolGraphArguments,
-                minimumAccessLevel: parsedArguments.arguments.symbolGraphMinimumAccessLevel.flatMap { .init(rawValue: $0) }
+                customSymbolGraphOptions: parsedArguments.symbolGraphArguments
             )
             
             if target.doccCatalogPath == nil,
@@ -120,16 +114,9 @@ import PackagePlugin
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
                 symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
-                outputPath: doccArchiveOutputPath
+                outputPath: doccArchiveOutputPath,
+                dependencyArchivePaths: task.dependencies.map { $0.target.doccArchiveOutputPath(in: context) }
             )
-            if isCombinedDocumentationEnabled {
-                doccArguments.append(CommandLineOption.enableExternalLinkSupport.defaultName)
-                
-                for taskDependency in task.dependencies {
-                    let dependencyArchivePath = taskDependency.target.doccArchiveOutputPath(in: context)
-                    doccArguments.append(contentsOf: [CommandLineOption.externalLinkDependency.defaultName, dependencyArchivePath])
-                }
-            }
             
             if verbose {
                 let arguments = doccArguments.joined(separator: " ")
@@ -149,7 +136,8 @@ import PackagePlugin
             if process.terminationReason == .exit && process.terminationStatus == 0 {
                 print("Conversion complete! (\(conversionDuration.descriptionInSeconds))")
                 
-                let describedOutputPath = doccArguments.outputPath ?? "unknown location"
+                var arguments = CommandLineArguments(doccArguments)
+                let describedOutputPath = arguments.extractOption(named: DocCArguments.outputPath).last ?? "unknown location"
                 print("Generated DocC archive at '\(describedOutputPath)'")
             } else {
                 Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")

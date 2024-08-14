@@ -1,23 +1,30 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
 /// Parsed command-line arguments.
-public struct ParsedArguments {
-    /// The underlying set of raw string arguments for this set of parsed arguments.
-    public let arguments: Arguments
+struct ParsedArguments {
+    private var arguments: CommandLineArguments
     
-    /// A Boolean value that is true if the parsed arguments indicate that a help message
-    /// should be printed.
-    ///
-    /// This is determined by looking for the `--help` and `-h` flags.
-    public var help: Bool {
-        return arguments.contains("--help") || arguments.contains("-h")
+    /// Creates a new collection of parsed arguments from the given raw arguments.
+    init(_ rawArguments: [String]) {
+        var arguments = CommandLineArguments(rawArguments)
+        
+        pluginArguments      = .init(extractingFrom: &arguments)
+        symbolGraphArguments = .init(extractingFrom: &arguments)
+        
+        self.arguments = arguments
     }
+    
+    /// The parsed plugin arguments.
+    let pluginArguments: ParsedPluginArguments
+    
+    /// The parsed symbol graph arguments.
+    let symbolGraphArguments: ParsedSymbolGraphArguments
     
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
@@ -66,175 +73,114 @@ public struct ParsedArguments {
     /// produce documentation for the described target with the given custom options.
     ///
     /// - Parameters:
-    ///   - action: The `docc` plugin action that will be invoked.
-    ///
-    ///   - targetKind: The kind of target being built.
-    ///
-    ///     For example, this could be a library or an executable.
-    ///
-    ///   - doccCatalogPath: The docc catalog that should be passed to `docc`, if any.
-    ///
-    ///   - targetName: The name of the target being described.
-    ///
-    ///     Used as a fallback value for the required bundle identifier and display name options.
-    ///
-    ///   - symbolGraphDirectoryPath: Path to the directory containing symbol graph files that
-    ///     should be passed to `docc`.
-    ///
-    ///   - outputPath: The location where `docc` should emit the resulting DocC archive.
-    public func doccArguments(
+    ///   - action: The `docc` action to construct arguments for.
+    ///   - targetKind: The kind of target (`library` or `executable`) being built.
+    ///   - doccCatalogPath: The path to the documentation catalog for this target, if any.
+    ///   - targetName: The name of the target being being built.
+    ///   - symbolGraphDirectoryPath: A path to a directory containing symbol graph files for this target.
+    ///   - outputPath: The location where `docc` should write the resulting documentation archive.
+    ///   - dependencyArchivePaths: A list of paths for this target's dependencies' already-built documentation archives.
+    func doccArguments(
         action: PluginAction,
         targetKind: DocumentationTargetKind,
         doccCatalogPath: String?,
         targetName: String,
         symbolGraphDirectoryPath: String,
-        outputPath: String
-    ) -> Arguments {
-        var doccArguments = arguments.filter(for: .docc)
+        outputPath: String,
+        dependencyArchivePaths: [String] = []
+    ) -> [String] {
+        var arguments = self.arguments
         
-        // Iterate through the flags required for the `docc` invocation
-        // and append any that are not already present.
-        for requiredFlag in Self.requiredFlags {
-            guard !doccArguments.contains(requiredFlag) else {
-                continue
-            }
+        if !pluginArguments.disableLMDBIndex {
+            arguments.insertIfMissing(.flag(DocCArguments.emitLMDBIndex))
+        }
+        
+        arguments.insertIfMissing(.option(DocCArguments.fallbackDisplayName, value: targetName))
+        arguments.insertIfMissing(.option(DocCArguments.fallbackBundleIdentifier, value: targetName))
+        
+        arguments.insertIfMissing(.option(DocCArguments.additionalSymbolGraphDirectory, value: symbolGraphDirectoryPath))
+        
+        arguments.insertIfMissing(.option(DocCArguments.outputPath, value: outputPath))
+        
+        if pluginArguments.enableCombinedDocumentation {
+            arguments.insertIfMissing(.flag(DocCArguments.enableExternalLinkSupport))
             
-            doccArguments.append(requiredFlag)
-        }
-        
-        // Build up an array of required command line options by iterating through
-        // the options that are required by `docc` and setting their default
-        // value based on the given context for this invocation.
-        let requiredOptions = Self.requiredOptions.compactMap { option -> RequiredCommandLineOption? in
-            let optionValue: String
-            switch option {
-            case .fallbackDisplayName:
-                optionValue = targetName
-            case .fallbackBundleIdentifier:
-                optionValue = targetName
-            case .additionalSymbolGraphDirectory:
-                optionValue = symbolGraphDirectoryPath
-            case .outputPath:
-                optionValue = outputPath
-            default:
-                // This will throw an assertion when running in tests but allow us to fail
-                // gracefully when running in production.
-                assertionFailure("Unexpected required option: '\(option)'.")
-                return nil
+            for dependencyArchivePath in dependencyArchivePaths {
+                arguments.insertIfMissing(.option(DocCArguments.externalLinkDependency, value: dependencyArchivePath))
             }
-            
-            return RequiredCommandLineOption(option, defaultValue: optionValue)
         }
         
-        // Now that we've formed an array of required command line options, along with
-        // their default values, insert them into the existing set of arguments if
-        // they haven't already been specified.
-        for requiredOption in requiredOptions {
-            doccArguments = requiredOption.insertIntoArgumentsIfMissing(doccArguments)
-        }
-        
-        // Add any required options that are specific to the kind of target being built
-        doccArguments = targetKind.addRequiredOptions(to: doccArguments)
-        
-        // Apply any argument transformations. This allows for custom
-        // flags that are specific to the plugin and not built-in to `docc`.
-        for argumentsTransformer in Self.argumentsTransformers {
-            doccArguments = argumentsTransformer.transform(doccArguments)
+        switch targetKind {
+        case .library:
+            break
+        case .executable:
+            arguments.insertIfMissing(.option(DocCArguments.fallbackDefaultModuleKind, value: "Command-line Tool"))
         }
         
         // If we were given a catalog path, prepend it to the set of arguments.
-        if let doccCatalogPath = doccCatalogPath {
-            doccArguments = [doccCatalogPath] + doccArguments
+        if let doccCatalogPath {
+            arguments.prepend(rawArgument: doccCatalogPath)
         }
         
-        return [action.rawValue] + doccArguments
-    }
-    
-    /// Creates a new set of parsed arguments with the given arguments.
-    public init(_ arguments: [String]) {
-        self.arguments = arguments
-        
-        let symbolGraphArguments = arguments.filter(for: .dumpSymbolGraph)
-        
-        self.symbolGraphArguments = ParsedArguments.ArgumentConsumer.dumpSymbolGraph.flags.compactMap {
-            $0.value(for: symbolGraphArguments)
-        }
-    }
-    
-    // Build array with plugin flags that modify the symbol graph generation,
-    // filtering from the available custom symbol graph options those
-    // that correspond to the received flags
-    var symbolGraphArguments: [PluginFlag]
-    
-    /// The command-line options required by the `docc` tool.
-    private static let requiredOptions: [CommandLineOption] = [
-        .fallbackDisplayName,
-        .fallbackBundleIdentifier,
-        .additionalSymbolGraphDirectory,
-        .outputPath,
-    ]
-    
-    /// The command-line flags required by the `docc` tool.
-    private static let requiredFlags = [
-        "--emit-lmdb-index",
-    ]
-    
-    private static let argumentsTransformers: [ArgumentsTransforming] = [
-        PluginFlag.disableIndex,
-        PluginFlag.extendedTypes,
-        PluginFlag.skipSynthesizedSymbols
-    ]
-}
-
-private extension ParsedArguments {
-    enum ArgumentConsumer: CaseIterable {
-        /// The `docc` command
-        case docc
-        /// The `swift package dump-symbol-graph` command
-        case dumpSymbolGraph
-        
-        /// Returns the flags applicable to an `ArgumentConsumer`.
-        ///
-        /// If `flags.isEmpty` is `true`, this `ArgumentConsumer` is assumed to
-        /// consume all flags not consumed by any of the other `ArgumentConsumer`s.
-        var flags: [PluginFlag] {
-            switch self {
-            case .dumpSymbolGraph:
-                return [
-                    PluginFlag.extendedTypes,
-                    PluginFlag.skipSynthesizedSymbols
-                ]
-            case .docc:
-                return []
-            }
-        }
+        return [action.rawValue] + arguments.remainingArguments
     }
 }
 
-private extension Arguments {
-    /// Returns the subset of arguments which are applicable to the given `consumer`.
-    func filter(for consumer: ParsedArguments.ArgumentConsumer) -> Arguments {
-        if !consumer.flags.isEmpty {
-            // If the consumer can provide a complete list of valid flags,
-            // we only include elements that are included in one of these flags'
-            // `parsedValues`, i.e. if one of these flags can be applied to the
-            // element.
-            let flagsToInclude = consumer.flags
-            return self.filter { argument in
-                flagsToInclude.contains(where: { flag in
-                    flag.parsedValues.contains(argument)
-                })
-            }
-        } else {
-            // If the consumer cannot provide a complete list of valid flags, (which
-            // should only happen for the `.docc` case) we return all elements
-            // that are not applicable to any of the other `ArgumentConsumer`s.
-            let flagsToExclude = ParsedArguments.ArgumentConsumer.allCases.flatMap(\.flags)
-            return self.filter { argument in
-                !flagsToExclude.contains(where: { flag in
-                    flag.parsedValues.contains(argument)
-                })
-            }
-        }
-    }
+enum DocCArguments {
+    /// A fallback value for the bundle display name, if the documentation catalog doesn't specify one or if the build has no symbol information.
+    ///
+    /// The plugin defines this name so that it can pass a default value for older versions of `docc` which require this.
+    static let fallbackDisplayName = CommandLineArgument.Names(
+        preferred: "--fallback-display-name"
+    )
+    
+    /// A fallback value for the bundle identifier, if the documentation catalog doesn't specify one or if the build has no symbol information.
+    ///
+    /// The plugin defines this name so that it can pass a default value for older versions of `docc` which require this.
+    static let fallbackBundleIdentifier = CommandLineArgument.Names(
+        preferred: "--fallback-bundle-identifier"
+    )
+    
+    /// A fallback value for the "module kind" display name, if the documentation catalog doesn't specify one.
+    ///
+    /// The plugin defines this name so that it can pass a default value when building documentation for executable targets.
+    static let fallbackDefaultModuleKind = CommandLineArgument.Names(
+        preferred: "--fallback-default-module-kind"
+    )
+    
+    /// A directory of symbol graph files that DocC will use as input when building documentation.
+    ///
+    /// The plugin defines this name so that it can pass a default value.
+    static let additionalSymbolGraphDirectory = CommandLineArgument.Names(
+        preferred: "--additional-symbol-graph-dir"
+    )
+    
+    /// Configures DocC to include a LMDB representation of the navigator index in the output.
+    ///
+    /// The plugin defines this name so that it can pass this flag by default.
+    static let emitLMDBIndex = CommandLineArgument.Names(
+        preferred: "--emit-lmdb-index"
+    )
+    
+    /// The directory where DocC will write the built documentation archive.
+    ///
+    /// The plugin defines this name so that it can intercept it and support building documentation for multiple targets within one package build command.
+    static let outputPath = CommandLineArgument.Names(
+        preferred: "--output-path",
+        alternatives: ["--output-dir", "-o"]
+    )
+    
+    /// A DocC feature flag to enable support for linking to documentation dependencies.
+    ///
+    /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
+    static let enableExternalLinkSupport = CommandLineArgument.Names(
+        preferred: "--enable-experimental-external-link-support"
+    )
+    
+    /// A DocC flag that specifies a dependency DocC archive that the current build can link to.
+    ///
+    /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
+    static let externalLinkDependency = CommandLineArgument.Names(
+        preferred: "--dependency"
+    )
 }
