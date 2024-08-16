@@ -86,7 +86,7 @@ extension DocumentedFlag {
     /// The minimum access level that the symbol graph extractor will emit symbols for
     static let minimumAccessLevel = Self(
         names: .init(preferred: "--symbol-graph-minimum-access-level"),
-        abstract: "Include symbols with this access level or more. (default: public)",
+        abstract: "Include symbols with this access level or more.",
         discussion: """
             Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
             """

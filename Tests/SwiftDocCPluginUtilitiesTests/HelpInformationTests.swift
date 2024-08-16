@@ -47,7 +47,7 @@ final class HelpInformationTests: XCTestCase {
                                       Exclude synthesized symbols from the generated documentation.
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
               --symbol-graph-minimum-access-level
-                                      Include symbols with this access level or more. (default: public)
+                                      Include symbols with this access level or more.
                     Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
 
             DOCC INPUTS & OUTPUTS:
@@ -194,7 +194,7 @@ final class HelpInformationTests: XCTestCase {
                                       Exclude synthesized symbols from the generated documentation.
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
               --symbol-graph-minimum-access-level
-                                      Include symbols with this access level or more. (default: public)
+                                      Include symbols with this access level or more.
                     Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
 
             DOCC PREVIEW OPTIONS:
