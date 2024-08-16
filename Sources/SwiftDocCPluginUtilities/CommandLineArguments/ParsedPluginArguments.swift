@@ -17,26 +17,11 @@ struct ParsedPluginArguments {
     
     /// Creates a new plugin arguments container by extracting the known plugin values from a command line argument list.
     init(extractingFrom arguments: inout CommandLineArguments) {
-        enableCombinedDocumentation = arguments.extractFlag(named: Self.enableCombinedDocumentation).last ?? false
-        disableLMDBIndex = arguments.extractFlag(named: Self.disableLMDBIndex).last ?? false
-        verbose          = arguments.extractFlag(named: Self.verbose).last          ?? false
-        help             = arguments.extractFlag(named: Self.help).last             ?? false
+        enableCombinedDocumentation = arguments.extractFlag(.enableCombinedDocumentation) ?? false
+        disableLMDBIndex = arguments.extractFlag(.disableLMDBIndex)     ?? false
+        verbose          = arguments.extractFlag(.verbose)              ?? false
+        help             = arguments.extractFlag(named: Self.help).last ?? false
     }
-    
-    /// A plugin feature flag to enable building combined documentation for multiple targets.
-    static let enableCombinedDocumentation = CommandLineArgument.Names(
-        preferred: "--enable-experimental-combined-documentation"
-    )
-    
-    /// A plugin feature flag to skip adding the `--emit-lmdb-index` flag, that the plugin adds by default.
-    static let disableLMDBIndex = CommandLineArgument.Names(
-        preferred: "--disable-indexing", alternatives: ["--no-indexing"]
-    )
-    
-    /// A plugin feature flag to enable verbose logging.
-    static let verbose = CommandLineArgument.Names(
-        preferred: "--verbose"
-    )
     
     /// A common command line tool flag to print the help text instead of running the command.
     static let help = CommandLineArgument.Names(
@@ -53,26 +38,18 @@ struct ParsedSymbolGraphArguments {
     
     /// Creates a new symbol graph arguments container by extracting the known plugin values from a command line argument list.
     init(extractingFrom arguments: inout CommandLineArguments) {
-        minimumAccessLevel     = arguments.extractOption(named: Self.minimumAccessLevel).last
-        skipSynthesizedSymbols = arguments.extractFlag(named: Self.skipSynthesizedSymbols).last
-        includeExtendedTypes   = arguments.extractFlag(named: Self.includeExtendedTypes, inverseNames: Self.excludeExtendedTypes).last
+        minimumAccessLevel     = arguments.extractOption(.minimumAccessLevel)
+        skipSynthesizedSymbols = arguments.extractFlag(.skipSynthesizedSymbols)
+        includeExtendedTypes   = arguments.extractFlag(.extendedTypes)
+    }
+}
+
+private extension CommandLineArguments {
+    mutating func extractFlag(_ flag: DocumentedFlag) -> Bool? {
+        extractFlag(named: flag.names, inverseNames: flag.inverseNames).last
     }
     
-    /// The minimum access level that the symbol graph extractor will emit symbols for.
-    static let minimumAccessLevel = CommandLineArgument.Names(
-        preferred: "--symbol-graph-minimum-access-level"
-    )
-    
-    /// The feature flag to omit synthesized symbols when extracting symbol information.
-    static let skipSynthesizedSymbols = CommandLineArgument.Names(
-        preferred: "--experimental-skip-synthesized-symbols"
-    )
-    
-    /// A pair of positive and negative feature flags to either include or exclude extended types when extracting symbol information.
-    static let includeExtendedTypes = CommandLineArgument.Names(
-        preferred: "--include-extended-types"
-    )
-    static let excludeExtendedTypes = CommandLineArgument.Names(
-        preferred: "--exclude-extended-types"
-    )
+    mutating func extractOption(_ flag: DocumentedFlag) -> String? {
+        extractOption(named: flag.names).last
+    }
 }

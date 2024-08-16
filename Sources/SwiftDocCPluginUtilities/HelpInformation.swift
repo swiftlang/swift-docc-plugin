@@ -44,13 +44,13 @@ public enum HelpInformation {
         }
         
         var supportedPluginFlags = [
-            DocumentedFlag.disableIndex,
+            DocumentedFlag.disableLMDBIndex,
             DocumentedFlag.verbose,
         ]
         
         let doccFeatures = (try? DocCFeatures(doccExecutable: doccExecutableURL)) ?? .init()
         if doccFeatures.contains(.linkDependencies) {
-            supportedPluginFlags.insert(DocumentedFlag.enableCombinedDocumentationSupport, at: 1)
+            supportedPluginFlags.insert(DocumentedFlag.enableCombinedDocumentation, at: 1)
         }
         
         for flag in supportedPluginFlags {

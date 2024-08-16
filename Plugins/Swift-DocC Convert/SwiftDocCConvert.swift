@@ -47,7 +47,7 @@ import PackagePlugin
             guard doccFeatures?.contains(.linkDependencies) == true else {
                 // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
                 Diagnostics.error("""
-                Unsupported use of '--\(ParsedPluginArguments.enableCombinedDocumentation)'. \
+                Unsupported use of '\(DocumentedFlag.enableCombinedDocumentation.names.preferred)'. \
                 DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
                 """)
                 return
