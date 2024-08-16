@@ -10,10 +10,6 @@ import Foundation
 
 /// A collection of command-line arguments
 public struct CommandLineArguments {
-    // This is very similar to `PackagePlugin.ArgumentExtractor`.
-    // However, because only the plugin itself can import `PackagePlugin` we're unable to test it or our extensions to it.
-    // For this reason, new code should use this small implementation instead. 
-    
     /// Creates a new collection of command-line arguments from a list of strings
     public init(_ arguments: [String]) {
         guard let literalSeparator = arguments.firstIndex(of: "--") else {
