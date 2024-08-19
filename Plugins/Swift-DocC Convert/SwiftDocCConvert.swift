@@ -71,7 +71,8 @@ import PackagePlugin
         // An inner function that defines the work to build documentation for a given target.
         func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws -> URL? {
             let target = task.target
-            print("Generating documentation for '\(target.name)'...")
+            print("Extracting symbol information for '\(target.name)'...")
+            let symbolGraphGenerationStartTime = DispatchTime.now()
             
             let symbolGraphs = try packageManager.doccSymbolGraphs(
                 for: target,
@@ -101,6 +102,8 @@ import PackagePlugin
                 return nil
             }
             
+            print("Finished extracting symbol information for '\(target.name)'. (\(symbolGraphGenerationStartTime.distance(to: .now()).descriptionInSeconds))")
+            
             // Construct the output path for the generated DocC archive
             let archiveOutputPath: String
             let dependencyArchivePaths: [String]
@@ -117,7 +120,7 @@ import PackagePlugin
             }
             
             if verbose {
-                print("docc archive output path: '\(doccArchiveOutputPath)'")
+                print("documentation archive output path: '\(archiveOutputPath)'")
             }
             
             // Use the parsed arguments gathered earlier to generate the necessary
@@ -139,7 +142,7 @@ import PackagePlugin
                 print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
             }
             
-            print("Converting documentation...")
+            print("Building documentation for '\(target.name)'...")
             let conversionStartTime = DispatchTime.now()
             
             // Run `docc convert` with the generated arguments and wait until the process completes
@@ -150,7 +153,7 @@ import PackagePlugin
             
             // Check whether the `docc convert` invocation was successful.
             if process.terminationReason == .exit && process.terminationStatus == 0 {
-                print("Conversion complete! (\(conversionDuration.descriptionInSeconds))")
+                print("Finished building documentation for '\(target.name)' (\(conversionStartTime.distance(to: .now()).descriptionInSeconds))")
             } else {
                 Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")
             }
