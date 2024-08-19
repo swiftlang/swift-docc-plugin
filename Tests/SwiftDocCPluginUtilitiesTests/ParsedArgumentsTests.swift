@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -164,6 +164,7 @@ final class ParsedArgumentsTests: XCTestCase {
         let argumentsWithOutputPath = ParsedArguments(
             ["--output-path", "/my/custom/output-path"]
         )
+        XCTAssertEqual(argumentsWithOutputPath.outputDirectory?.path, "/my/custom/output-path")
         
         XCTAssertEqual(
             argumentsWithOutputPath.doccArguments(
@@ -176,11 +177,11 @@ final class ParsedArgumentsTests: XCTestCase {
             ),
             [
                 "convert",
-                "--output-path", "/my/custom/output-path",
                 "--emit-lmdb-index",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
+                "--output-path", "/my/output-path",
             ]
         )
     }
@@ -212,7 +213,7 @@ final class ParsedArgumentsTests: XCTestCase {
             ]
         )
         
-        let argumentsWithAllRequiredOptions = ParsedArguments(
+        let argumentsWithFallbackInfoAndOutputPath = ParsedArguments(
             [
                 "--fallback-display-name", "custom-display-name",
                 "--fallback-bundle-identifier", "custom-bundle-identifier",
@@ -220,9 +221,10 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--output-path", "/my/custom/output-path",
             ]
         )
+        XCTAssertEqual(argumentsWithFallbackInfoAndOutputPath.outputDirectory?.path, "/my/custom/output-path")
         
         XCTAssertEqual(
-            argumentsWithAllRequiredOptions.doccArguments(
+            argumentsWithFallbackInfoAndOutputPath.doccArguments(
                 action: .convert,
                 targetKind: .library,
                 doccCatalogPath: nil,
@@ -235,8 +237,8 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--fallback-display-name", "custom-display-name",
                 "--fallback-bundle-identifier", "custom-bundle-identifier",
                 "--additional-symbol-graph-dir", "/my/custom/symbol-graph",
-                "--output-path", "/my/custom/output-path",
                 "--emit-lmdb-index",
+                "--output-path", "/my/output-path",
             ]
         )
     }
@@ -288,12 +290,11 @@ final class ParsedArgumentsTests: XCTestCase {
             ]
         )
         
-        let disableIndexingWithCustomOutputArguments = ParsedArguments(
-            [
-                "--disable-indexing",
-                "--output-path", "/custom/output-path"
-            ]
-        )
+        let disableIndexingWithCustomOutputArguments = ParsedArguments([
+            "--disable-indexing",
+            "--output-path", "/custom/output-path"
+        ])
+        XCTAssertEqual(disableIndexingWithCustomOutputArguments.outputDirectory?.path, "/custom/output-path")
         
         XCTAssertEqual(
             disableIndexingWithCustomOutputArguments.doccArguments(
@@ -307,10 +308,10 @@ final class ParsedArgumentsTests: XCTestCase {
             [
                 "convert",
                 "/my/catalog.docc",
-                "--output-path", "/custom/output-path",
                 "--fallback-display-name", "MyTarget",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
+                "--output-path", "/my/output-path",
             ]
         )
     }
@@ -341,7 +342,7 @@ final class ParsedArgumentsTests: XCTestCase {
             ]
         )
         
-        let argumentsWithMixOfRequiredAndOptional = ParsedArguments(
+        let argumentsWithOutputPath = ParsedArguments(
             [
                 "--transform-for-static-hosting",
                 "--port", "1802",
@@ -350,9 +351,10 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--output-path", "/my/custom/output-path",
             ]
         )
+        XCTAssertEqual(argumentsWithOutputPath.outputDirectory?.path, "/my/custom/output-path")
         
         XCTAssertEqual(
-            argumentsWithMixOfRequiredAndOptional.doccArguments(
+            argumentsWithOutputPath.doccArguments(
                 action: .preview,
                 targetKind: .library,
                 doccCatalogPath: "/my/catalog.docc",
@@ -367,10 +369,10 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--port", "1802",
                 "--analyze",
                 "--fallback-display-name", "custom-display-name",
-                "--output-path", "/my/custom/output-path",
                 "--emit-lmdb-index",
                 "--fallback-bundle-identifier", "MyTarget",
                 "--additional-symbol-graph-dir", "/my/symbol-graph",
+                "--output-path", "/my/output-path",
             ]
         )
     }

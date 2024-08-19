@@ -148,21 +148,18 @@ struct SwiftInvocationResult {
     let exitStatus: Int
     
     var referencedDocCArchives: [URL] {
-        return standardOutput
+        standardOutput
+            // Remove trailing empty lines
+            .trimmingCharacters(in: .newlines)
+            // The last few lines is a list of all the output archives
             .components(separatedBy: .newlines)
-            .filter { line in
-                line.hasPrefix("Generated DocC archive at")
-            }
-            .flatMap { line in
-                line.components(separatedBy: .whitespaces)
-                    .map { component in
-                        return component.trimmingCharacters(in: CharacterSet(charactersIn: "'."))
-                    }
-                    .filter { component in
-                        return component.hasSuffix(".doccarchive")
-                    }
-                    .compactMap(URL.init(fileURLWithPath:))
-            }
+            .reversed()
+            // Gather the lines that list archive names
+            .prefix(while: { $0.hasSuffix(".doccarchive") })
+            // Create absolute URLs for each archive
+            .map { URL(fileURLWithPath: $0.trimmingCharacters(in: .whitespaces)) }
+            // Restore the original output order
+            .reversed()
     }
     
     var onlyOutputArchive: URL? {

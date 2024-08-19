@@ -111,7 +111,7 @@ import PackagePlugin
             doccCatalogPath: target.doccCatalogPath,
             targetName: target.name,
             symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
-            outputPath: target.doccArchiveOutputPath(in: context)
+            outputPath: parsedArguments.outputDirectory?.path ?? target.doccArchiveOutputPath(in: context)
         )
         
         if verbose {

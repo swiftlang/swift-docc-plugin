@@ -42,8 +42,10 @@ import PackagePlugin
         let verbose = parsedArguments.pluginArguments.verbose
         let isCombinedDocumentationEnabled = parsedArguments.pluginArguments.enableCombinedDocumentation
         
+        let doccFeatures: DocCFeatures?
+        // Only read and decode the features file if something is going to check those flags.
         if isCombinedDocumentationEnabled {
-            let doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
+            doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
             guard doccFeatures?.contains(.linkDependencies) == true else {
                 // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
                 Diagnostics.error("""
@@ -52,6 +54,8 @@ import PackagePlugin
                 """)
                 return
             }
+        } else {
+            doccFeatures = nil
         }
         
 #if swift(>=5.7)
@@ -98,7 +102,19 @@ import PackagePlugin
             }
             
             // Construct the output path for the generated DocC archive
-            let doccArchiveOutputPath = target.doccArchiveOutputPath(in: context)
+            let archiveOutputPath: String
+            let dependencyArchivePaths: [String]
+            if isCombinedDocumentationEnabled {
+                // When building combined documentation for many targets, the individual target's documentation isn't the final product.
+                // Because of this, we 
+                archiveOutputPath  = target.dependencyDocCArchiveOutputPath(in: context)
+                dependencyArchivePaths = task.dependencies.map { $0.target.dependencyDocCArchiveOutputPath(in: context) }
+                try? FileManager.default.createDirectory(at: URL(fileURLWithPath: archiveOutputPath).deletingLastPathComponent(), withIntermediateDirectories: true)
+            } else {
+                // Preserve the old
+                archiveOutputPath = parsedArguments.outputDirectory?.path ?? target.doccArchiveOutputPath(in: context)
+                dependencyArchivePaths = []
+            }
             
             if verbose {
                 print("docc archive output path: '\(doccArchiveOutputPath)'")
@@ -108,14 +124,14 @@ import PackagePlugin
             // arguments to pass to `docc`. ParsedArguments will merge the flags provided
             // by the user with default fallback values for required flags that were not
             // provided.
-            var doccArguments = parsedArguments.doccArguments(
+            let doccArguments = parsedArguments.doccArguments(
                 action: .convert,
                 targetKind: target.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
                 symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
-                outputPath: doccArchiveOutputPath,
-                dependencyArchivePaths: task.dependencies.map { $0.target.doccArchiveOutputPath(in: context) }
+                outputPath: archiveOutputPath,
+                dependencyArchivePaths: dependencyArchivePaths
             )
             
             if verbose {
@@ -135,49 +151,62 @@ import PackagePlugin
             // Check whether the `docc convert` invocation was successful.
             if process.terminationReason == .exit && process.terminationStatus == 0 {
                 print("Conversion complete! (\(conversionDuration.descriptionInSeconds))")
-                
-                var arguments = CommandLineArguments(doccArguments)
-                let describedOutputPath = arguments.extractOption(named: DocCArguments.outputPath).last ?? "unknown location"
-                print("Generated DocC archive at '\(describedOutputPath)'")
             } else {
                 Diagnostics.error("'docc convert' invocation failed with a nonzero exit code: '\(process.terminationStatus)'")
             }
             
-            return URL(fileURLWithPath: doccArchiveOutputPath)
+            return URL(fileURLWithPath: archiveOutputPath)
         }
         
         let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
-        var documentationArchives = try buildGraphRunner.perform(performBuildTask)
+        let documentationArchives = try buildGraphRunner.perform(performBuildTask)
             .compactMap { $0 }
+            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
         
-        if documentationArchives.count > 1 {
-            documentationArchives = documentationArchives.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
-            
-            if isCombinedDocumentationEnabled {
-                // Merge the archives into a combined archive
-                let combinedArchiveName = "Combined \(context.package.displayName) Documentation.doccarchive"
-                let combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
-                
-                var mergeCommandArguments = ["merge"]
-                mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
-                mergeCommandArguments.append(contentsOf: ["--output-path", combinedArchiveOutput.path])
-                
-                // Remove the combined archive if it already exists
-                try? FileManager.default.removeItem(at: combinedArchiveOutput)
-                
-                // Create a new combined archive
-                let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
-                process.waitUntilExit()
-                
-                // Display the combined archive before the other generated archives
-                documentationArchives.insert(combinedArchiveOutput, at: 0)
-            }
-            
-            print("""
-            Generated \(documentationArchives.count) DocC archives in '\(context.pluginWorkDirectory.string)':
-              \(documentationArchives.map(\.lastPathComponent).joined(separator: "\n  "))
-            """)
+        guard let firstArchive = documentationArchives.first else {
+            print("Didn't generate any documentation archives.")
+            return
         }
+        
+        guard isCombinedDocumentationEnabled else {
+            if documentationArchives.count > 1 {
+                print("""
+                Generated \(documentationArchives.count) documentation archives:
+                  \(documentationArchives.map(\.path).joined(separator: "\n  "))
+                """)
+            } else {
+                print("""
+                Generated documentation archive at:
+                  \(firstArchive.path)
+                """)
+            }
+            return
+        }
+        
+        // Merge the archives into a combined archive
+        let combinedArchiveOutput: URL
+        if let specifiedOutputLocation = parsedArguments.outputDirectory {
+            combinedArchiveOutput = specifiedOutputLocation
+        } else {
+            let combinedArchiveName = "\(context.package.displayName.replacingWhitespaceAndPunctuation(with: "-")).doccarchive"
+            combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
+        }
+        
+        var mergeCommandArguments = ["merge"]
+        mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
+        mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.preferred, combinedArchiveOutput.path])
+        
+        // Remove the combined archive if it already exists
+        try? FileManager.default.removeItem(at: combinedArchiveOutput)
+        
+        // Create a new combined archive
+        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
+        process.waitUntilExit()
+        
+        print("""
+        Generated combined documentation archive at:
+          \(combinedArchiveOutput.path)
+        """)
     }
 }
 
@@ -192,5 +221,12 @@ extension SwiftSourceModuleTarget: DocumentationBuildGraphTarget {
             @unknown default:           return []
             }
         }
+    }
+}
+
+private extension String {
+    func replacingWhitespaceAndPunctuation(with separator: String) -> String {
+        let charactersToStrip = CharacterSet.whitespaces.union(.punctuationCharacters)
+        return components(separatedBy: charactersToStrip).filter({ !$0.isEmpty }).joined(separator: separator)
     }
 }

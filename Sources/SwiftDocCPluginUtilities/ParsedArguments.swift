@@ -6,6 +6,8 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
+import Foundation
+
 /// Parsed command-line arguments.
 struct ParsedArguments {
     private var arguments: CommandLineArguments
@@ -14,6 +16,10 @@ struct ParsedArguments {
     init(_ rawArguments: [String]) {
         var arguments = CommandLineArguments(rawArguments)
         
+        outputDirectory = arguments.extractOption(named: DocCArguments.outputPath).last.map {
+            URL(fileURLWithPath: $0, isDirectory: true).standardizedFileURL
+        }
+        
         pluginArguments      = .init(extractingFrom: &arguments)
         symbolGraphArguments = .init(extractingFrom: &arguments)
         
@@ -21,10 +27,13 @@ struct ParsedArguments {
     }
     
     /// The parsed plugin arguments.
-    let pluginArguments: ParsedPluginArguments
+    var pluginArguments: ParsedPluginArguments
     
     /// The parsed symbol graph arguments.
-    let symbolGraphArguments: ParsedSymbolGraphArguments
+    var symbolGraphArguments: ParsedSymbolGraphArguments
+    
+    /// The location where the plugin should write the output documentation archive(s).
+    var outputDirectory: URL?
     
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
@@ -100,6 +109,7 @@ struct ParsedArguments {
         
         arguments.insertIfMissing(.option(DocCArguments.additionalSymbolGraphDirectory, value: symbolGraphDirectoryPath))
         
+        assert(arguments.extractOption(named: DocCArguments.outputPath).isEmpty,"The plugin arguments should have extracted the output path.")
         arguments.insertIfMissing(.option(DocCArguments.outputPath, value: outputPath))
         
         if pluginArguments.enableCombinedDocumentation {
