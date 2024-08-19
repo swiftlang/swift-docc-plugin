@@ -84,4 +84,7 @@ extension DocCFeatures.Feature {
     
     /// DocC supports grouping overloaded symbols.
     static let overloads = DocCFeatures.Feature(name: "overloads")
+        
+    /// DocC supports specifying the display name and kind of the synthesized landing page for combined archive.
+    static let synthesizedLandingPageName = DocCFeatures.Feature(name: "synthesized-landing-page-name")
 }

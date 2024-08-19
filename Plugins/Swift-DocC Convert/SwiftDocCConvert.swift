@@ -196,6 +196,11 @@ import PackagePlugin
         mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
         mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.preferred, combinedArchiveOutput.path])
         
+        if let doccFeatures, doccFeatures.contains(.synthesizedLandingPageName) {
+            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageName.preferred, context.package.displayName])
+            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageKind.preferred, "Package"])
+        }
+        
         // Remove the combined archive if it already exists
         try? FileManager.default.removeItem(at: combinedArchiveOutput)
         

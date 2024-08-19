@@ -193,4 +193,18 @@ enum DocCArguments {
     static let externalLinkDependency = CommandLineArgument.Names(
         preferred: "--dependency"
     )
+    
+    /// A DocC flag for the "merge" command that specifies a custom display name for the synthesized landing page.
+    ///
+    /// The plugin defines this name so that it can specify the package name as the display name of the default landing page when building combined documentation for multiple targets.
+    static let synthesizedLandingPageName = CommandLineArgument.Names(
+        preferred: "--synthesized-landing-page-name"
+    )
+    
+    /// A DocC flag for the "merge" command that specifies a custom kind for the synthesized landing page.
+    ///
+    /// The plugin defines this name so that it can specify "Package" as the kind of the default landing page when building combined documentation for multiple targets.
+    static let synthesizedLandingPageKind = CommandLineArgument.Names(
+        preferred: "--synthesized-landing-page-kind"
+    )
 }
