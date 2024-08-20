@@ -68,6 +68,9 @@ import PackagePlugin
         let snippetExtractor: SnippetExtractor? = nil
 #endif
         
+        let intermediateArchivesDirectory = URL(fileURLWithPath: context.pluginWorkDirectory.appending("intermediates").string)
+        try? FileManager.default.createDirectory(at: intermediateArchivesDirectory, withIntermediateDirectories: true)
+        
         // An inner function that defines the work to build documentation for a given target.
         func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws -> URL? {
             let target = task.target
@@ -104,19 +107,17 @@ import PackagePlugin
             
             print("Finished extracting symbol information for '\(target.name)'. (\(symbolGraphGenerationStartTime.distance(to: .now()).descriptionInSeconds))")
             
-            // Construct the output path for the generated DocC archive
-            let archiveOutputPath: String
-            let dependencyArchivePaths: [String]
-            if isCombinedDocumentationEnabled {
-                // When building combined documentation for many targets, the individual target's documentation isn't the final product.
-                // Because of this, we 
-                archiveOutputPath  = target.dependencyDocCArchiveOutputPath(in: context)
-                dependencyArchivePaths = task.dependencies.map { $0.target.dependencyDocCArchiveOutputPath(in: context) }
-                try? FileManager.default.createDirectory(at: URL(fileURLWithPath: archiveOutputPath).deletingLastPathComponent(), withIntermediateDirectories: true)
+            // Use an an intermediate output location for each target to avoid targets writing to the same location.
+            // When all targets have finished building successfully, the command will move the archives into the final output location.
+            func archiveOutputDir(for target: Target) -> String {
+                intermediateArchivesDirectory.appendingPathComponent("\(target.name).doccarchive", isDirectory: true).path
+            }
+            
+            let archiveOutputPath = archiveOutputDir(for: target)
+            let dependencyArchivePaths: [String] = if isCombinedDocumentationEnabled {
+                task.dependencies.map { archiveOutputDir(for: $0.target) }
             } else {
-                // Preserve the old
-                archiveOutputPath = parsedArguments.outputDirectory?.path ?? target.doccArchiveOutputPath(in: context)
-                dependencyArchivePaths = []
+                []
             }
             
             if verbose {
@@ -162,31 +163,55 @@ import PackagePlugin
         }
         
         let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
-        let documentationArchives = try buildGraphRunner.perform(performBuildTask)
+        let intermediateDocumentationArchives = try buildGraphRunner.perform(performBuildTask)
             .compactMap { $0 }
             .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
         
-        guard let firstArchive = documentationArchives.first else {
+        guard let firstIntermediateArchive = intermediateDocumentationArchives.first else {
             print("Didn't generate any documentation archives.")
             return
         }
         
         guard isCombinedDocumentationEnabled else {
-            if documentationArchives.count > 1 {
+            // Move the intermediate archives into their final output location(s).
+            let defaultPluginOutputDirectory = URL(fileURLWithPath: context.pluginWorkDirectory.string)
+            if intermediateDocumentationArchives.count > 1 {
+                // If the developer built more than one target, move each target into a _subdirectory_ of the output directory.
+                let outputDirectory = parsedArguments.outputDirectory ?? defaultPluginOutputDirectory
+                try? FileManager.default.createDirectory(at: outputDirectory, withIntermediateDirectories: false)
+                
+                let archiveLocations = intermediateDocumentationArchives.map { outputDirectory.appendingPathComponent($0.lastPathComponent, isDirectory: true) }
+                for (from, to) in zip(intermediateDocumentationArchives, archiveLocations) {
+                    try? FileManager.default.removeItem(at: to)
+                    try FileManager.default.moveItem(at: from, to: to)
+                }
+                
                 print("""
-                Generated \(documentationArchives.count) documentation archives:
-                  \(documentationArchives.map(\.path).joined(separator: "\n  "))
+                Generated \(archiveLocations.count) documentation archives:
+                  \(archiveLocations.map(\.standardizedFileURL.path).joined(separator: "\n  "))
                 """)
             } else {
+                let archiveLocation: URL
+                if let specifiedOutputLocation = parsedArguments.outputDirectory {
+                    // If the developer only built one target and specified an output directory, move the only archive's content into that directory.
+                    archiveLocation = specifiedOutputLocation
+                } else {
+                    // Otherwise, make a new subdirectory for the archive inside the plugin's default output directory
+                    archiveLocation = defaultPluginOutputDirectory.appendingPathComponent(firstIntermediateArchive.lastPathComponent, isDirectory: true)
+                }
+                
+                try? FileManager.default.removeItem(at: archiveLocation)
+                try FileManager.default.moveItem(at: firstIntermediateArchive, to: archiveLocation)
                 print("""
                 Generated documentation archive at:
-                  \(firstArchive.path)
+                  \(archiveLocation.standardizedFileURL.path)
                 """)
             }
             return
         }
         
-        // Merge the archives into a combined archive
+        // Merge the intermediate archives into a combined archive
+        
         let combinedArchiveOutput: URL
         if let specifiedOutputLocation = parsedArguments.outputDirectory {
             combinedArchiveOutput = specifiedOutputLocation
@@ -196,7 +221,7 @@ import PackagePlugin
         }
         
         var mergeCommandArguments = ["merge"]
-        mergeCommandArguments.append(contentsOf: documentationArchives.map(\.standardizedFileURL.path))
+        mergeCommandArguments.append(contentsOf: intermediateDocumentationArchives.map(\.standardizedFileURL.path))
         mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.preferred, combinedArchiveOutput.path])
         
         if let doccFeatures, doccFeatures.contains(.synthesizedLandingPageName) {
@@ -213,7 +238,7 @@ import PackagePlugin
         
         print("""
         Generated combined documentation archive at:
-          \(combinedArchiveOutput.path)
+          \(combinedArchiveOutput.standardizedFileURL.path)
         """)
     }
 }

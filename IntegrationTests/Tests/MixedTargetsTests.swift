@@ -41,6 +41,43 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
         )
         XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: libraryArchiveURL), expectedLibraryDataFiles)
     }
+    
+    func testMultipleTargetsOutputPath() throws {
+        let outputDirectory = try temporaryDirectory().appendingPathComponent("output")
+        
+        let result = try swiftPackage(
+            "--disable-sandbox",
+            "generate-documentation", "--target", "Executable", "--target", "Library",
+            "--output-path", outputDirectory.path,
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
+        )
+        
+        result.assertExitStatusEquals(0)
+        let outputArchives = result.referencedDocCArchives
+        XCTAssertEqual(outputArchives.count, 2)
+        XCTAssertEqual(outputArchives.map(\.path), [
+            outputDirectory.appendingPathComponent("Executable.doccarchive").path,
+            outputDirectory.appendingPathComponent("Library.doccarchive").path,
+        ])
+        
+        let executableArchiveURL = try XCTUnwrap(
+            outputArchives.first(where: { $0.lastPathComponent == "Executable.doccarchive" })
+        )
+        let executableDataDirectoryContents = try filesIn(.dataSubdirectory, of: executableArchiveURL)
+            .map(\.relativePath)
+            .sorted()
+        
+        XCTAssertEqual(executableDataDirectoryContents, expectedExecutableDataFiles)
+        
+        let libraryArchiveURL = try XCTUnwrap(
+            outputArchives.first(where: { $0.lastPathComponent == "Library.doccarchive" })
+        )
+        let libraryDataDirectoryContents = try filesIn(.dataSubdirectory, of: libraryArchiveURL)
+            .map(\.relativePath)
+            .sorted()
+        
+        XCTAssertEqual(libraryDataDirectoryContents, expectedLibraryDataFiles)
+    }
 }
 
 private let expectedExecutableDataFiles = [
