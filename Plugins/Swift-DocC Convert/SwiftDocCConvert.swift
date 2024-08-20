@@ -165,7 +165,6 @@ import PackagePlugin
         let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
         let intermediateDocumentationArchives = try buildGraphRunner.perform(performBuildTask)
             .compactMap { $0 }
-            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
         
         guard let firstIntermediateArchive = intermediateDocumentationArchives.first else {
             print("Didn't generate any documentation archives.")
@@ -180,7 +179,9 @@ import PackagePlugin
                 let outputDirectory = parsedArguments.outputDirectory ?? defaultPluginOutputDirectory
                 try? FileManager.default.createDirectory(at: outputDirectory, withIntermediateDirectories: false)
                 
-                let archiveLocations = intermediateDocumentationArchives.map { outputDirectory.appendingPathComponent($0.lastPathComponent, isDirectory: true) }
+                let archiveLocations = intermediateDocumentationArchives
+                    .map { outputDirectory.appendingPathComponent($0.lastPathComponent, isDirectory: true) }
+                
                 for (from, to) in zip(intermediateDocumentationArchives, archiveLocations) {
                     try? FileManager.default.removeItem(at: to)
                     try FileManager.default.moveItem(at: from, to: to)
@@ -188,7 +189,7 @@ import PackagePlugin
                 
                 print("""
                 Generated \(archiveLocations.count) documentation archives:
-                  \(archiveLocations.map(\.standardizedFileURL.path).joined(separator: "\n  "))
+                  \(archiveLocations.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }).map(\.standardizedFileURL.path).joined(separator: "\n  "))
                 """)
             } else {
                 let archiveLocation: URL
