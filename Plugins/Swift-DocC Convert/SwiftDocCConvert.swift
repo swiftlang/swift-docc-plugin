@@ -42,20 +42,14 @@ import PackagePlugin
         let verbose = parsedArguments.pluginArguments.verbose
         let isCombinedDocumentationEnabled = parsedArguments.pluginArguments.enableCombinedDocumentation
         
-        let doccFeatures: DocCFeatures?
-        // Only read and decode the features file if something is going to check those flags.
-        if isCombinedDocumentationEnabled {
-            doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
-            guard doccFeatures?.contains(.linkDependencies) == true else {
-                // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
-                Diagnostics.error("""
-                Unsupported use of '\(DocumentedFlag.enableCombinedDocumentation.names.preferred)'. \
-                DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
-                """)
-                return
-            }
-        } else {
-            doccFeatures = nil
+        let doccFeatures = try? DocCFeatures(doccExecutable: doccExecutableURL)
+        if isCombinedDocumentationEnabled, doccFeatures?.contains(.linkDependencies) == false {
+            // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
+            Diagnostics.error("""
+            Unsupported use of '\(DocumentedFlag.enableCombinedDocumentation.names.preferred)'. \
+            DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
+            """)
+            return
         }
         
 #if swift(>=5.7)
