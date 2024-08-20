@@ -150,8 +150,6 @@ import PackagePlugin
             let process = try Process.run(doccExecutableURL, arguments: doccArguments)
             process.waitUntilExit()
             
-            let conversionDuration = conversionStartTime.distance(to: .now())
-            
             // Check whether the `docc convert` invocation was successful.
             if process.terminationReason == .exit && process.terminationStatus == 0 {
                 print("Finished building documentation for '\(target.name)' (\(conversionStartTime.distance(to: .now()).descriptionInSeconds))")
