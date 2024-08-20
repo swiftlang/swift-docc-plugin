@@ -159,6 +159,14 @@ struct SwiftInvocationResult {
                     .compactMap(URL.init(fileURLWithPath:))
             }
     }
+    
+    var onlyOutputArchive: URL? {
+        let archives = referencedDocCArchives
+        guard archives.count == 1 else {
+            return nil
+        }
+        return archives.first
+    }
 
     var pluginOutputsDirectory: URL {
         if arguments.contains("preview-documentation") {

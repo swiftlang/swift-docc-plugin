@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2023 Apple Inc. and the Swift project authors
+// Copyright (c) 2023-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -31,99 +31,60 @@ final class TargetWithSwiftExtensionsTests: ConcurrencyRequiringTestCase {
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
         
-        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
+        result.assertExitStatusEquals(0)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
+        
+        let dataDirectoryContents = try relativeFilePathsIn(.dataSubdirectory, of: archiveURL)
         
         #if swift(>=5.9)
-        try assertDirectoryContentsWithExtendedTypes(dataDirectoryContents)
+        XCTAssertEqual(dataDirectoryContents, expectedDataContentWithExtendedTypes)
         #else
-        try assertDirectoryContentsWithoutExtendedTypes(dataDirectoryContents)
+        XCTAssertEqual(dataDirectoryContents, expectedDataContentWithoutExtendedTypes)
         #endif
     }
     
     func testGenerateDocumentationWithDisablementFlag() throws {
         let result = try swiftPackage(
-            "generate-documentation",
-            "--exclude-extended-types",
+            "generate-documentation", "--exclude-extended-types",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
         
-        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
+        result.assertExitStatusEquals(0)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
         
-        try assertDirectoryContentsWithoutExtendedTypes(dataDirectoryContents)
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), expectedDataContentWithoutExtendedTypes)
     }
     
     func testGenerateDocumentationWithEnablementFlag() throws {
         let result = try swiftPackage(
-            "generate-documentation",
-            "--include-extended-types",
+            "generate-documentation", "--include-extended-types",
             workingDirectory: try setupTemporaryDirectoryForFixture(named: "LibraryTargetWithExtensionSymbols")
         )
         
-        let dataDirectoryContents = try unwrapDataDirectoryContents(of: result)
-        
-        try assertDirectoryContentsWithExtendedTypes(dataDirectoryContents)
-    }
-    
-    func assertDirectoryContentsWithExtendedTypes(_ contents: [URL],
-                                                  _ message: @autoclosure () -> String = "",
-                                                  file: StaticString = #filePath,
-                                                  line: UInt = #line) throws {
-        XCTAssertEqual(
-            Set(contents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                "library/swift.json",
-                
-                "swift/int.json",
-                "int/isarray.json",
-                "int/asfoo.json",
-                "int/customfooconvertible-implementations.json",
-                
-                "swift/array.json",
-                "array/isarray.json",
-                
-                "library/foo.json",
-                "foo/foo().json",
-                
-                "library/customfooconvertible.json",
-                "customfooconvertible/asfoo.json",
-            ],
-            message(),
-            file: file,
-            line: line
-        )
-    }
-    
-    func assertDirectoryContentsWithoutExtendedTypes(_ contents: [URL],
-                                                     _ message: @autoclosure () -> String = "",
-                                                     file: StaticString = #filePath,
-                                                     line: UInt = #line) throws {
-        XCTAssertEqual(
-            Set(contents.map(\.lastTwoPathComponents)),
-            [
-                "documentation/library.json",
-                
-                "library/foo.json",
-                "foo/foo().json",
-                
-                "library/customfooconvertible.json",
-                "customfooconvertible/asfoo.json",
-            ],
-            message(),
-            file: file,
-            line: line
-        )
-    }
-    
-    func unwrapDataDirectoryContents(of result: SwiftInvocationResult,
-                                     _ message: @autoclosure () -> String = "",
-                                     file: StaticString = #filePath,
-                                     line: UInt = #line) throws -> [URL] {
         result.assertExitStatusEquals(0)
-        XCTAssertEqual(result.referencedDocCArchives.count, 1, message(), file: file, line: line)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
         
-        let doccArchiveURL = try XCTUnwrap(result.referencedDocCArchives.first, message(), file: file, line: line)
-        
-        return try filesIn(.dataSubdirectory, of: doccArchiveURL)
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), expectedDataContentWithExtendedTypes)
     }
 }
+
+private let expectedDataContentWithoutExtendedTypes = [
+    "documentation/library.json",
+    "documentation/library/customfooconvertible.json",
+    "documentation/library/customfooconvertible/asfoo.json",
+    "documentation/library/foo.json",
+    "documentation/library/foo/foo().json",
+]
+
+private let expectedDataContentWithExtendedTypes =
+    expectedDataContentWithoutExtendedTypes + expectedDataExtendedTypesContent
+
+private let expectedDataExtendedTypesContent = [
+    "documentation/library/swift.json",
+    "documentation/library/swift/array.json",
+    "documentation/library/swift/array/isarray.json",
+    "documentation/library/swift/int.json",
+    "documentation/library/swift/int/asfoo.json",
+    "documentation/library/swift/int/customfooconvertible-implementations.json",
+    "documentation/library/swift/int/isarray.json",
+]
