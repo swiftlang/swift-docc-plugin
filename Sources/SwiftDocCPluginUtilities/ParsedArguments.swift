@@ -23,6 +23,8 @@ struct ParsedArguments {
         pluginArguments      = .init(extractingFrom: &arguments)
         symbolGraphArguments = .init(extractingFrom: &arguments)
         
+        assert(arguments.extractOption(named: DocCArguments.outputPath).isEmpty,
+               "There shouldn't be any output path argument left in the remaining DocC arguments.")
         self.arguments = arguments
     }
     
@@ -108,8 +110,6 @@ struct ParsedArguments {
         arguments.insertIfMissing(.option(DocCArguments.fallbackBundleIdentifier, value: targetName))
         
         arguments.insertIfMissing(.option(DocCArguments.additionalSymbolGraphDirectory, value: symbolGraphDirectoryPath))
-        
-        assert(arguments.extractOption(named: DocCArguments.outputPath).isEmpty,"The plugin arguments should have extracted the output path.")
         arguments.insertIfMissing(.option(DocCArguments.outputPath, value: outputPath))
         
         if pluginArguments.enableCombinedDocumentation {
