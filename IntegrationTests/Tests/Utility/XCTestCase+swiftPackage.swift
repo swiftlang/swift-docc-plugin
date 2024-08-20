@@ -155,7 +155,7 @@ struct SwiftInvocationResult {
             .components(separatedBy: .newlines)
             .reversed()
             // Gather the lines that list archive names
-            .prefix(while: { $0.hasSuffix(".doccarchive") })
+            .prefix(while: { !$0.hasPrefix("Generated ") })
             // Create absolute URLs for each archive
             .map { URL(fileURLWithPath: $0.trimmingCharacters(in: .whitespaces)) }
             // Restore the original output order

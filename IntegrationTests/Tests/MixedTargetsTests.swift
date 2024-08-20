@@ -78,6 +78,62 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
         
         XCTAssertEqual(libraryDataDirectoryContents, expectedLibraryDataFiles)
     }
+
+    func testCombinedDocumentation() throws {
+#if compiler(>=6.0)
+        let result = try swiftPackage(
+            "generate-documentation", "--target", "Executable", "--target", "Library",
+            "--enable-experimental-combined-documentation",
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
+        )
+        
+        result.assertExitStatusEquals(0)
+        let outputArchives = result.referencedDocCArchives
+        XCTAssertEqual(outputArchives.count, 1)
+        XCTAssertEqual(outputArchives.map(\.lastPathComponent), [
+            "MixedTargets.doccarchive",
+        ])
+        
+        let combinedArchiveURL = try XCTUnwrap(outputArchives.first)
+        let combinedDataDirectoryContents = try filesIn(.dataSubdirectory, of: combinedArchiveURL)
+            .map(\.relativePath)
+            .sorted()
+        
+        XCTAssertEqual(combinedDataDirectoryContents, expectedExecutableDataFiles + expectedLibraryDataFiles)
+#else
+        XCTSkip("This test requires a Swift-DocC version that support the link-dependencies feature")
+#endif
+    }
+    
+    func testCombinedDocumentationWithOutputPath() throws {
+#if compiler(>=6.0)
+        let outputDirectory = try temporaryDirectory().appendingPathComponent("output")
+        
+        let result = try swiftPackage(
+            "--disable-sandbox",
+            "generate-documentation", "--target", "Executable", "--target", "Library",
+            "--enable-experimental-combined-documentation",
+            "--output-path", outputDirectory.path,
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "MixedTargets")
+        )
+        
+        result.assertExitStatusEquals(0)
+        let outputArchives = result.referencedDocCArchives
+        XCTAssertEqual(outputArchives.count, 1)
+        XCTAssertEqual(outputArchives.map(\.path), [
+            outputDirectory.path
+        ])
+        
+        let combinedArchiveURL = try XCTUnwrap(outputArchives.first)
+        let combinedDataDirectoryContents = try filesIn(.dataSubdirectory, of: combinedArchiveURL)
+            .map(\.relativePath)
+            .sorted()
+        
+        XCTAssertEqual(combinedDataDirectoryContents, expectedExecutableDataFiles + expectedLibraryDataFiles)
+#else
+        XCTSkip("This test requires a Swift-DocC version that support the link-dependencies feature")
+#endif
+    }
 }
 
 private let expectedExecutableDataFiles = [
