@@ -9,6 +9,11 @@
 import Foundation
 import PackagePlugin
 
+/// Generating symbol graphs is the only task that can't run in parallel.
+///
+/// We serialize its execution to support build concurrency for the other tasks.
+private let symbolGraphGenerationLock = NSLock()
+
 extension PackageManager {
     struct DocCSymbolGraphResult {
         let unifiedSymbolGraphsDirectory: URL
@@ -66,7 +71,9 @@ extension PackageManager {
             print("symbol graph options: '\(symbolGraphOptions)'")
         }
         
-        let targetSymbolGraphs = try getSymbolGraph(for: target, options: symbolGraphOptions)
+        let targetSymbolGraphs = try symbolGraphGenerationLock.withLock {
+            try getSymbolGraph(for: target, options: symbolGraphOptions)
+        }
         let targetSymbolGraphsDirectory = URL(
             fileURLWithPath: targetSymbolGraphs.directoryPath.string,
             isDirectory: true

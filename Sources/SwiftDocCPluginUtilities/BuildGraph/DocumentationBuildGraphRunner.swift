@@ -19,7 +19,6 @@ struct DocumentationBuildGraphRunner<Target: DocumentationBuildGraphTarget> {
     func perform<Result>(_ work: @escaping Work<Result>) throws -> [Result] {
         // Create a serial queue to perform each documentation build task
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
         
         // Operations can't raise errors. Instead we catch the error from 'performBuildTask(_:)'
         // and cancel the remaining tasks.
