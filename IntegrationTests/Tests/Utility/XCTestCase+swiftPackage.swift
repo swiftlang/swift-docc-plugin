@@ -148,14 +148,18 @@ struct SwiftInvocationResult {
     let exitStatus: Int
     
     var referencedDocCArchives: [URL] {
-        standardOutput
+        let reverseLogLines = standardOutput
             // Remove trailing empty lines
             .trimmingCharacters(in: .newlines)
             // The last few lines is a list of all the output archives
             .components(separatedBy: .newlines)
             .reversed()
-            // Gather the lines that list archive names
-            .prefix(while: { !$0.hasPrefix("Generated ") })
+        
+        guard let startOfArchiveOutputIndex = reverseLogLines.firstIndex(where: { $0.hasPrefix("Generated ") }) else {
+            return []
+        }
+        
+        return reverseLogLines[..<startOfArchiveOutputIndex]
             // Create absolute URLs for each archive
             .map { URL(fileURLWithPath: $0.trimmingCharacters(in: .whitespaces)) }
             // Restore the original output order
