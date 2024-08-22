@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022-2023 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -44,34 +44,33 @@ public enum HelpInformation {
         }
         
         var supportedPluginFlags = [
-            PluginFlag.disableIndex,
-            PluginFlag.skipSynthesizedSymbols
+            DocumentedFlag.disableLMDBIndex,
+            DocumentedFlag.verbose,
         ]
         
         let doccFeatures = (try? DocCFeatures(doccExecutable: doccExecutableURL)) ?? .init()
-        
-        // stops 'not mutated' warning for Swift 5.7 and lower
-        supportedPluginFlags += []
-        
-#if swift(>=5.8)
-        supportedPluginFlags += [PluginFlag.extendedTypes]
-#endif
         if doccFeatures.contains(.linkDependencies) {
-            supportedPluginFlags += [PluginFlag.enableCombinedDocumentationSupport]
+            supportedPluginFlags.insert(DocumentedFlag.enableCombinedDocumentation, at: 1)
         }
         
         for flag in supportedPluginFlags {
-            var flagListText = flag.positive.parsedValues.sorted().joined(separator: ", ")
-            if !flag.negative.parsedValues.isEmpty {
-                flagListText += " / \(flag.negative.parsedValues.sorted().joined(separator: ", "))"
-            }
-            
-            helpText += """
-                  \(flagListText)
-                                          \(flag.abstract)
-                        \(flag.description)
-                
-                """
+            helpText += flag.helpDescription
+        }
+        
+        helpText += "\nSYMBOL GRAPH OPTIONS:\n"
+        var supportedSymbolGraphFlags = [
+            DocumentedFlag.skipSynthesizedSymbols,
+            DocumentedFlag.minimumAccessLevel,
+        ]
+#if swift(>=5.8)
+        supportedSymbolGraphFlags.insert(DocumentedFlag.extendedTypes, at: 1)
+#else
+        // stops 'not mutated' warning for Swift 5.7 and lower
+        supportedPluginFlags += []
+#endif
+        
+        for flag in supportedSymbolGraphFlags {
+            helpText += flag.helpDescription
         }
         
         if let doccHelp = try _doccHelp(pluginAction, doccExecutableURL) {
@@ -115,8 +114,7 @@ public enum HelpInformation {
               target should be previewed with the --target or --product option.
         
         PACKAGE MANAGER OPTIONS:
-          --disable-sandbox
-                                  Disable using the sandbox when executing subprocesses.
+          --disable-sandbox       Disable using the sandbox when executing subprocesses.
                 This flag is **required** when previewing documentation because Swift-DocC
                 preview requires local network access to run a local web server.
           --allow-writing-to-package-directory
@@ -129,6 +127,44 @@ public enum HelpInformation {
           --product <product>     Preview documentation for the specified product.
         
         """
+}
+
+private extension DocumentedFlag {
+    var helpDescription: String {
+        var flagListText = names.listForHelpDescription
+        if let inverseNames {
+            flagListText += " / \(inverseNames.listForHelpDescription)"
+        }
+        
+        var description = if flagListText.count < 23 {
+            // The flag is short enough to fit the abstract on the same line
+            """
+              \(flagListText.padding(toLength: 23, withPad: " ", startingAt: 0)) \(abstract)
+            
+            """
+        } else {
+            // The flag is too long to fit the abstract on the same line
+            """
+              \(flagListText)
+                                      \(abstract)
+            
+            """
+        }
+        if let discussion {
+            description += """
+                    \(discussion)
+            
+            """
+        }
+        
+        return description
+    }
+}
+
+private extension CommandLineArgument.Names {
+    var listForHelpDescription: String {
+        ([preferred] + all.subtracting([preferred]).sorted()).joined(separator: ", ")
+    }
 }
 
 private extension Process {

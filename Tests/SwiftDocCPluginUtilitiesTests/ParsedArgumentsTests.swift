@@ -12,37 +12,21 @@ import XCTest
 
 final class ParsedArgumentsTests: XCTestCase {
     func testHelp() {
-        XCTAssertTrue(
-            ParsedArguments(["--help"]).help
-        )
+        XCTAssertTrue(ParsedArguments(["--help"]).pluginArguments.help)
         
-        XCTAssertTrue(
-            ParsedArguments(["-h"]).help
-        )
+        XCTAssertTrue(ParsedArguments(["-h"]).pluginArguments.help)
         
-        XCTAssertTrue(
-            ParsedArguments(["--other-flag", "--help"]).help
-        )
+        XCTAssertTrue(ParsedArguments(["--other-flag", "--help"]).pluginArguments.help)
         
-        XCTAssertTrue(
-            ParsedArguments(["--other-flag", "-h"]).help
-        )
+        XCTAssertTrue(ParsedArguments(["--other-flag", "-h"]).pluginArguments.help)
         
-        XCTAssertTrue(
-            ParsedArguments(["--other-flag", "-h", "--help", "argument"]).help
-        )
+        XCTAssertTrue(ParsedArguments(["--other-flag", "-h", "--help", "argument"]).pluginArguments.help)
         
-        XCTAssertFalse(
-            ParsedArguments(["--other-flag"]).help
-        )
+        XCTAssertFalse(ParsedArguments(["--other-flag"]).pluginArguments.help)
         
-        XCTAssertFalse(
-            ParsedArguments(["--other-flag", "argument"]).help
-        )
+        XCTAssertFalse(ParsedArguments(["--other-flag", "argument"]).pluginArguments.help)
         
-        XCTAssertFalse(
-            ParsedArguments(["--hel"]).help
-        )
+        XCTAssertFalse(ParsedArguments(["--hel"]).pluginArguments.help)
     }
     
     func testDocCArgumentsForNoArguments() {
@@ -459,26 +443,44 @@ final class ParsedArgumentsTests: XCTestCase {
         XCTAssertFalse(doccArguments.contains("--experimental-skip-synthesized-symbols"))
     }
     
-    func testDumpSymbolGraphArguments() {
-        var dumpSymbolGraphArguments: ParsedArguments
+    func testSymbolGraphArguments() {
+        do {
+            let arguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--symbol-graph-minimum-access-level", "internal"])
+            
+            XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
+            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertEqual(arguments.symbolGraphArguments.minimumAccessLevel, "internal")
+        }
         
-        dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols"])
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes.positive, .skipSynthesizedSymbols])
+        do {
+            let arguments = ParsedArguments(["--exclude-extended-types", "--experimental-skip-synthesized-symbols"])
+            
+            XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
+            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
+        }
         
-        dumpSymbolGraphArguments = ParsedArguments(["--exclude-extended-types", "--experimental-skip-synthesized-symbols"])
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes.negative, .skipSynthesizedSymbols])
-        
-        dumpSymbolGraphArguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--exclude-extended-types"])
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes.negative, .skipSynthesizedSymbols])
-        
-        dumpSymbolGraphArguments = ParsedArguments(["--exclude-extended-types", "--include-extended-types"])
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [.extendedTypes.positive])
+        do {
+            let arguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--exclude-extended-types"])
+            
+            XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
+            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
+        }
+        do {
+            let arguments = ParsedArguments(["--exclude-extended-types", "--include-extended-types"])
+            
+            XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
+            XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+            XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
+        }
     }
     
-    func testDumpSymbolGraphArgumentsWithDocCArguments() {
-        let dumpSymbolGraphArguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
+    func testDefaultSymbolGraphArguments() {
+        let arguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
         
-        
-        XCTAssertEqual(dumpSymbolGraphArguments.symbolGraphArguments, [])
+        XCTAssertNil(arguments.symbolGraphArguments.includeExtendedTypes)
+        XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+        XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
     }
 }

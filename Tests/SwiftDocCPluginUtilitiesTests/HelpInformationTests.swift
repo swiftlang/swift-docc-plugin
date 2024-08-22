@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -40,9 +40,15 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --verbose               Increase verbosity to include informational output.
+            
+            SYMBOL GRAPH OPTIONS:
               --experimental-skip-synthesized-symbols
-                                      Exclude synthesized symbols from the generated documentation
+                                      Exclude synthesized symbols from the generated documentation.
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
+              --symbol-graph-minimum-access-level
+                                      Include symbols with this access level or more.
+                    Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
 
             DOCC INPUTS & OUTPUTS:
               <catalog-path>          Path to a '.docc' documentation catalog directory.
@@ -167,8 +173,7 @@ final class HelpInformationTests: XCTestCase {
                   target should be previewed with the --target or --product option.
 
             PACKAGE MANAGER OPTIONS:
-              --disable-sandbox
-                                      Disable using the sandbox when executing subprocesses.
+              --disable-sandbox       Disable using the sandbox when executing subprocesses.
                     This flag is **required** when previewing documentation because Swift-DocC
                     preview requires local network access to run a local web server.
               --allow-writing-to-package-directory
@@ -182,10 +187,16 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
-              --experimental-skip-synthesized-symbols
-                                      Exclude synthesized symbols from the generated documentation
-                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
+              --verbose               Increase verbosity to include informational output.
             
+            SYMBOL GRAPH OPTIONS:
+              --experimental-skip-synthesized-symbols
+                                      Exclude synthesized symbols from the generated documentation.
+                    Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
+              --symbol-graph-minimum-access-level
+                                      Include symbols with this access level or more.
+                    Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
+
             DOCC PREVIEW OPTIONS:
               -p, --port <port-number>
                                       Port number to use for the preview web server. (default: 8080)

@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -28,18 +28,17 @@ import PackagePlugin
             possibleTargets = specifiedTargets
         }
         
-        let verbose = argumentExtractor.extractFlag(named: "verbose") > 0
-        
         // Parse the given command-line arguments
         let parsedArguments = ParsedArguments(argumentExtractor.remainingArguments)
         
-        // If the `--help` or `-h` flag was passed, print the plugin's help information
-        // and exit.
-        guard !parsedArguments.help else {
+        // If the `--help` or `-h` flag was passed, print the plugin's help information and exit.
+        guard !parsedArguments.pluginArguments.help else {
             let helpInfo = try HelpInformation.forAction(.preview, doccExecutableURL: doccExecutableURL)
             print(helpInfo)
             return
         }
+        
+        let verbose = parsedArguments.pluginArguments.verbose
         
         // Confirm that at least one compatible target was provided.
         guard let target = possibleTargets.first else {
@@ -84,8 +83,7 @@ import PackagePlugin
             context: context,
             verbose: verbose,
             snippetExtractor: snippetExtractor,
-            customSymbolGraphOptions: parsedArguments.symbolGraphArguments,
-            minimumAccessLevel: parsedArguments.arguments.symbolGraphMinimumAccessLevel.flatMap { .init(rawValue: $0) }
+            customSymbolGraphOptions: parsedArguments.symbolGraphArguments
         )
         
         if try FileManager.default.contentsOfDirectory(atPath: symbolGraphs.targetSymbolGraphsDirectory.path).isEmpty {

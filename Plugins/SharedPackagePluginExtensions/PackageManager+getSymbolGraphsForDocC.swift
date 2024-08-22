@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -32,44 +32,34 @@ extension PackageManager {
         }
     }
     
-    /// Returns the relevant symbols graphs for Swift-DocC documentation generation for
-    /// the given target.
+    /// Returns the relevant symbols graphs for Swift-DocC documentation generation for the given target.
     func doccSymbolGraphs(
         for target: SwiftSourceModuleTarget,
         context: PluginContext,
         verbose: Bool,
         snippetExtractor: SnippetExtractor?,
-        customSymbolGraphOptions: [PluginFlag],
-        minimumAccessLevel: SymbolGraphOptions.AccessLevel? = nil
+        customSymbolGraphOptions: ParsedSymbolGraphArguments
     ) throws -> DocCSymbolGraphResult {
         // First generate the primary symbol graphs containing information about the
         // symbols defined in the target itself.
-        
         var symbolGraphOptions = target.defaultSymbolGraphOptions(in: context.package)
-        if let minimumAccessLevel {
+        
+        if let rawMinimumAccessLevel = customSymbolGraphOptions.minimumAccessLevel,
+           let minimumAccessLevel = SymbolGraphOptions.AccessLevel(rawValue: rawMinimumAccessLevel)
+        {
             symbolGraphOptions.minimumAccessLevel = minimumAccessLevel
         }
         
-        // Modify the symbol graph options with the custom ones
-        for customSymbolGraphOption in customSymbolGraphOptions {
-            switch customSymbolGraphOption {
-            case .extendedTypes.positive:
-#if swift(>=5.8)
-                symbolGraphOptions.emitExtensionBlocks = true
+        if customSymbolGraphOptions.skipSynthesizedSymbols == true {
+            symbolGraphOptions.includeSynthesized = false
+        }
+        
+        if let includeExtendedTypes = customSymbolGraphOptions.includeExtendedTypes {
+#if swift(<5.8)
+            print("warning: detected '--\(includeExtendedTypes ? "include" : "exclude")-extended-types' option, which is incompatible with your swift version (required: 5.8)")
 #else
-                print("warning: detected '--include-extended-types' option, which is incompatible with your swift version (required: 5.8)")
+            symbolGraphOptions.emitExtensionBlocks = includeExtendedTypes
 #endif
-            case .extendedTypes.negative:
-#if swift(>=5.8)
-                symbolGraphOptions.emitExtensionBlocks = false
-#else
-                print("warning: detected '--exclude-extended-types' option, which is incompatible with your swift version (required: 5.8)")
-#endif
-            case .skipSynthesizedSymbols:
-                symbolGraphOptions.includeSynthesized = false
-            default:
-                fatalError("error: unknown PluginFlag (\(customSymbolGraphOption.parsedValues.joined(separator: ", "))) detected in symbol graph generation - please create an issue at https://github.com/swiftlang/swift-docc-plugin")
-         }
         }
         
         if verbose {
