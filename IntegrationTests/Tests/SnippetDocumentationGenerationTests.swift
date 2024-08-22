@@ -44,6 +44,9 @@ final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
     }
 
     func testPreviewDocumentationWithSnippets() throws {
+#if os(macOS)
+        throw XCTSkip("Skipping integration tests due to rdar://134406349")
+#else
         let outputDirectory = try temporaryDirectory().appendingPathComponent("output")
 
         let port = try getAvailablePort()
@@ -102,5 +105,6 @@ final class SnippetDocumentationGenerationTests: ConcurrencyRequiringTestCase {
 
         // Send an interrupt to the SwiftPM parent process
         process.interrupt()
+#endif
     }
 }
