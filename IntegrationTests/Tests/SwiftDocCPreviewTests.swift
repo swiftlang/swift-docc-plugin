@@ -11,9 +11,6 @@ import XCTest
 
 final class SwiftDocCPreview: ConcurrencyRequiringTestCase {
     func testRunPreviewServerOnSamePortRepeatedly() throws {
-#if os(macOS)
-        throw XCTSkip("Skipping integration tests due to rdar://134406349")
-#else
         // Because only a single server can bind to a given port at a time,
         // this test ensures that the preview server running in the `docc`
         // process exits when the an interrupt is sent to the `SwiftPM` process.
@@ -113,6 +110,5 @@ final class SwiftDocCPreview: ConcurrencyRequiringTestCase {
             // Send an interrupt to the SwiftPM parent process
             process.interrupt()
         }
-#endif
     }
 }
