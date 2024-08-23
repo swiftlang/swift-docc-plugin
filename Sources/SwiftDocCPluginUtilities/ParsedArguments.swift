@@ -6,6 +6,8 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
+import Foundation
+
 /// Parsed command-line arguments.
 struct ParsedArguments {
     private var arguments: CommandLineArguments
@@ -14,17 +16,26 @@ struct ParsedArguments {
     init(_ rawArguments: [String]) {
         var arguments = CommandLineArguments(rawArguments)
         
+        outputDirectory = arguments.extractOption(named: DocCArguments.outputPath).last.map {
+            URL(fileURLWithPath: $0, isDirectory: true).standardizedFileURL
+        }
+        
         pluginArguments      = .init(extractingFrom: &arguments)
         symbolGraphArguments = .init(extractingFrom: &arguments)
         
+        assert(arguments.extractOption(named: DocCArguments.outputPath).isEmpty,
+               "There shouldn't be any output path argument left in the remaining DocC arguments.")
         self.arguments = arguments
     }
     
     /// The parsed plugin arguments.
-    let pluginArguments: ParsedPluginArguments
+    var pluginArguments: ParsedPluginArguments
     
     /// The parsed symbol graph arguments.
-    let symbolGraphArguments: ParsedSymbolGraphArguments
+    var symbolGraphArguments: ParsedSymbolGraphArguments
+    
+    /// The location where the plugin should write the output documentation archive(s).
+    var outputDirectory: URL?
     
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///
@@ -99,7 +110,6 @@ struct ParsedArguments {
         arguments.insertIfMissing(.option(DocCArguments.fallbackBundleIdentifier, value: targetName))
         
         arguments.insertIfMissing(.option(DocCArguments.additionalSymbolGraphDirectory, value: symbolGraphDirectoryPath))
-        
         arguments.insertIfMissing(.option(DocCArguments.outputPath, value: outputPath))
         
         if pluginArguments.enableCombinedDocumentation {
@@ -182,5 +192,19 @@ enum DocCArguments {
     /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
     static let externalLinkDependency = CommandLineArgument.Names(
         preferred: "--dependency"
+    )
+    
+    /// A DocC flag for the "merge" command that specifies a custom display name for the synthesized landing page.
+    ///
+    /// The plugin defines this name so that it can specify the package name as the display name of the default landing page when building combined documentation for multiple targets.
+    static let synthesizedLandingPageName = CommandLineArgument.Names(
+        preferred: "--synthesized-landing-page-name"
+    )
+    
+    /// A DocC flag for the "merge" command that specifies a custom kind for the synthesized landing page.
+    ///
+    /// The plugin defines this name so that it can specify "Package" as the kind of the default landing page when building combined documentation for multiple targets.
+    static let synthesizedLandingPageKind = CommandLineArgument.Names(
+        preferred: "--synthesized-landing-page-kind"
     )
 }
