@@ -99,7 +99,7 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
             .map(\.relativePath)
             .sorted()
         
-        XCTAssertEqual(combinedDataDirectoryContents, expectedExecutableDataFiles + expectedLibraryDataFiles)
+        XCTAssertEqual(combinedDataDirectoryContents, expectedCombinedDataFiles)
 #else
         XCTSkip("This test requires a Swift-DocC version that support the link-dependencies feature")
 #endif
@@ -129,12 +129,16 @@ final class MixedTargetsTests: ConcurrencyRequiringTestCase {
             .map(\.relativePath)
             .sorted()
         
-        XCTAssertEqual(combinedDataDirectoryContents, expectedExecutableDataFiles + expectedLibraryDataFiles)
+        XCTAssertEqual(combinedDataDirectoryContents, expectedCombinedDataFiles)
 #else
         XCTSkip("This test requires a Swift-DocC version that support the link-dependencies feature")
 #endif
     }
 }
+
+private let expectedCombinedDataFiles = [
+    "documentation.json"
+] + expectedExecutableDataFiles + expectedLibraryDataFiles
 
 private let expectedExecutableDataFiles = [
     "documentation/executable.json",
