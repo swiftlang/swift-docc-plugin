@@ -18,15 +18,15 @@ import PackagePlugin
         var argumentExtractor = ArgumentExtractor(arguments)
         let specifiedTargets = try argumentExtractor.extractSpecifiedTargets(in: context.package)
         
-        let swiftSourceModuleTargets: [SourceModuleTarget]
+        let sourceModuleTargets: [SourceModuleTarget]
         if specifiedTargets.isEmpty {
-            swiftSourceModuleTargets = context.package.allDocumentableTargets
+            sourceModuleTargets = context.package.allDocumentableTargets
         } else {
-            swiftSourceModuleTargets = specifiedTargets
+            sourceModuleTargets = specifiedTargets
         }
         
-        guard !swiftSourceModuleTargets.isEmpty else {
-            throw ArgumentParsingError.packageDoesNotContainSwiftSourceModuleTargets
+        guard !sourceModuleTargets.isEmpty else {
+            throw ArgumentParsingError.packageDoesNotContainSourceModuleTargets
         }
         
         // Parse the given command-line arguments
@@ -66,13 +66,13 @@ import PackagePlugin
         try? FileManager.default.createDirectory(at: intermediateArchivesDirectory, withIntermediateDirectories: true)
         
         // An inner function that defines the work to build documentation for a given target.
-        func performBuildTask(_ task: DocumentationBuildGraph<SwiftSourceModuleTarget>.Task) throws -> URL? {
+        func performBuildTask(_ task: DocumentationBuildGraph<SourceModuleDocumentationBuildGraphTarget>.Task) throws -> URL? {
             let target = task.target
             print("Extracting symbol information for '\(target.name)'...")
             let symbolGraphGenerationStartTime = DispatchTime.now()
             
             let symbolGraphs = try packageManager.doccSymbolGraphs(
-                for: target,
+                for: target.sourceTarget,
                 context: context,
                 verbose: verbose,
                 snippetExtractor: snippetExtractor,
@@ -88,7 +88,7 @@ import PackagePlugin
                     DocC catalog and will not produce documentation
                     """
                 
-                if swiftSourceModuleTargets.count > 1 {
+                if sourceModuleTargets.count > 1 {
                     // We're building multiple targets, just emit a warning for this
                     // one target that does not produce documentation.
                     Diagnostics.warning(message)
@@ -107,9 +107,9 @@ import PackagePlugin
                 intermediateArchivesDirectory.appendingPathComponent("\(target.name).doccarchive", isDirectory: true).path
             }
             
-            let archiveOutputPath = archiveOutputDir(for: target)
+            let archiveOutputPath = archiveOutputDir(for: target.sourceTarget)
             let dependencyArchivePaths: [String] = if isCombinedDocumentationEnabled {
-                task.dependencies.map { archiveOutputDir(for: $0.target) }
+                task.dependencies.map { archiveOutputDir(for: $0.target.sourceTarget) }
             } else {
                 []
             }
@@ -124,7 +124,7 @@ import PackagePlugin
             // provided.
             let doccArguments = parsedArguments.doccArguments(
                 action: .convert,
-                targetKind: target.kind == .executable ? .executable : .library,
+                targetKind: target.sourceTarget.kind == .executable ? .executable : .library,
                 doccCatalogPath: target.doccCatalogPath,
                 targetName: target.name,
                 symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
@@ -154,7 +154,7 @@ import PackagePlugin
             return URL(fileURLWithPath: archiveOutputPath)
         }
         
-        let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: swiftSourceModuleTargets))
+        let buildGraphRunner = DocumentationBuildGraphRunner(buildGraph: .init(targets: sourceModuleTargets.map( {SourceModuleDocumentationBuildGraphTarget(sourceTarget: $0)})))
         let intermediateDocumentationArchives = try buildGraphRunner.perform(performBuildTask)
             .compactMap { $0 }
         
@@ -236,17 +236,31 @@ import PackagePlugin
     }
 }
 
-// We add the conformance here so that 'DocumentationBuildGraphTarget' doesn't need to know about 'SwiftSourceModuleTarget' or import 'PackagePlugin'.
-extension SwiftSourceModuleTarget: DocumentationBuildGraphTarget {
+// We add the conformance here so that 'DocumentationBuildGraphTarget' doesn't need to know about 'SourceModuleTarget' or import 'PackagePlugin'.
+struct SourceModuleDocumentationBuildGraphTarget: DocumentationBuildGraphTarget {
+    var sourceTarget: SourceModuleTarget
+
     var dependencyIDs: [String] {
         // List all the target dependencies in a flat list.
-        dependencies.flatMap {
+        sourceTarget.dependencies.flatMap {
             switch $0 {
             case .target(let target):   return [target.id]
             case .product(let product): return product.targets.map { $0.id }
             @unknown default:           return []
             }
         }
+    }
+
+    var id: String {
+        sourceTarget.id
+    }
+
+    var name: String {
+        sourceTarget.name
+    }
+
+    var doccCatalogPath: String? {
+        sourceTarget.doccCatalogPath
     }
 }
 
