@@ -108,11 +108,7 @@ import PackagePlugin
             }
             
             let archiveOutputPath = archiveOutputDir(for: target)
-            let dependencyArchivePaths: [String] = if isCombinedDocumentationEnabled {
-                task.dependencies.map { archiveOutputDir(for: $0.target) }
-            } else {
-                []
-            }
+            let dependencyArchivePaths: [String] = isCombinedDocumentationEnabled ? task.dependencies.map { archiveOutputDir(for: $0.target) } : []
             
             if verbose {
                 print("documentation archive output path: '\(archiveOutputPath)'")
