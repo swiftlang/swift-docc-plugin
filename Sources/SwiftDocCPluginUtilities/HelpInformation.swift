@@ -136,15 +136,16 @@ private extension DocumentedFlag {
             flagListText += " / \(inverseNames.listForHelpDescription)"
         }
         
-        var description = if flagListText.count < 23 {
+        var description: String
+        if flagListText.count < 23 {
             // The flag is short enough to fit the abstract on the same line
-            """
+            description = """
               \(flagListText.padding(toLength: 23, withPad: " ", startingAt: 0)) \(abstract)
             
             """
         } else {
             // The flag is too long to fit the abstract on the same line
-            """
+            description = """
               \(flagListText)
                                       \(abstract)
             
