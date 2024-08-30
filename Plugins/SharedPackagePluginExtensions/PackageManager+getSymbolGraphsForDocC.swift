@@ -12,7 +12,7 @@ import PackagePlugin
 /// Generating symbol graphs is the only task that can't run in parallel.
 ///
 /// We serialize its execution to support build concurrency for the other tasks.
-private let symbolGraphGenerationLock = NSLock()
+private let symbolGraphGenerationLock = Lock()
 
 extension PackageManager {
     struct DocCSymbolGraphResult {

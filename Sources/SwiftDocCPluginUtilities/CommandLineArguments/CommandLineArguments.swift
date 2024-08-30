@@ -28,10 +28,10 @@ public struct CommandLineArguments {
     }
     
     /// All remaining (not-yet extracted) options or flags, up to the the first `--` separator (if there is one).
-    private var remainingOptionsOrFlags: [String].SubSequence
+    private var remainingOptionsOrFlags: Array<String>.SubSequence
     
     /// All literals after the first `--` separator (if there is one).
-    private var literalValues: [String].SubSequence
+    private var literalValues: Array<String>.SubSequence
     
     // MARK: Extract
     

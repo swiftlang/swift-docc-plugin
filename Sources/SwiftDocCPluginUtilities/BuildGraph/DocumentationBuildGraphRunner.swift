@@ -22,7 +22,7 @@ struct DocumentationBuildGraphRunner<Target: DocumentationBuildGraphTarget> {
         
         // Operations can't raise errors. Instead we catch the error from 'performBuildTask(_:)'
         // and cancel the remaining tasks.
-        let resultLock = NSLock()
+        let resultLock = Lock()
         var caughtError: Error?
         var results: [Result] = []
         

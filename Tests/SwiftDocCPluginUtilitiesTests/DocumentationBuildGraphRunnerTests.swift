@@ -233,7 +233,7 @@ private extension DocumentationBuildGraphRunner {
         performing work: @escaping Work<TaskResult>
     ) -> (processedTargets: [TaskStatus], result: Result<[TaskResult], any Error>) {
         var processedTargets: [TaskStatus] = []
-        let lock = NSLock()
+        let lock = Lock()
         
         let result = Swift.Result(catching: {
             try self.perform { task in
