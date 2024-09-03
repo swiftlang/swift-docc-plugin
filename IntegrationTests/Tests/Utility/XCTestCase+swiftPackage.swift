@@ -96,20 +96,15 @@ extension XCTestCase {
         }
 
         return try processQueue.sync {
-            let standardOutputString = String(data: standardOutputData, encoding: .utf8) ?? ""
-            let standardErrorString = String(data: standardErrorData, encoding: .utf8) ?? ""
+            let standardOutputString = String(data: standardOutputData, encoding: .utf8)
+            let standardErrorString = String(data: standardErrorData, encoding: .utf8)
 
-            
-            if process.terminationStatus != 0, standardErrorString.contains("<unknown>:0: error: unknown argument: ") {
-                throw XCTSkip("Skipping integration tests due to rdar://134406349")
-            }
-            
             return SwiftInvocationResult(
                 workingDirectory: directoryURL,
                 swiftExecutable: try swiftExecutableURL,
                 arguments: arguments.map(\.description),
-                standardOutput: standardOutputString ,
-                standardError: standardErrorString,
+                standardOutput: standardOutputString ?? "",
+                standardError: standardErrorString ?? "",
                 exitStatus: Int(process.terminationStatus)
             )
         }
