@@ -90,15 +90,15 @@ extension ArgumentExtractor {
                 )
             }
             
-            guard let swiftSourceModuleTarget = target as? SourceModuleTarget else {
+            guard let sourceModuleTarget = target as? SourceModuleTarget else {
                 throw ArgumentParsingError.targetIsNotSourceModule(specifiedTarget)
             }
             
-            guard swiftSourceModuleTarget.kind != .test else {
+            guard sourceModuleTarget.kind != .test else {
                 throw ArgumentParsingError.testTarget(specifiedTarget)
             }
             
-            return swiftSourceModuleTarget
+            return sourceModuleTarget
         }
         
         return productTargets + targets
