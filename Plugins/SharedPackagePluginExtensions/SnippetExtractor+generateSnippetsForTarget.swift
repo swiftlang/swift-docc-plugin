@@ -11,7 +11,7 @@ import PackagePlugin
 
 extension SnippetExtractor {
     func generateSnippets(
-        for target: SwiftSourceModuleTarget,
+        for target: SourceModuleTarget,
         context: PluginContext
     ) throws -> URL? {
         guard let package = context.package.package(for: target) else {
