@@ -51,19 +51,20 @@ public struct CommandLineArguments {
             }
             defer { remainingOptionsOrFlags.remove(at: index) }
             
+            // "--option-name=value"
+            if suffix.first == "=" {
+                
+                values.append(String(suffix.dropFirst(/* the equal sign */)))
+            }
+            
             // "--option-name", "value"
-            if suffix.isEmpty {
+            else {
                 let indexAfter = remainingOptionsOrFlags.index(after: index)
                 if indexAfter < remainingOptionsOrFlags.endIndex {
                     values.append(remainingOptionsOrFlags[indexAfter])
                     
                     remainingOptionsOrFlags.remove(at: indexAfter)
                 }
-            }
-            
-            // "--option-name=value"
-            else if suffix.first == "=" {
-                values.append(String(suffix.dropFirst(/* the equal sign */)))
             }
         }
 
