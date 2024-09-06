@@ -209,20 +209,21 @@ import PackagePlugin
             combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
         }
         
-        var mergeCommandArguments = ["merge"]
-        mergeCommandArguments.append(contentsOf: intermediateDocumentationArchives.map(\.standardizedFileURL.path))
-        mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.names.preferred, combinedArchiveOutput.path])
+        var mergeCommandArguments = CommandLineArguments(
+            ["merge"] + intermediateDocumentationArchives.map(\.standardizedFileURL.path)
+        )
+        mergeCommandArguments.insertIfMissing(DocCArguments.outputPath, value: combinedArchiveOutput.path)
         
         if let doccFeatures, doccFeatures.contains(.synthesizedLandingPageName) {
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageName.names.preferred, context.package.displayName])
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageKind.names.preferred, "Package"])
+            mergeCommandArguments.insertIfMissing(DocCArguments.synthesizedLandingPageName, value: context.package.displayName)
+            mergeCommandArguments.insertIfMissing(DocCArguments.synthesizedLandingPageKind, value: "Package")
         }
         
         // Remove the combined archive if it already exists
         try? FileManager.default.removeItem(at: combinedArchiveOutput)
         
         // Create a new combined archive
-        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
+        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments.remainingArguments)
         process.waitUntilExit()
         
         print("""
