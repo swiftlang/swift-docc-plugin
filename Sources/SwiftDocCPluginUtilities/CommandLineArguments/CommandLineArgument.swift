@@ -40,7 +40,7 @@ public struct CommandLineArgument {
         /// An option argument with an associated value.
         ///
         /// For example: `"--some-option", "value"` or `"--some-option=value"`.
-        case option(value: String)
+        case option(value: String, kind: Option.Kind)
     }
     
     // Only create arguments from flags or options (with a value)
@@ -52,7 +52,7 @@ public struct CommandLineArgument {
     
     init(_ option: Option, value: String) {
         names = option.names
-        kind = .option(value: value)
+        kind = .option(value: value, kind: option.kind)
     }
 }
 
@@ -61,9 +61,10 @@ extension CommandLineArgument {
     ///
     /// For example: `"--some-flag"`.
     public struct Flag {
+        /// The names of this command line flag.
         public var names: Names
         
-        /// Creates a new command line flag
+        /// Creates a new command line flag.
         ///
         /// - Parameters:
         ///   - preferred: The preferred name for this flag.
@@ -78,22 +79,36 @@ extension CommandLineArgument {
     ///
     /// For example: `"--some-option", "value"` or `"--some-option=value"`.
     public struct Option {
+        /// The names of this command line option.
         public var names: Names
+        /// The kind of value for this command line option.
+        public var kind: Kind
+        
+        /// A kind of value(s) that a command line option supports.
+        public enum Kind {
+            /// An option that supports a single value.
+            case singleValue
+            /// An option that supports an array of different values.
+            case arrayOfValues
+        }
         
         /// Creates a new command line option.
         ///
         /// - Parameters:
         ///   - preferred: The preferred name for this option.
         ///   - alternatives: A collection of alternative names for this option.
-        public init(preferred: String, alternatives: Set<String> = []) {
+        ///   - kind: The kind of value(s) that this option supports.
+        public init(preferred: String, alternatives: Set<String> = [], kind: Kind = .singleValue) {
             // This is duplicating the `Names` parameters to offer a nicer initializer for the common case.
             self.init(
-                Names(preferred: preferred, alternatives: alternatives)
+                Names(preferred: preferred, alternatives: alternatives),
+                kind: kind
             )
         }
         
-        init(_ names: Names) {
+        init(_ names: Names, kind: Kind = .singleValue) {
             self.names = names
+            self.kind  = kind
         }
     }
 }

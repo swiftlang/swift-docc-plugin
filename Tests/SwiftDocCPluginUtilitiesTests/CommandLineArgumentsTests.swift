@@ -59,6 +59,82 @@ final class CommandLineArgumentsTests: XCTestCase {
         XCTAssertEqual(arguments.remainingArguments, ["--some-flag", "--other-flag", "--another-option", "another-value", "--this-option", "new-value", "--yet-another-option", "another-new-value", "--", "--some-literal-value"])
     }
     
+    func testInsertSameSingleValueOptionWithDifferentValues() {
+        let optionName = "--some-option"
+        let optionNameAlternate = "--some-option-alternate"
+        let option = CommandLineArgument.Option(
+            preferred: optionName,
+            alternatives: [optionNameAlternate],
+            kind: .singleValue // the default
+        )
+        
+        for initialArguments in [
+            ["\(optionName)=first"],
+            [optionNameAlternate, "second"],
+        ] {
+            var arguments = CommandLineArguments(initialArguments)
+            
+            XCTAssertTrue(arguments.insertIfMissing(option, value: "first"), "The arguments already contains some other value for this option")
+            XCTAssertEqual(arguments.remainingArguments, initialArguments)
+            
+            XCTAssertTrue(arguments.insertIfMissing(option, value: "second"), "The arguments already contains some other value for this option")
+            XCTAssertEqual(arguments.remainingArguments, initialArguments)
+            
+            XCTAssertTrue(arguments.insertIfMissing(option, value: "third"), "The arguments already contains some other value for this option")
+            XCTAssertEqual(arguments.remainingArguments, initialArguments)
+        }
+    }
+    
+    func testInsertSameArrayOfValuesOptionWithDifferentValues() {
+        let optionName = "--some-option"
+        let optionNameAlternate = "--some-option-alternate"
+        let option = CommandLineArgument.Option(
+            preferred: optionName,
+            alternatives: [optionNameAlternate],
+            kind: .arrayOfValues
+        )
+        
+        var arguments = CommandLineArguments([
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+        ])
+        
+        XCTAssertTrue(arguments.insertIfMissing(option, value: "first"), "The arguments already contains this value (using the preferred option spelling)")
+        XCTAssertEqual(arguments.remainingArguments, [
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+        ])
+        
+        XCTAssertTrue(arguments.insertIfMissing(option, value: "second"), "The arguments already contains this value (using the alternate option spelling)")
+        XCTAssertEqual(arguments.remainingArguments, [
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+        ])
+        
+        XCTAssertFalse(arguments.insertIfMissing(option, value: "third"), "This value is new (doesn't exist among the arguments yet)")
+        XCTAssertEqual(arguments.remainingArguments, [
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+            optionName, "third",
+        ])
+        
+        XCTAssertFalse(arguments.insertIfMissing(option, value: "fourth"), "Third value us also new ... (doesn't exist among the arguments yet)")
+        XCTAssertEqual(arguments.remainingArguments, [
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+            optionName, "third",
+            optionName, "fourth",
+        ])
+        
+        XCTAssertTrue(arguments.insertIfMissing(option, value: "fourth"), "... but now it exists (after inserting it above)")
+        XCTAssertEqual(arguments.remainingArguments, [
+            "\(optionName)=first",
+            optionNameAlternate, "second",
+            optionName, "third",
+            optionName, "fourth",
+        ])
+    }
+    
     func testExtractDifferentArgumentSpellings() {
         // Options
         do {

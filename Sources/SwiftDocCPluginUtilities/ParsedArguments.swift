@@ -191,7 +191,8 @@ enum DocCArguments {
     ///
     /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
     static let externalLinkDependency = CommandLineArgument.Option(
-        preferred: "--dependency"
+        preferred: "--dependency",
+        kind: .arrayOfValues
     )
     
     /// A DocC flag for the "merge" command that specifies a custom display name for the synthesized landing page.

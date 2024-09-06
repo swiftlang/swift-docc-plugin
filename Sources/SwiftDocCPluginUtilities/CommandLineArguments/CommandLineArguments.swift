@@ -152,16 +152,48 @@ private extension ArraySlice<String> {
         switch argument.kind {
         case .flag:
             append(argument.names.preferred)
-        case .option(let value):
+        case .option(let value, _):
             append(contentsOf: [argument.names.preferred, value])
         }
     }
     
-    /// Checks if the slice contains the given argument.
+    /// Checks if the slice contains the given argument (flag or argument).
     func contains(_ argument: CommandLineArgument) -> Bool {
-        contains(where: {
-            argument.names.suffixAfterMatchingNamesWith(argument: $0) != nil
-        })
+        let names = argument.names
+        guard case .option(let value, .arrayOfValues) = argument.kind else {
+            // When matching flags or single-value options, it's sufficient to check if the slice contains any of the names.
+            //
+            // The slice is considered to contain the single-value option, no matter what the existing value is.
+            // This is used to avoid repeating an single-value option with a different value.
+            return contains(where: {
+                names.suffixAfterMatchingNamesWith(argument: $0) != nil
+            })
+        }
+        
+        // When matching options that support arrays of values, it's necessary to check the existing option's value.
+        //
+        // The slice is only considered to contain the array-of-values option, if the new value is found.
+        // This is used to allow array-of-values options to insert multiple different values into the arguments.
+        for (argumentIndex, argument) in indexed() {
+            guard let suffix = names.suffixAfterMatchingNamesWith(argument: argument) else {
+                continue
+            }
+            
+            // "--option-name", "value"
+            if suffix.first != "=" {
+                let indexAfter = index(after: argumentIndex)
+                if indexAfter < endIndex, self[indexAfter] == value {
+                    return true
+                }
+            }
+            
+            // "--option-name=value"
+            else if suffix.dropFirst(/* the equal sign */) == value {
+                return true
+            }
+        }
+        // Non of the existing options match the new value.
+        return false
     }
 }
 
