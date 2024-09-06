@@ -211,11 +211,11 @@ import PackagePlugin
         
         var mergeCommandArguments = ["merge"]
         mergeCommandArguments.append(contentsOf: intermediateDocumentationArchives.map(\.standardizedFileURL.path))
-        mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.preferred, combinedArchiveOutput.path])
+        mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.names.preferred, combinedArchiveOutput.path])
         
         if let doccFeatures, doccFeatures.contains(.synthesizedLandingPageName) {
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageName.preferred, context.package.displayName])
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageKind.preferred, "Package"])
+            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageName.names.preferred, context.package.displayName])
+            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageKind.names.preferred, "Package"])
         }
         
         // Remove the combined archive if it already exists

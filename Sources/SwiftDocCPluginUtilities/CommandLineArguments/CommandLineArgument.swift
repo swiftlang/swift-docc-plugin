@@ -43,18 +43,57 @@ public struct CommandLineArgument {
         case option(value: String)
     }
     
-    /// Creates a new command line flag with the given names.
-    /// - Parameters:
-    ///   - names: The names for the new command line flag.
-    public static func flag(_ names: Names) -> Self {
-        .init(names: names, kind: .flag)
+    // Only create arguments from flags or options (with a value)
+    
+    init(_ flag: Flag) {
+        names = flag.names
+        kind = .flag
     }
     
-    /// Creates a new command option with the given names and associated value.
-    /// - Parameters:
-    ///   - names: The names for the new command line option.
-    ///   - value: The value that's associated with this command line option.
-    public static func option(_ names: Names, value: String) -> Self {
-        .init(names: names, kind: .option(value: value))
+    init(_ option: Option, value: String) {
+        names = option.names
+        kind = .option(value: value)
+    }
+}
+
+extension CommandLineArgument {
+    /// A flag argument without an associated value.
+    ///
+    /// For example: `"--some-flag"`.
+    public struct Flag {
+        public var names: Names
+        
+        /// Creates a new command line flag
+        ///
+        /// - Parameters:
+        ///   - preferred: The preferred name for this flag.
+        ///   - alternatives: A collection of alternative names for this flag.
+        public init(preferred: String, alternatives: Set<String> = []) {
+            // This is duplicating the `Names` parameters to offer a nicer initializer for the common case.
+            names = .init(preferred: preferred, alternatives: alternatives)
+        }
+    }
+    
+    /// An option argument that will eventually associated with a value.
+    ///
+    /// For example: `"--some-option", "value"` or `"--some-option=value"`.
+    public struct Option {
+        public var names: Names
+        
+        /// Creates a new command line option.
+        ///
+        /// - Parameters:
+        ///   - preferred: The preferred name for this option.
+        ///   - alternatives: A collection of alternative names for this option.
+        public init(preferred: String, alternatives: Set<String> = []) {
+            // This is duplicating the `Names` parameters to offer a nicer initializer for the common case.
+            self.init(
+                Names(preferred: preferred, alternatives: alternatives)
+            )
+        }
+        
+        init(_ names: Names) {
+            self.names = names
+        }
     }
 }

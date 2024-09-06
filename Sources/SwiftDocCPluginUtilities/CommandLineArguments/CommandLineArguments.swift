@@ -41,8 +41,9 @@ public struct CommandLineArguments {
     ///
     /// - Parameter names: The names of a command line option.
     /// - Returns: The extracted values for this command line option, in the order that they appear in the arguments list.
-    public mutating func extractOption(named names: CommandLineArgument.Names) -> [String] {
+    public mutating func extract(_ option: CommandLineArgument.Option) -> [String] {
         var values = [String]()
+        let names = option.names
         
         for (index, argument) in remainingOptionsOrFlags.indexed().reversed() {
             guard let suffix = names.suffixAfterMatchingNamesWith(argument: argument) else {
@@ -92,12 +93,24 @@ public struct CommandLineArguments {
     
     // MARK: Insert
     
-    /// Inserts a command line argument into the arguments list unless it already exists.
-    /// - Parameter argument: The command line argument (flag or option) to insert.
+    /// Inserts a command line option into the arguments list unless it already exists.
+    /// - Parameters:
+    ///   - argument: The command line option to insert.
+    ///   - matchOptionWithAnyValue: If `true`, an option argument will be considered a match even
     /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
-    public mutating func insertIfMissing(_ argument: CommandLineArgument) -> Bool  {
-        remainingOptionsOrFlags.appendIfMissing(argument)
+    public mutating func insertIfMissing(_ option: CommandLineArgument.Option, value: String) -> Bool {
+        remainingOptionsOrFlags.appendIfMissing(.init(option, value: value))
+    }
+    
+    /// Inserts a command line flag into the arguments list unless it already exists.
+    /// - Parameters:
+    ///   - argument: The command line flag to insert.
+    ///   - matchOptionWithAnyValue: If `true`, an option argument will be considered a match even
+    /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
+    @discardableResult
+    public mutating func insertIfMissing(_ flag: CommandLineArgument.Flag) -> Bool {
+        remainingOptionsOrFlags.appendIfMissing(.init(flag))
     }
     
     /// Adds a raw string argument to the start of the arguments list
@@ -107,13 +120,13 @@ public struct CommandLineArguments {
     
     /// Inserts a command line argument into the arguments list, overriding any existing values.
     /// - Parameters:
-    ///  - argument: The command line argument (flag or option) to insert.
-    ///  - newValue: The new value for this command line argument.
+    ///   - argument: The command line argument (flag or option) to insert.
+    ///   - newValue: The new value for this command line argument.
     /// - Returns: `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
-    public mutating func overrideOrInsertOption(named names: CommandLineArgument.Names, newValue: String) -> Bool {
-        let didRemoveArguments = !extractOption(named: names).isEmpty
-        remainingOptionsOrFlags.append(.option(names, value: newValue))
+    public mutating func overrideOrInsert(_ option: CommandLineArgument.Option, newValue: String) -> Bool {
+        let didRemoveArguments = !extract(option).isEmpty
+        remainingOptionsOrFlags.append(.init(option, value: newValue))
         return didRemoveArguments
     }
 }
@@ -126,7 +139,7 @@ private extension ArraySlice<String> {
     /// - Returns:  `true` if the argument was already present in the slice; otherwise, `false`.
     @discardableResult
     mutating func appendIfMissing(_ argument: CommandLineArgument) -> Bool {
-        guard !contains(argument.names) else {
+        guard !contains(argument) else {
             return true
         }
         append(argument)
@@ -144,10 +157,10 @@ private extension ArraySlice<String> {
         }
     }
     
-    /// Checks if the slice contains any of the given names.
-    func contains(_ names: CommandLineArgument.Names) -> Bool {
+    /// Checks if the slice contains the given argument.
+    func contains(_ argument: CommandLineArgument) -> Bool {
         contains(where: {
-            names.suffixAfterMatchingNamesWith(argument: $0) != nil
+            argument.names.suffixAfterMatchingNamesWith(argument: $0) != nil
         })
     }
 }

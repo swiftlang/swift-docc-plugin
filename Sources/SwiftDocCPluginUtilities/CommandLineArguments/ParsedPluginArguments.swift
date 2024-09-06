@@ -50,6 +50,6 @@ private extension CommandLineArguments {
     }
     
     mutating func extractOption(_ flag: DocumentedFlag) -> String? {
-        extractOption(named: flag.names).last
+        extract(.init(flag.names)).last
     }
 }
