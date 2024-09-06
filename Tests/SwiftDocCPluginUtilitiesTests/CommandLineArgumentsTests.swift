@@ -140,9 +140,9 @@ final class CommandLineArgumentsTests: XCTestCase {
         do {
             var arguments = CommandLineArguments(["--spelling-one", "value-one", "--spelling-two=value-two", "-s", "value-three", "-s=value-four", "--spelling-one", "value-five", "--", "--spelling-one", "value-six"])
             
-            let extractedValues = arguments.extract(
-                CommandLineArgument.Option(preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"])
-            )
+            let extractedValues = arguments.extract(Option(
+                preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"]
+            ))
             XCTAssertEqual(extractedValues, ["value-one", "value-two", "value-three", "value-four", "value-five"])
             XCTAssertEqual(arguments.remainingArguments, ["--", "--spelling-one", "value-six"])
         }
@@ -151,9 +151,9 @@ final class CommandLineArgumentsTests: XCTestCase {
         do {
             var arguments = CommandLineArguments(["--spelling-one", "--spelling-two", "-s", "--spelling-one", "--", "--spelling-one"])
             
-            let extractedValues = arguments.extractFlag(named:
-                .init(preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"])
-            )
+            let extractedValues = arguments.extract(Flag(
+                preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"]
+            ))
             XCTAssertEqual(extractedValues, [true, true, true, true])
             XCTAssertEqual(arguments.remainingArguments, ["--", "--spelling-one"])
         }
@@ -162,10 +162,10 @@ final class CommandLineArgumentsTests: XCTestCase {
         do {
             var arguments = CommandLineArguments(["--spelling-one", "--spelling-two", "--negative-spelling-one", "--negative-spelling-two", "-s", "--spelling-one", "-ns", "--", "--spelling-one", "--negative-spelling-two"])
             
-            let extractedValues = arguments.extractFlag(
-                named:        .init(preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"]),
+            let extractedValues = arguments.extract(Flag(
+                preferred: "--spelling-one", alternatives: ["--spelling-two", "-s"],
                 inverseNames: .init(preferred: "--negative-spelling-one", alternatives: ["--negative-spelling-two", "-ns"])
-            )
+            ))
             XCTAssertEqual(extractedValues, [true, true, false, false, true, true, false])
             XCTAssertEqual(arguments.remainingArguments, ["--", "--spelling-one", "--negative-spelling-two"])
         }
@@ -204,6 +204,6 @@ private extension CommandLineArguments {
     }
 
     mutating func extractFlag(rawName: String) -> [Bool] {
-        extractFlag(named: .init(preferred: rawName))
+        extract(CommandLineArgument.Flag(preferred: rawName))
     }
 }

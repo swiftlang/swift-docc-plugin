@@ -44,13 +44,13 @@ public enum HelpInformation {
         }
         
         var supportedPluginFlags = [
-            DocumentedFlag.disableLMDBIndex,
-            DocumentedFlag.verbose,
+            DocumentedArgument.disableLMDBIndex,
+            DocumentedArgument.verbose,
         ]
         
         let doccFeatures = (try? DocCFeatures(doccExecutable: doccExecutableURL)) ?? .init()
         if doccFeatures.contains(.linkDependencies) {
-            supportedPluginFlags.insert(DocumentedFlag.enableCombinedDocumentation, at: 1)
+            supportedPluginFlags.insert(DocumentedArgument.enableCombinedDocumentation, at: 1)
         }
         
         for flag in supportedPluginFlags {
@@ -59,11 +59,11 @@ public enum HelpInformation {
         
         helpText += "\nSYMBOL GRAPH OPTIONS:\n"
         var supportedSymbolGraphFlags = [
-            DocumentedFlag.skipSynthesizedSymbols,
-            DocumentedFlag.minimumAccessLevel,
+            DocumentedArgument.skipSynthesizedSymbols,
+            DocumentedArgument.minimumAccessLevel,
         ]
 #if swift(>=5.8)
-        supportedSymbolGraphFlags.insert(DocumentedFlag.extendedTypes, at: 1)
+        supportedSymbolGraphFlags.insert(DocumentedArgument.extendedTypes, at: 1)
 #else
         // stops 'not mutated' warning for Swift 5.7 and lower
         supportedPluginFlags += []
@@ -129,10 +129,10 @@ public enum HelpInformation {
         """
 }
 
-private extension DocumentedFlag {
+private extension DocumentedArgument {
     var helpDescription: String {
         var flagListText = names.listForHelpDescription
-        if let inverseNames {
+        if case .flag(let flag) = argument, let inverseNames = flag.inverseNames {
             flagListText += " / \(inverseNames.listForHelpDescription)"
         }
         

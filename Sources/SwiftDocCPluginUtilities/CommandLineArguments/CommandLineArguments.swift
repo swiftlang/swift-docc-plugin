@@ -79,10 +79,12 @@ public struct CommandLineArguments {
     ///   - positiveNames: The positive names for a command line flag.
     ///   - negativeNames: The negative names for this command line flag, if any.
     /// - Returns: The extracted values for this command line flag.
-    public mutating func extractFlag(named positiveNames: CommandLineArgument.Names, inverseNames negativeNames: CommandLineArgument.Names? = nil) -> [Bool] {
-        var values = [Bool]()
+    public mutating func extract(_ flag: CommandLineArgument.Flag) -> [Bool] {
+        let positiveNames = flag.names
+        let negativeNames = flag.inverseNames
         let allNamesToCheck = positiveNames.all.union(negativeNames?.all ?? [])
         
+        var values = [Bool]()
         for (index, argument) in remainingOptionsOrFlags.indexed().reversed() where allNamesToCheck.contains(argument) {
             remainingOptionsOrFlags.remove(at: index)
             

@@ -18,13 +18,13 @@ struct ParsedPluginArguments {
     /// Creates a new plugin arguments container by extracting the known plugin values from a command line argument list.
     init(extractingFrom arguments: inout CommandLineArguments) {
         enableCombinedDocumentation = arguments.extractFlag(.enableCombinedDocumentation) ?? false
-        disableLMDBIndex = arguments.extractFlag(.disableLMDBIndex)     ?? false
-        verbose          = arguments.extractFlag(.verbose)              ?? false
-        help             = arguments.extractFlag(named: Self.help).last ?? false
+        disableLMDBIndex = arguments.extractFlag(.disableLMDBIndex) ?? false
+        verbose          = arguments.extractFlag(.verbose)          ?? false
+        help             = arguments.extract(Self.help).last        ?? false
     }
     
     /// A common command line tool flag to print the help text instead of running the command.
-    static let help = CommandLineArgument.Names(
+    static let help = CommandLineArgument.Flag(
         preferred: "--help", alternatives: ["-h"]
     )
 }
@@ -45,11 +45,21 @@ struct ParsedSymbolGraphArguments {
 }
 
 private extension CommandLineArguments {
-    mutating func extractFlag(_ flag: DocumentedFlag) -> Bool? {
-        extractFlag(named: flag.names, inverseNames: flag.inverseNames).last
+    mutating func extractFlag(_ flag: DocumentedArgument) -> Bool? {
+        guard case .flag(let flag) = flag.argument else {
+            assertionFailure("Unexpectedly used flag-only API with an option \(flag.argument)")
+            return nil
+        }
+        return extract(flag).last
     }
     
-    mutating func extractOption(_ flag: DocumentedFlag) -> String? {
-        extract(.init(flag.names)).last
+    mutating func extractOption(_ flag: DocumentedArgument) -> String? {
+        guard case .option(let option) = flag.argument else {
+            assertionFailure("Unexpectedly used option-only API with a flag \(flag.argument)")
+            return nil
+        }
+        
+        assert(option.kind == .singleValue, "Unexpectedly used single-value option API with an array-of-values option \(option)")
+        return extract(option).last
     }
 }

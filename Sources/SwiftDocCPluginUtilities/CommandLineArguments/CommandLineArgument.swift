@@ -63,15 +63,19 @@ extension CommandLineArgument {
     public struct Flag {
         /// The names of this command line flag.
         public var names: Names
+        /// The negative names for this flag, if any.
+        public var inverseNames: CommandLineArgument.Names?
         
         /// Creates a new command line flag.
         ///
         /// - Parameters:
         ///   - preferred: The preferred name for this flag.
         ///   - alternatives: A collection of alternative names for this flag.
-        public init(preferred: String, alternatives: Set<String> = []) {
+        ///   - inverseNames: The negative names for this flag, if any.
+        public init(preferred: String, alternatives: Set<String> = [], inverseNames: CommandLineArgument.Names? = nil) {
             // This is duplicating the `Names` parameters to offer a nicer initializer for the common case.
             names = .init(preferred: preferred, alternatives: alternatives)
+            self.inverseNames = inverseNames
         }
     }
     
