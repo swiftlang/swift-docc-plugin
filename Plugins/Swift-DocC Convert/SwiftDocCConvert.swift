@@ -222,6 +222,11 @@ import PackagePlugin
         // Remove the combined archive if it already exists
         try? FileManager.default.removeItem(at: combinedArchiveOutput)
         
+        if verbose {
+            let arguments = mergeCommandArguments.remainingArguments.joined(separator: " ")
+            print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+        }
+        
         // Create a new combined archive
         let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments.remainingArguments)
         process.waitUntilExit()
