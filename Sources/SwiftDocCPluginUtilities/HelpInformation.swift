@@ -66,7 +66,7 @@ public enum HelpInformation {
         supportedSymbolGraphFlags.insert(DocumentedArgument.extendedTypes, at: 1)
 #else
         // stops 'not mutated' warning for Swift 5.7 and lower
-        supportedPluginFlags += []
+        supportedSymbolGraphFlags += []
 #endif
         
         for flag in supportedSymbolGraphFlags {
