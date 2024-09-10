@@ -46,7 +46,7 @@ import PackagePlugin
         if isCombinedDocumentationEnabled, doccFeatures?.contains(.linkDependencies) == false {
             // The developer uses the combined documentation plugin flag with a DocC version that doesn't support combined documentation.
             Diagnostics.error("""
-            Unsupported use of '\(DocumentedFlag.enableCombinedDocumentation.names.preferred)'. \
+            Unsupported use of '\(DocumentedArgument.enableCombinedDocumentation.names.preferred)'. \
             DocC version at '\(doccExecutableURL.path)' doesn't support combined documentation.
             """)
             return
@@ -209,20 +209,26 @@ import PackagePlugin
             combinedArchiveOutput = URL(fileURLWithPath: context.pluginWorkDirectory.appending(combinedArchiveName).string)
         }
         
-        var mergeCommandArguments = ["merge"]
-        mergeCommandArguments.append(contentsOf: intermediateDocumentationArchives.map(\.standardizedFileURL.path))
-        mergeCommandArguments.append(contentsOf: [DocCArguments.outputPath.preferred, combinedArchiveOutput.path])
+        var mergeCommandArguments = CommandLineArguments(
+            ["merge"] + intermediateDocumentationArchives.map(\.standardizedFileURL.path)
+        )
+        mergeCommandArguments.insertIfMissing(DocCArguments.outputPath, value: combinedArchiveOutput.path)
         
         if let doccFeatures, doccFeatures.contains(.synthesizedLandingPageName) {
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageName.preferred, context.package.displayName])
-            mergeCommandArguments.append(contentsOf: [DocCArguments.synthesizedLandingPageKind.preferred, "Package"])
+            mergeCommandArguments.insertIfMissing(DocCArguments.synthesizedLandingPageName, value: context.package.displayName)
+            mergeCommandArguments.insertIfMissing(DocCArguments.synthesizedLandingPageKind, value: "Package")
         }
         
         // Remove the combined archive if it already exists
         try? FileManager.default.removeItem(at: combinedArchiveOutput)
         
+        if verbose {
+            let arguments = mergeCommandArguments.remainingArguments.joined(separator: " ")
+            print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+        }
+        
         // Create a new combined archive
-        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments)
+        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments.remainingArguments)
         process.waitUntilExit()
         
         print("""

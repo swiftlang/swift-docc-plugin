@@ -35,14 +35,15 @@ public struct CommandLineArguments {
     
     // MARK: Extract
     
-    /// Extracts the values for the command line option with the given names.
+    /// Extracts the values for the given command line option.
     ///
     /// Upon return, the arguments list no longer contains any elements that match any spelling of this command line option or its values.
     ///
-    /// - Parameter names: The names of a command line option.
+    /// - Parameter option: The command line option to extract values for.
     /// - Returns: The extracted values for this command line option, in the order that they appear in the arguments list.
-    public mutating func extractOption(named names: CommandLineArgument.Names) -> [String] {
+    public mutating func extract(_ option: CommandLineArgument.Option) -> [String] {
         var values = [String]()
+        let names = option.names
         
         for (index, argument) in remainingOptionsOrFlags.indexed().reversed() {
             guard let suffix = names.suffixAfterMatchingNamesWith(argument: argument) else {
@@ -50,8 +51,14 @@ public struct CommandLineArguments {
             }
             defer { remainingOptionsOrFlags.remove(at: index) }
             
+            // "--option-name=value"
+            if suffix.first == "=" {
+                
+                values.append(String(suffix.dropFirst(/* the equal sign */)))
+            }
+            
             // "--option-name", "value"
-            if suffix.isEmpty {
+            else {
                 let indexAfter = remainingOptionsOrFlags.index(after: index)
                 if indexAfter < remainingOptionsOrFlags.endIndex {
                     values.append(remainingOptionsOrFlags[indexAfter])
@@ -59,28 +66,23 @@ public struct CommandLineArguments {
                     remainingOptionsOrFlags.remove(at: indexAfter)
                 }
             }
-            
-            // "--option-name=value"
-            else if suffix.first == "=" {
-                values.append(String(suffix.dropFirst(/* the equal sign */)))
-            }
         }
 
         return values.reversed() // The values are gathered in reverse order
     }
     
-    /// Extracts the values for the command line flag with the given names.
+    /// Extracts the values for the command line flag.
     ///
     /// Upon return, the arguments list no longer contains any elements that match any spelling of this command line flag.
     ///
-    /// - Parameters:
-    ///   - positiveNames: The positive names for a command line flag.
-    ///   - negativeNames: The negative names for this command line flag, if any.
+    /// - Parameter flag: The command line flag to extract values for.
     /// - Returns: The extracted values for this command line flag.
-    public mutating func extractFlag(named positiveNames: CommandLineArgument.Names, inverseNames negativeNames: CommandLineArgument.Names? = nil) -> [Bool] {
-        var values = [Bool]()
+    public mutating func extract(_ flag: CommandLineArgument.Flag) -> [Bool] {
+        let positiveNames = flag.names
+        let negativeNames = flag.inverseNames
         let allNamesToCheck = positiveNames.all.union(negativeNames?.all ?? [])
         
+        var values = [Bool]()
         for (index, argument) in remainingOptionsOrFlags.indexed().reversed() where allNamesToCheck.contains(argument) {
             remainingOptionsOrFlags.remove(at: index)
             
@@ -92,12 +94,22 @@ public struct CommandLineArguments {
     
     // MARK: Insert
     
-    /// Inserts a command line argument into the arguments list unless it already exists.
-    /// - Parameter argument: The command line argument (flag or option) to insert.
+    /// Inserts a command line option into the arguments list unless it already exists.
+    /// - Parameters:
+    ///   - option: The command line option to insert.
+    ///   - value: The value for this option.
     /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
-    public mutating func insertIfMissing(_ argument: CommandLineArgument) -> Bool  {
-        remainingOptionsOrFlags.appendIfMissing(argument)
+    public mutating func insertIfMissing(_ option: CommandLineArgument.Option, value: String) -> Bool {
+        remainingOptionsOrFlags.appendIfMissing(.init(option, value: value))
+    }
+    
+    /// Inserts a command line flag into the arguments list unless it already exists.
+    /// - Parameter flag: The command line flag to insert.
+    /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
+    @discardableResult
+    public mutating func insertIfMissing(_ flag: CommandLineArgument.Flag) -> Bool {
+        remainingOptionsOrFlags.appendIfMissing(.init(flag))
     }
     
     /// Adds a raw string argument to the start of the arguments list
@@ -105,15 +117,15 @@ public struct CommandLineArguments {
         remainingOptionsOrFlags.insert(rawArgument, at: 0)
     }
     
-    /// Inserts a command line argument into the arguments list, overriding any existing values.
+    /// Inserts a command line option with a new value into the arguments list, overriding any existing values.
     /// - Parameters:
-    ///  - argument: The command line argument (flag or option) to insert.
-    ///  - newValue: The new value for this command line argument.
+    ///   - option: The command line option to insert.
+    ///   - newValue: The new value for this option.
     /// - Returns: `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
-    public mutating func overrideOrInsertOption(named names: CommandLineArgument.Names, newValue: String) -> Bool {
-        let didRemoveArguments = !extractOption(named: names).isEmpty
-        remainingOptionsOrFlags.append(.option(names, value: newValue))
+    public mutating func overrideOrInsert(_ option: CommandLineArgument.Option, newValue: String) -> Bool {
+        let didRemoveArguments = !extract(option).isEmpty
+        remainingOptionsOrFlags.append(.init(option, value: newValue))
         return didRemoveArguments
     }
 }
@@ -126,7 +138,7 @@ private extension ArraySlice<String> {
     /// - Returns:  `true` if the argument was already present in the slice; otherwise, `false`.
     @discardableResult
     mutating func appendIfMissing(_ argument: CommandLineArgument) -> Bool {
-        guard !contains(argument.names) else {
+        guard !contains(argument) else {
             return true
         }
         append(argument)
@@ -139,16 +151,48 @@ private extension ArraySlice<String> {
         switch argument.kind {
         case .flag:
             append(argument.names.preferred)
-        case .option(let value):
+        case .option(let value, _):
             append(contentsOf: [argument.names.preferred, value])
         }
     }
     
-    /// Checks if the slice contains any of the given names.
-    func contains(_ names: CommandLineArgument.Names) -> Bool {
-        contains(where: {
-            names.suffixAfterMatchingNamesWith(argument: $0) != nil
-        })
+    /// Checks if the slice contains the given argument (flag or option).
+    func contains(_ argument: CommandLineArgument) -> Bool {
+        let names = argument.names
+        guard case .option(let value, .arrayOfValues) = argument.kind else {
+            // When matching flags or single-value options, it's sufficient to check if the slice contains any of the names.
+            //
+            // The slice is considered to contain the single-value option, no matter what the existing value is.
+            // This is used to avoid repeating an single-value option with a different value.
+            return contains(where: {
+                names.suffixAfterMatchingNamesWith(argument: $0) != nil
+            })
+        }
+        
+        // When matching options that support arrays of values, it's necessary to check the existing option's value.
+        //
+        // The slice is only considered to contain the array-of-values option, if the new value is found.
+        // This is used to allow array-of-values options to insert multiple different values into the arguments.
+        for (argumentIndex, argument) in indexed() {
+            guard let suffix = names.suffixAfterMatchingNamesWith(argument: argument) else {
+                continue
+            }
+            
+            // "--option-name", "value"
+            if suffix.first != "=" {
+                let indexAfter = index(after: argumentIndex)
+                if indexAfter < endIndex, self[indexAfter] == value {
+                    return true
+                }
+            }
+            
+            // "--option-name=value"
+            else if suffix.dropFirst(/* the equal sign */) == value {
+                return true
+            }
+        }
+        // Non of the existing options match the new value.
+        return false
     }
 }
 

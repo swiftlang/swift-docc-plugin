@@ -28,6 +28,7 @@ let package = Package(
                 .copy("Fixtures/SingleTestTarget"),
                 .copy("Fixtures/SingleExecutableTarget"),
                 .copy("Fixtures/MixedTargets"),
+                .copy("Fixtures/TargetsWithDependencies"),
                 .copy("Fixtures/TargetWithDocCCatalog"),
                 .copy("Fixtures/PackageWithSnippets"),
                 .copy("Fixtures/PackageWithConformanceSymbols"),
