@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2024 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -11,9 +11,11 @@ import Snippets
 import struct SymbolKit.SymbolGraph
 
 extension SymbolGraph.Symbol {
-    /// Create a ``SymbolGraph.Symbol`` from a ``Snippet``.
+    /// Create a symbol for a given snippet.
     ///
-    /// - parameter moduleName: The name to use for the package name in the snippet symbol's precise identifier.
+    /// - Parameters:
+    ///   - snippet: The snippet to create a symbol for.
+    ///   - moduleName: The name to use for the package name in the snippet symbol's precise identifier.
     public init(_ snippet: Snippets.Snippet, moduleName: String) throws {
         let basename = snippet.sourceFile.deletingPathExtension().lastPathComponent
         let identifier = SymbolGraph.Symbol.Identifier(precise: "$snippet__\(moduleName).\(basename)", interfaceLanguage: "swift")
