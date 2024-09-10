@@ -139,42 +139,42 @@ struct ParsedArguments {
 enum DocCArguments {
     /// A fallback value for the bundle display name, if the documentation catalog doesn't specify one or if the build has no symbol information.
     ///
-    /// The plugin defines this name so that it can pass a default value for older versions of `docc` which require this.
+    /// The plugin defines this option so that it can pass a default value for older versions of `docc` which require this.
     static let fallbackDisplayName = CommandLineArgument.Option(
         preferred: "--fallback-display-name"
     )
     
     /// A fallback value for the bundle identifier, if the documentation catalog doesn't specify one or if the build has no symbol information.
     ///
-    /// The plugin defines this name so that it can pass a default value for older versions of `docc` which require this.
+    /// The plugin defines this option so that it can pass a default value for older versions of `docc` which require this.
     static let fallbackBundleIdentifier = CommandLineArgument.Option(
         preferred: "--fallback-bundle-identifier"
     )
     
     /// A fallback value for the "module kind" display name, if the documentation catalog doesn't specify one.
     ///
-    /// The plugin defines this name so that it can pass a default value when building documentation for executable targets.
+    /// The plugin defines this option so that it can pass a default value when building documentation for executable targets.
     static let fallbackDefaultModuleKind = CommandLineArgument.Option(
         preferred: "--fallback-default-module-kind"
     )
     
     /// A directory of symbol graph files that DocC will use as input when building documentation.
     ///
-    /// The plugin defines this name so that it can pass a default value.
+    /// The plugin defines this option so that it can pass a default value.
     static let additionalSymbolGraphDirectory = CommandLineArgument.Option(
         preferred: "--additional-symbol-graph-dir"
     )
     
     /// Configures DocC to include a LMDB representation of the navigator index in the output.
     ///
-    /// The plugin defines this name so that it can pass this flag by default.
+    /// The plugin defines this flag so that it can pass this flag by default.
     static let emitLMDBIndex = CommandLineArgument.Flag(
         preferred: "--emit-lmdb-index"
     )
     
     /// The directory where DocC will write the built documentation archive.
     ///
-    /// The plugin defines this name so that it can intercept it and support building documentation for multiple targets within one package build command.
+    /// The plugin defines this option so that it can intercept it and support building documentation for multiple targets within one package build command.
     static let outputPath = CommandLineArgument.Option(
         preferred: "--output-path",
         alternatives: ["--output-dir", "-o"]
@@ -182,14 +182,14 @@ enum DocCArguments {
     
     /// A DocC feature flag to enable support for linking to documentation dependencies.
     ///
-    /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
+    /// The plugin defines this flag so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
     static let enableExternalLinkSupport = CommandLineArgument.Flag(
         preferred: "--enable-experimental-external-link-support"
     )
     
     /// A DocC flag that specifies a dependency DocC archive that the current build can link to.
     ///
-    /// The plugin defines this name so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
+    /// The plugin defines this option so that it can specify documentation dependencies based on target dependencies when building combined documentation for multiple targets.
     static let externalLinkDependency = CommandLineArgument.Option(
         preferred: "--dependency",
         kind: .arrayOfValues
@@ -197,14 +197,14 @@ enum DocCArguments {
     
     /// A DocC flag for the "merge" command that specifies a custom display name for the synthesized landing page.
     ///
-    /// The plugin defines this name so that it can specify the package name as the display name of the default landing page when building combined documentation for multiple targets.
+    /// The plugin defines this option so that it can specify the package name as the display name of the default landing page when building combined documentation for multiple targets.
     static let synthesizedLandingPageName = CommandLineArgument.Option(
         preferred: "--synthesized-landing-page-name"
     )
     
     /// A DocC flag for the "merge" command that specifies a custom kind for the synthesized landing page.
     ///
-    /// The plugin defines this name so that it can specify "Package" as the kind of the default landing page when building combined documentation for multiple targets.
+    /// The plugin defines this option so that it can specify "Package" as the kind of the default landing page when building combined documentation for multiple targets.
     static let synthesizedLandingPageKind = CommandLineArgument.Option(
         preferred: "--synthesized-landing-page-kind"
     )

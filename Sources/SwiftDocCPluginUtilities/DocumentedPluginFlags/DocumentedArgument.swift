@@ -6,9 +6,9 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for Swift project authors
 
-/// A documented command-line flag for the plugin.
+/// A documented command-line argument for the plugin.
 ///
-/// This may include some flags that the plugin forwards to the symbol graph extract tool or to DocC.
+/// This may include some arguments (flags or options) that the plugin forwards to the symbol graph extract tool or to DocC.
 struct DocumentedArgument {
     /// A command line argument (flag or option) that is wrapped with documentation.
     enum Argument {
@@ -29,10 +29,10 @@ struct DocumentedArgument {
         }
     }
     
-    /// A short user-facing description of this flag.
+    /// A short user-facing description of this argument (flag or option).
     var abstract: String
     
-    /// An expanded user-facing description of this flag.
+    /// An expanded user-facing description of this argument (flag or option).
     var discussion: String?
     
     init(flag: CommandLineArgument.Flag, abstract: String, discussion: String? = nil) {
@@ -85,7 +85,7 @@ extension DocumentedArgument {
 // MARK: Symbol graph flags
 
 extension DocumentedArgument {
-    /// Include or exclude extended types in documentation archives.
+    /// A plugin feature flag to either include or exclude extended types in documentation archives.
     ///
     /// Enables/disables the extension block symbol format when calling the dump symbol graph API.
     ///
@@ -100,7 +100,7 @@ extension DocumentedArgument {
         discussion: "Allows documenting symbols that a target adds to its dependencies."
     )
     
-    /// Exclude synthesized symbols from the generated documentation.
+    /// A plugin feature flag to exclude synthesized symbols from the generated documentation.
     ///
     /// `--experimental-skip-synthesized-symbols` produces a DocC archive without compiler-synthesized symbols.
     static let skipSynthesizedSymbols = Self(

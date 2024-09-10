@@ -35,11 +35,11 @@ public struct CommandLineArguments {
     
     // MARK: Extract
     
-    /// Extracts the values for the command line option with the given names.
+    /// Extracts the values for the given command line option.
     ///
     /// Upon return, the arguments list no longer contains any elements that match any spelling of this command line option or its values.
     ///
-    /// - Parameter names: The names of a command line option.
+    /// - Parameter option: The command line option to extract values for.
     /// - Returns: The extracted values for this command line option, in the order that they appear in the arguments list.
     public mutating func extract(_ option: CommandLineArgument.Option) -> [String] {
         var values = [String]()
@@ -71,13 +71,11 @@ public struct CommandLineArguments {
         return values.reversed() // The values are gathered in reverse order
     }
     
-    /// Extracts the values for the command line flag with the given names.
+    /// Extracts the values for the command line flag.
     ///
     /// Upon return, the arguments list no longer contains any elements that match any spelling of this command line flag.
     ///
-    /// - Parameters:
-    ///   - positiveNames: The positive names for a command line flag.
-    ///   - negativeNames: The negative names for this command line flag, if any.
+    /// - Parameter flag: The command line flag to extract values for.
     /// - Returns: The extracted values for this command line flag.
     public mutating func extract(_ flag: CommandLineArgument.Flag) -> [Bool] {
         let positiveNames = flag.names
@@ -98,8 +96,8 @@ public struct CommandLineArguments {
     
     /// Inserts a command line option into the arguments list unless it already exists.
     /// - Parameters:
-    ///   - argument: The command line option to insert.
-    ///   - matchOptionWithAnyValue: If `true`, an option argument will be considered a match even
+    ///   - option: The command line option to insert.
+    ///   - value: The value for this option.
     /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
     public mutating func insertIfMissing(_ option: CommandLineArgument.Option, value: String) -> Bool {
@@ -107,9 +105,7 @@ public struct CommandLineArguments {
     }
     
     /// Inserts a command line flag into the arguments list unless it already exists.
-    /// - Parameters:
-    ///   - argument: The command line flag to insert.
-    ///   - matchOptionWithAnyValue: If `true`, an option argument will be considered a match even
+    /// - Parameter flag: The command line flag to insert.
     /// - Returns:  `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
     public mutating func insertIfMissing(_ flag: CommandLineArgument.Flag) -> Bool {
@@ -121,10 +117,10 @@ public struct CommandLineArguments {
         remainingOptionsOrFlags.insert(rawArgument, at: 0)
     }
     
-    /// Inserts a command line argument into the arguments list, overriding any existing values.
+    /// Inserts a command line option with a new value into the arguments list, overriding any existing values.
     /// - Parameters:
-    ///   - argument: The command line argument (flag or option) to insert.
-    ///   - newValue: The new value for this command line argument.
+    ///   - option: The command line option to insert.
+    ///   - newValue: The new value for this option.
     /// - Returns: `true` if the argument was already present in the arguments list; otherwise, `false`.
     @discardableResult
     public mutating func overrideOrInsert(_ option: CommandLineArgument.Option, newValue: String) -> Bool {
@@ -160,7 +156,7 @@ private extension ArraySlice<String> {
         }
     }
     
-    /// Checks if the slice contains the given argument (flag or argument).
+    /// Checks if the slice contains the given argument (flag or option).
     func contains(_ argument: CommandLineArgument) -> Bool {
         let names = argument.names
         guard case .option(let value, .arrayOfValues) = argument.kind else {
