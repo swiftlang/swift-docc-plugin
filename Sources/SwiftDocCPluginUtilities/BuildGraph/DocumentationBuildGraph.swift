@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift project authors
+// Copyright (c) 2024-2025 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -9,7 +9,7 @@
 import Foundation
 
 /// A target that can have a documentation task in the build graph
-protocol DocumentationBuildGraphTarget {
+protocol DocumentationBuildGraphTarget: SendableMetatype {
     typealias ID = String
     /// The unique identifier of this target
     var id: ID { get }
