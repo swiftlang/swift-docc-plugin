@@ -28,7 +28,7 @@ extension DispatchTimeInterval {
             return String(format: "%.2f", Double(value)/Double(1_000_000_000)) + "s"
         case .never:
             return "n/a"
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+        #if canImport(Darwin)
         @unknown default:
             return "n/a"
         #endif
@@ -38,7 +38,7 @@ extension DispatchTimeInterval {
 
 // `distance(to:)` is currently only available on macOS. This should be removed
 // when it's available on all platforms.
-#if os(Linux) || os(Windows) || os(Android) || os(OpenBSD)
+#if !canImport(Darwin)
 extension DispatchTime {
     public func distance(to: DispatchTime) -> DispatchTimeInterval {
         let duration = to.uptimeNanoseconds - self.uptimeNanoseconds
