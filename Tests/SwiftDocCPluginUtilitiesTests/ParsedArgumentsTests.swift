@@ -451,6 +451,7 @@ final class ParsedArgumentsTests: XCTestCase {
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
             XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertNil(arguments.symbolGraphArguments.skipInheritedDocs)
             XCTAssertEqual(arguments.symbolGraphArguments.minimumAccessLevel, "internal")
         }
         
@@ -459,6 +460,7 @@ final class ParsedArgumentsTests: XCTestCase {
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
             XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertNil(arguments.symbolGraphArguments.skipInheritedDocs)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
         
@@ -467,6 +469,7 @@ final class ParsedArgumentsTests: XCTestCase {
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
             XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertNil(arguments.symbolGraphArguments.skipInheritedDocs)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
         do {
@@ -474,6 +477,7 @@ final class ParsedArgumentsTests: XCTestCase {
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
             XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+            XCTAssertNil(arguments.symbolGraphArguments.skipInheritedDocs)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
     }
@@ -483,6 +487,7 @@ final class ParsedArgumentsTests: XCTestCase {
         
         XCTAssertNil(arguments.symbolGraphArguments.includeExtendedTypes)
         XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+        XCTAssertNil(arguments.symbolGraphArguments.skipInheritedDocs)
         XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
     }
 }
