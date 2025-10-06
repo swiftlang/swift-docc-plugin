@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2022 Apple Inc. and the Swift project authors
+// Copyright (c) 2022-2025 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -23,6 +23,10 @@ extension SourceModuleTarget {
             // the 'public' minimum access level.
             targetMinimumAccessLevel = .public
         }
+
+#if swift(>=6.3)
+        let skipInheritedDocs = false
+#endif
         
 #if swift(>=5.9)
         let emitExtensionBlockSymbolDefault = true
@@ -32,12 +36,26 @@ extension SourceModuleTarget {
         
         return PackageManager.SymbolGraphOptions(
             minimumAccessLevel: targetMinimumAccessLevel,
+            includeInheritedDocs: !skipInheritedDocs,
             includeSynthesized: true,
             includeSPI: false,
             emitExtensionBlocks: emitExtensionBlockSymbolDefault
         )
     }
 }
+
+#if swift(<6.3)
+private extension PackageManager.SymbolGraphOptions {
+    /// A compatibility layer for lower Swift versions which don't toggle include/skip inherited docs.
+    init(minimumAccessLevel: PackagePlugin.PackageManager.SymbolGraphOptions.AccessLevel = .public,
+         includeInheritedDocs: Bool = true
+         includeSynthesized: Bool = false,
+         includeSPI: Bool = false,
+         emitExtensionBlocks: Bool) {
+        self.init(minimumAccessLevel: minimumAccessLevel, includeSynthesized: includeSynthesized, includeSPI: includeSPI, emitExtensionBlocks: emitExtensionBlocks)
+    }
+}
+#endif
 
 
 #if swift(<5.8)
