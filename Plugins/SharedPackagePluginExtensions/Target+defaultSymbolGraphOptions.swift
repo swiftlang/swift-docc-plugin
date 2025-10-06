@@ -24,7 +24,7 @@ extension SourceModuleTarget {
             targetMinimumAccessLevel = .public
         }
 
-#if swift(>=6.3)
+#if swift(<6.3)
         let skipInheritedDocs = false
 #endif
         
@@ -48,7 +48,7 @@ extension SourceModuleTarget {
 private extension PackageManager.SymbolGraphOptions {
     /// A compatibility layer for lower Swift versions which don't toggle include/skip inherited docs.
     init(minimumAccessLevel: PackagePlugin.PackageManager.SymbolGraphOptions.AccessLevel = .public,
-         includeInheritedDocs: Bool = true
+         includeInheritedDocs: Bool = true,
          includeSynthesized: Bool = false,
          includeSPI: Bool = false,
          emitExtensionBlocks: Bool) {
