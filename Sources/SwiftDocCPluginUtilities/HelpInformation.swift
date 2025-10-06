@@ -63,7 +63,7 @@ public enum HelpInformation {
             DocumentedArgument.minimumAccessLevel,
         ]
 
-#if swift(>=6.3)
+#if compiler(>=6.3)
         supportedSymbolGraphFlags.append(DocumentedArgument.skipInheritedDocs)
 #endif
 

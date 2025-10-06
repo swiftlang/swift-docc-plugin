@@ -60,7 +60,7 @@ extension PackageManager {
         }
 
         if let skipInheritedDocs = customSymbolGraphOptions.skipInheritedDocs {
-#if swift(<6.3)
+#if compiler(<6.3)
             print("warning: detected '--skip-inherited-docs' option, which is incompatible with your swift version (required: 6.3)")
 #else
             symbolGraphOptions.includeInheritedDocs = !skipInheritedDocs
