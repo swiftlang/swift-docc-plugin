@@ -122,8 +122,8 @@ extension DocumentedArgument {
 
     /// Skip inherited docs from parent class or protocol members.
     static let skipInheritedDocs = Self(
-        option: .init(preferred: "--include-inherited-docs"),
-        abstract: "Include inherited docs from parent class or protocol members.",
+        flag: .init(preferred: "--skip-inherited-docs"),
+        abstract: "Skip inherited docs from parent class or protocol members.",
         discussion: """
             Documentation from class and protocol members is inherited by children. Set this
             option to disable the inheritance.
