@@ -24,9 +24,7 @@ extension SourceModuleTarget {
             targetMinimumAccessLevel = .public
         }
 
-#if compiler(<6.3)
         let skipInheritedDocs = false
-#endif
         
 #if swift(>=5.9)
         let emitExtensionBlockSymbolDefault = true
