@@ -199,7 +199,7 @@ final class HelpInformationTests: XCTestCase {
                                       Include symbols with this access level or more.
                     Supported access level values are: `open`, `public`, `internal`, `private`, `fileprivate`
               --skip-inherited-docs   Skip inherited docs from parent class or protocol members.
-                    Documentation from class and protocol members is inherited by children. Set this option to disable the inheritance.
+                    Documentation comments from class and protocol members is inherited by children. Set this option to disable the inheritance of the comments.
 
             DOCC PREVIEW OPTIONS:
               -p, --port <port-number>
