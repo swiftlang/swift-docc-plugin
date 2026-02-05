@@ -1,0 +1,6 @@
+# Symlinks type for Windows
+
+Plugins/Swift-DocC[[:space:]]Convert/Symbolic[[:space:]]Links/SharedPackagePluginExtensions symlink=dir
+Plugins/Swift-DocC[[:space:]]Convert/Symbolic[[:space:]]Links/SwiftDocCPluginUtilities symlink=dir
+Plugins/Swift-DocC[[:space:]]Preview/Symbolic[[:space:]]Links/SharedPackagePluginExtensions symlink=dir
+Plugins/Swift-DocC[[:space:]]Preview/Symbolic[[:space:]]Links/SwiftDocCPluginUtilities symlink=dir
