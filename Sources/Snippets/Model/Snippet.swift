@@ -30,7 +30,8 @@ public struct Snippet {
     public var slices: [String: Range<Int>]
 
     init(parsing source: String, sourceFile: URL) {
-        let extractor = SnippetParser(source: source)
+        let commentStyle = SnippetLanguage.commentStyle(forFileExtension: sourceFile.pathExtension)
+        let extractor = SnippetParser(source: source, commentStyle: commentStyle)
         self.explanation = extractor.explanationLines.joined(separator: "\n")
         self.presentationLines = extractor.presentationLines.map(String.init)
         self.slices = extractor.slices

@@ -530,35 +530,168 @@ class SnippetParseTests: XCTestCase {
         }
         """, snippet.presentationCode)
     }
+
+    func testParsePythonSnippet() {
+        let pythonSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.py")
+
+        let source = """
+        # A Python example showing list comprehension
+
+        # snippet.hide
+        import sys
+        # snippet.show
+
+        # snippet.setup
+        numbers = [1, 2, 3, 4, 5]
+        # snippet.end
+
+        squares = [x * x for x in numbers]
+        print(squares)
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: pythonSourceFile)
+        XCTAssertEqual("A Python example showing list comprehension", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["setup"], "numbers = [1, 2, 3, 4, 5]")
+
+        let expectedCode = """
+        numbers = [1, 2, 3, 4, 5]
+
+        squares = [x * x for x in numbers]
+        print(squares)
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    func testParseBashSnippet() {
+        let bashSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.sh")
+
+        let source = """
+        # A bash script example
+
+        # snippet.hide
+        set -euo pipefail
+        # snippet.show
+
+        echo "Hello, world!"
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: bashSourceFile)
+        XCTAssertEqual("A bash script example", snippet.explanation)
+        XCTAssertEqual("echo \"Hello, world!\"", snippet.presentationCode)
+    }
+
+    func testParseHtmlSnippet() {
+        let htmlSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!-- snippet.hide -->
+        <!DOCTYPE html>
+        <!-- snippet.show -->
+
+        <!-- snippet.body -->
+        <div class="container">
+            <p>Hello</p>
+        </div>
+        <!-- snippet.end -->
+
+        <footer>End</footer>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["body"], """
+        <div class="container">
+            <p>Hello</p>
+        </div>
+        """)
+
+        let expectedCode = """
+        <div class="container">
+            <p>Hello</p>
+        </div>
+
+        <footer>End</footer>
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
 }
 
 class SnippetParseMarkerTests: XCTestCase {
     func testParseHideShow() {
-        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// snippet.show"))
-        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Show"))
-        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.SHOW"))
-        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show"))
-        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show      "))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// snippet.show", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Show", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.SHOW", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "//      snippet.show      ", commentStyle: .slashSlash))
 
-        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// snippet.hide"))
-        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Hide"))
-        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.HIDE"))
-        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide"))
-        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide   "))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// snippet.hide", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// Snippet.Hide", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "// SNIPPET.HIDE", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide", commentStyle: .slashSlash))
+        XCTAssertEqual(.visibilityChange(isVisible: false), SnippetParser.tryParseSnippetMarker(from: "//      snippet.hide   ", commentStyle: .slashSlash))
 
         // Markers need to be a comment.
-        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.show"))
-        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.hide"))
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.show", commentStyle: .slashSlash))
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.hide", commentStyle: .slashSlash))
     }
-    
+
     func testParseSliceStartAndEnd() {
-        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "// snippet.foo"))
-        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo"))
-        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo    "))
-        
-        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.end"))
-        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.END"))
-        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//   snippet.end"))
-        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//    snippet.end  "))
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "// snippet.foo", commentStyle: .slashSlash))
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo", commentStyle: .slashSlash))
+        XCTAssertEqual(.startSlice(identifier: "foo"), SnippetParser.tryParseSnippetMarker(from: "//   snippet.foo    ", commentStyle: .slashSlash))
+
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.end", commentStyle: .slashSlash))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "// snippet.END", commentStyle: .slashSlash))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//   snippet.end", commentStyle: .slashSlash))
+        XCTAssertEqual(.endSlice, SnippetParser.tryParseSnippetMarker(from: "//    snippet.end  ", commentStyle: .slashSlash))
+    }
+
+    func testParseHashCommentMarkers() {
+        XCTAssertEqual(.visibilityChange(isVisible: true),
+                       SnippetParser.tryParseSnippetMarker(from: "# snippet.show", commentStyle: .hash))
+        XCTAssertEqual(.visibilityChange(isVisible: false),
+                       SnippetParser.tryParseSnippetMarker(from: "# snippet.hide", commentStyle: .hash))
+        XCTAssertEqual(.visibilityChange(isVisible: true),
+                       SnippetParser.tryParseSnippetMarker(from: "#   snippet.show", commentStyle: .hash))
+        XCTAssertEqual(.startSlice(identifier: "foo"),
+                       SnippetParser.tryParseSnippetMarker(from: "# snippet.foo", commentStyle: .hash))
+        XCTAssertEqual(.endSlice,
+                       SnippetParser.tryParseSnippetMarker(from: "# snippet.end", commentStyle: .hash))
+
+        // Hash markers need to be a comment
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.show", commentStyle: .hash))
+
+        // Hash style should NOT match // comments
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "// snippet.show", commentStyle: .hash))
+    }
+
+    func testParseHtmlCommentMarkers() {
+        XCTAssertEqual(.visibilityChange(isVisible: true),
+                       SnippetParser.tryParseSnippetMarker(from: "<!-- snippet.show -->", commentStyle: .xml))
+        XCTAssertEqual(.visibilityChange(isVisible: false),
+                       SnippetParser.tryParseSnippetMarker(from: "<!-- snippet.hide -->", commentStyle: .xml))
+        XCTAssertEqual(.visibilityChange(isVisible: true),
+                       SnippetParser.tryParseSnippetMarker(from: "<!--   snippet.show   -->", commentStyle: .xml))
+        XCTAssertEqual(.startSlice(identifier: "foo"),
+                       SnippetParser.tryParseSnippetMarker(from: "<!-- snippet.foo -->", commentStyle: .xml))
+        XCTAssertEqual(.endSlice,
+                       SnippetParser.tryParseSnippetMarker(from: "<!-- snippet.end -->", commentStyle: .xml))
+
+        // HTML markers without closing --> should still work
+        XCTAssertEqual(.visibilityChange(isVisible: true),
+                       SnippetParser.tryParseSnippetMarker(from: "<!-- snippet.show", commentStyle: .xml))
+
+        // HTML markers need to be a comment
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "snippet.show", commentStyle: .xml))
+
+        // HTML style should NOT match // comments
+        XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "// snippet.show", commentStyle: .xml))
     }
 }

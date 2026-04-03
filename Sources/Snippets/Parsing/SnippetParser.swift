@@ -69,12 +69,10 @@ extension Substring {
     }
 }
 
-/// Extracts a ``Snippet`` structure from Swift source code.
-///
-/// - todo: In order to support different styles of comments, it might be
-///   better to adopt SwiftSyntax if possible in the future.
+/// Extracts a ``Snippet`` structure from source code
 struct SnippetParser {
     var source: String
+    var commentStyle: CommentStyle
     var explanationLines = [Substring]()
     var presentationLines = [Substring]()
     var slices = [String: Range<Int>]()
@@ -104,10 +102,10 @@ struct SnippetParser {
         var explanationLines = [Substring]()
         for var line in lines {
             guard !line.isEmptyOrWhiteSpace,
-                  SnippetParser.tryParseSnippetMarker(from: line) == nil else {
+                  SnippetParser.tryParseSnippetMarker(from: line, commentStyle: commentStyle) == nil else {
                 break
             }
-            guard SnippetParser.tryParseCommentMarkerPrefix(from: &line) else {
+            guard SnippetParser.tryParseCommentMarkerPrefix(from: &line, commentStyle: commentStyle) else {
                 break
             }
             explanationLines.append(line)
@@ -127,16 +125,17 @@ struct SnippetParser {
         self.explanationLines = explanationLines
     }
     
-    init(source: String) {
+    init(source: String, commentStyle: CommentStyle) {
         self.source = source
+        self.commentStyle = commentStyle
         var lines = source.split(separator: "\n", omittingEmptySubsequences: false)[...]
             .drop { $0.isEmptyOrWhiteSpace }
-        
+
         extractExplanation(from: &lines)
-                
+
         var lineNumber = 0
         for line in lines {
-            switch SnippetParser.parseContent(from: line) {
+            switch SnippetParser.parseContent(from: line, commentStyle: commentStyle) {
             case let .visibilityChange(isVisible):
                 self.isVisible = isVisible
             case let .startSlice(identifier: identifier):
@@ -186,9 +185,12 @@ extension SnippetParser {
         case presentationLine
     }
     
-    static func tryParseSnippetMarker(from line: Substring) -> LineParseResult? {
+    static func tryParseSnippetMarker(
+        from line: Substring,
+        commentStyle: CommentStyle
+    ) -> LineParseResult? {
         var line = line
-        guard SnippetParser.tryParseCommentMarkerPrefix(from: &line) else {
+        guard SnippetParser.tryParseCommentMarkerPrefix(from: &line, commentStyle: commentStyle) else {
             return nil
         }
         
@@ -214,17 +216,32 @@ extension SnippetParser {
         }
     }
     
-    static func tryParseCommentMarkerPrefix(from line: inout Substring) -> Bool {
+    static func tryParseCommentMarkerPrefix(
+        from line: inout Substring,
+        commentStyle: CommentStyle
+    ) -> Bool {
         var trimmed = line.drop { $0.isWhitespace }
-        guard trimmed.trimExpectedPrefix("//") else {
-            return false
+        switch commentStyle {
+        case .lineComment(let prefix):
+            guard trimmed.trimExpectedPrefix(prefix) else { return false }
+        case .blockComment(let prefix, let suffix):
+            guard trimmed.trimExpectedPrefix(prefix) else { return false }
+            if let closingRange = trimmed.range(of: suffix, options: .backwards) {
+                trimmed = trimmed[..<closingRange.lowerBound]
+                while trimmed.last?.isWhitespace == true {
+                    trimmed = trimmed.dropLast()
+                }
+            }
         }
         line = trimmed
         return true
     }
     
-    static func parseContent(from line: Substring) -> LineParseResult {
-        if let marker = tryParseSnippetMarker(from: line) {
+    static func parseContent(
+        from line: Substring,
+        commentStyle: CommentStyle
+    ) -> LineParseResult {
+        if let marker = tryParseSnippetMarker(from: line, commentStyle: commentStyle) {
             return marker
         }
         return .presentationLine
