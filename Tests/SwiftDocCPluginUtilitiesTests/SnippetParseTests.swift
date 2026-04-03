@@ -461,15 +461,74 @@ class SnippetParseTests: XCTestCase {
             // snippet.end
             func bar() {}
             """
-            
+
             let expectedPresentationCode = """
             func bar() {}
             """
-            
+
             let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
             XCTAssertEqual(expectedPresentationCode, snippet.presentationCode)
             XCTAssertTrue(snippet.slices.isEmpty)
         }
+    }
+
+    func testParseJavaSnippet() {
+        let javaSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("JavaExample.java")
+
+        let source = """
+        // A Java example showing basic usage.
+
+        // snippet.hide
+        import java.util.List;
+        // snippet.show
+
+        // snippet.setup
+        List<String> items = List.of("a", "b", "c");
+        // snippet.end
+
+        for (String item : items) {
+            System.out.println(item);
+        }
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: javaSourceFile)
+        XCTAssertEqual("A Java example showing basic usage.", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["setup"], "List<String> items = List.of(\"a\", \"b\", \"c\");")
+
+        let expectedCode = """
+        List<String> items = List.of("a", "b", "c");
+
+        for (String item : items) {
+            System.out.println(item);
+        }
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    func testParseCppSnippet() {
+        let source = """
+        // A C++ snippet
+
+        // snippet.hide
+        #include <iostream>
+        // snippet.show
+
+        int main() {
+            std::cout << "Hello" << std::endl;
+            return 0;
+        }
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual("A C++ snippet", snippet.explanation)
+        XCTAssertEqual("""
+        int main() {
+            std::cout << "Hello" << std::endl;
+            return 0;
+        }
+        """, snippet.presentationCode)
     }
 }
 

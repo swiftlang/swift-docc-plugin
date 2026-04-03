@@ -8,7 +8,7 @@
 
 import Foundation
 
-/// A Swift code snippet.
+/// A code snippet.
 ///
 /// A *snippet* is a short, focused code example that can be shown with little to no context or prose.
 public struct Snippet {
@@ -37,7 +37,7 @@ public struct Snippet {
         self.sourceFile = sourceFile
     }
 
-    /// Create a Swift snippet by parsing a file.
+    /// Create a snippet by parsing a file.
     ///
     /// - Parameter sourceFile: The URL of the file to parse.
     public init(parsing sourceFile: URL) throws {

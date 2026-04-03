@@ -18,9 +18,11 @@ extension SymbolGraph.Symbol {
     ///   - moduleName: The name to use for the package name in the snippet symbol's precise identifier.
     public init(_ snippet: Snippets.Snippet, moduleName: String) throws {
         let basename = snippet.sourceFile.deletingPathExtension().lastPathComponent
-        let identifier = SymbolGraph.Symbol.Identifier(precise: "$snippet__\(moduleName).\(basename)", interfaceLanguage: "swift")
+        let language = SnippetLanguage.language(forFileExtension: snippet.sourceFile.pathExtension)?.id
+            ?? snippet.sourceFile.pathExtension.lowercased()
+        let identifier = SymbolGraph.Symbol.Identifier(precise: "$snippet__\(moduleName).\(basename)", interfaceLanguage: language)
         let names = SymbolGraph.Symbol.Names.init(title: basename, navigator: nil, subHeading: nil, prose: nil)
-        
+
         var pathComponents = Array(snippet.sourceFile.absoluteURL.deletingPathExtension().pathComponents[...])
 
         guard let snippetsPathComponentIndex = pathComponents.firstIndex(where: {
@@ -50,7 +52,7 @@ extension SymbolGraph.Symbol {
                   accessLevel: accessLevel,
                   kind: kind,
                   mixins: [
-                      SymbolGraph.Symbol.Snippet.mixinKey: SymbolGraph.Symbol.Snippet(language: "swift", lines: snippet.presentationLines, slices: snippet.slices)
+                      SymbolGraph.Symbol.Snippet.mixinKey: SymbolGraph.Symbol.Snippet(language: language, lines: snippet.presentationLines, slices: snippet.slices)
                   ],
                   isVirtual: true)
     }

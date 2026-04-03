@@ -255,6 +255,56 @@ final class SnippetExtractTests: XCTestCase {
         XCTAssertNil(snippetDirectory)
     }
 
+    func testSnippetGenerationWithMixedFileExtensions() throws {
+        let expectedFilePaths: Set<String> = [
+            "/my/package/Snippets",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+        ]
+        let existingFilePaths: Set<String> = [
+            "/my/package/Snippets",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+        ]
+        snippetExtractor._fileExists = { path in
+            XCTAssertTrue(
+                expectedFilePaths.contains(path),
+                "Unexpected file path: '\(path)'"
+            )
+            return existingFilePaths.contains(path)
+        }
+
+        snippetExtractor._findSnippetFilesInDirectory = { _ in
+            [
+                "/my/package/Snippets/SwiftExample.swift",
+                "/my/package/Snippets/JavaExample.java",
+                "/my/package/Snippets/CppExample.cpp",
+            ]
+        }
+
+        var capturedArguments: [String]?
+        snippetExtractor._runProcess = { process in
+            capturedArguments = process.arguments
+        }
+
+        let snippetFile = try snippetExtractor.generateSnippets(
+            for: "package-id",
+            packageDisplayName: "MyPackage",
+            packageDirectory: URL(fileURLWithPath: "/my/package")
+        )
+
+        XCTAssertNotNil(snippetFile)
+        // Verify all three files were passed to the snippet-extract tool
+        XCTAssertEqual(
+            capturedArguments,
+            [
+                "--output", "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+                "--module-name", "MyPackage",
+                "/my/package/Snippets/SwiftExample.swift",
+                "/my/package/Snippets/JavaExample.java",
+                "/my/package/Snippets/CppExample.cpp",
+            ]
+        )
+    }
+
     func testSnippetExtractArguments() throws {
         // Valid
         XCTAssertNoThrow(try SnippetExtractCommand(arguments: [

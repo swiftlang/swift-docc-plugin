@@ -40,5 +40,22 @@ class SnippetSymbolTests: XCTestCase {
                                        sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/ASnippet.swift"))
         let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
         XCTAssertEqual(["Snippets", "ASnippet"], symbol.pathComponents)
+        XCTAssertEqual("swift", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("swift", snippetMixin?.language)
+    }
+
+    func testPathComponentsForJavaSnippetSymbol() throws {
+        let source = """
+        // A Java snippet.
+        public class Hello {}
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/Hello.java"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "Hello"], symbol.pathComponents)
+        XCTAssertEqual("java", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("java", snippetMixin?.language)
     }
 }
