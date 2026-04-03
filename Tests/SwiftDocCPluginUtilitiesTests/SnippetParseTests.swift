@@ -479,7 +479,7 @@ class SnippetParseTests: XCTestCase {
         let source = """
         // A Java example showing basic usage.
 
-        // snippet.hide
+        /* snippet.hide */
         import java.util.List;
         // snippet.show
 

@@ -27,6 +27,11 @@ public enum CommentStyle: Sendable {
     public static var xml: Self {
         .blockComment(prefix: "<!--", suffix: "-->")
     }
+
+    /// C-style block comment `/* ... */`
+    public static var cBlock: Self {
+        .blockComment(prefix: "/*", suffix: "*/")
+    }
 }
 
 /// A programming language supported for code snippets
@@ -74,15 +79,15 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
         }
     }
 
-    /// The comment style used by this language
-    public var commentStyle: CommentStyle {
+    /// The comment styles used by this language
+    public var commentStyles: [CommentStyle] {
         switch self {
         case .python, .bash, .zsh:
-            return .hash
+            return [.hash]
         case .xml, .html:
-            return .xml
+            return [.xml]
         default:
-            return .slashSlash
+            return [.slashSlash, .cBlock]
         }
     }
 
@@ -124,11 +129,11 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
         return allCases.first { $0.fileExtensions.contains(lowered) }
     }
 
-    /// Look up the comment style for a given file extension
+    /// Look up the comment styles for a given file extension
     ///
-    /// Returns `.slashSlash` for unknown extensions, since most programming
+    /// Returns `[.slashSlash]` for unknown extensions, since most programming
     /// languages use `//` line comments
-    public static func commentStyle(forFileExtension ext: String) -> CommentStyle {
-        language(forFileExtension: ext)?.commentStyle ?? .slashSlash
+    public static func commentStyles(forFileExtension ext: String) -> [CommentStyle] {
+        language(forFileExtension: ext)?.commentStyles ?? [.slashSlash]
     }
 }
