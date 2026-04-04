@@ -508,6 +508,9 @@ class SnippetParseTests: XCTestCase {
     }
 
     func testParseCppSnippet() {
+        let cppSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.cpp")
+
         let source = """
         // A C++ snippet
 
@@ -521,7 +524,7 @@ class SnippetParseTests: XCTestCase {
         }
         """
 
-        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        let snippet = Snippet(parsing: source, sourceFile: cppSourceFile)
         XCTAssertEqual("A C++ snippet", snippet.explanation)
         XCTAssertEqual("""
         int main() {
