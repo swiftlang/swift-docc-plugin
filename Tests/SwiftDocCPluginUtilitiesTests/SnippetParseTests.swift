@@ -624,6 +624,126 @@ class SnippetParseTests: XCTestCase {
         """
         XCTAssertEqual(expectedCode, snippet.presentationCode)
     }
+
+    func testParseYamlSnippet() {
+        let yamlSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.yaml")
+
+        let source = """
+        # A YAML configuration example
+
+        # snippet.hide
+        version: "3"
+        # snippet.show
+
+        # snippet.services
+        services:
+          web:
+            image: nginx
+            ports:
+              - "80:80"
+        # snippet.end
+
+        volumes:
+          data: {}
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: yamlSourceFile)
+        XCTAssertEqual("A YAML configuration example", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["services"], """
+        services:
+          web:
+            image: nginx
+            ports:
+              - "80:80"
+        """)
+
+        let expectedCode = """
+        services:
+          web:
+            image: nginx
+            ports:
+              - "80:80"
+
+        volumes:
+          data: {}
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    func testParseUnknownLanguageWithSlashSlashComments() {
+        let pklSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.pkl")
+
+        // We just assume an unknown language can likely handle # or //
+        let source = """
+        // A Pkl configuration example
+
+        // snippet.hide
+        amends "base.pkl"
+        // snippet.show
+
+        # snippet.config
+        host = "localhost"
+        port = 8080
+        # snippet.end
+
+        debug = true
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: pklSourceFile)
+        XCTAssertEqual("A Pkl configuration example", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["config"], """
+        host = "localhost"
+        port = 8080
+        """)
+
+        let expectedCode = """
+        host = "localhost"
+        port = 8080
+
+        debug = true
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    func testParseUnknownLanguageWithHashComments() {
+        let confSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.conf")
+
+        let source = """
+        # A configuration file example
+
+        # snippet.hide
+        [defaults]
+        # snippet.show
+
+        # snippet.main
+        server = 127.0.0.1
+        port = 3000
+        # snippet.end
+
+        log_level = info
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: confSourceFile)
+        XCTAssertEqual("A configuration file example", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["main"], """
+        server = 127.0.0.1
+        port = 3000
+        """)
+
+        let expectedCode = """
+        server = 127.0.0.1
+        port = 3000
+
+        log_level = info
+        """
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
 }
 
 class SnippetParseMarkerTests: XCTestCase {

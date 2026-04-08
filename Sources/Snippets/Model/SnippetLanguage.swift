@@ -1,6 +1,6 @@
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift project authors
+// Copyright (c) 2026 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -11,6 +11,10 @@ public enum CommentStyle: Sendable {
     /// Line comment with a given prefix, e.g. `//` or `#`
     case lineComment(String)
     /// Block comment with a prefix and suffix, e.g. `<!--` and `-->`
+    ///
+    /// Note: The snippet parser requires both the prefix and suffix to appear
+    /// on the same line. Multiline block comments are not supported for
+    /// snippet markers
     case blockComment(prefix: String, suffix: String)
 
     /// Inline comment style using `//`
@@ -40,8 +44,8 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
     case java
     case kotlin
     case c
-    case cpp
-    case objectiveC
+    case cpp = "c++"
+    case objectiveC = "objective-c"
     case csharp
     case go
     case rust
@@ -50,39 +54,23 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
     case scala
     case groovy
     case python
+    case ruby
     case bash
     case zsh
     case xml
     case html
+    case yaml
+    case toml
 
     /// The language identifier used in symbol graphs and for syntax highlighting
     public var id: String {
-        switch self {
-        case .swift:      return "swift"
-        case .java:       return "java"
-        case .kotlin:     return "kotlin"
-        case .c:          return "c"
-        case .cpp:        return "c++"
-        case .objectiveC: return "objective-c"
-        case .csharp:     return "csharp"
-        case .go:         return "go"
-        case .rust:       return "rust"
-        case .javascript: return "javascript"
-        case .typescript: return "typescript"
-        case .scala:      return "scala"
-        case .groovy:     return "groovy"
-        case .python:     return "python"
-        case .bash:       return "bash"
-        case .zsh:        return "zsh"
-        case .html:       return "html"
-        case .xml:        return "xml"
-        }
+        rawValue
     }
 
     /// The comment styles used by this language
     public var commentStyles: [CommentStyle] {
         switch self {
-        case .python, .bash, .zsh:
+        case .python, .bash, .zsh, .ruby, .yaml, .toml:
             return [.hash]
         case .xml, .html:
             return [.xml]
@@ -108,10 +96,13 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
         case .scala:       return ["scala"]
         case .groovy:      return ["groovy"]
         case .python:      return ["py"]
+        case .ruby:        return ["rb"]
         case .bash:        return ["sh", "bash"]
         case .zsh:         return ["zsh"]
         case .html:        return ["html", "htm", "xhtml"]
         case .xml:         return ["xml"]
+        case .yaml:        return ["yaml", "yml"]
+        case .toml:        return ["toml"]
         }
     }
 
@@ -131,9 +122,14 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
 
     /// Look up the comment styles for a given file extension
     ///
-    /// Returns `[.slashSlash]` for unknown extensions, since most programming
-    /// languages use `//` line comments
+    /// For unknown extensions, falls back to `//` line comments first,
+    /// then `#` line comments, covering the most common comment syntaxes
     public static func commentStyles(forFileExtension ext: String) -> [CommentStyle] {
-        language(forFileExtension: ext)?.commentStyles ?? [.slashSlash]
+        if let knownLanguage = language(forFileExtension: ext) {
+            knownLanguage.commentStyles
+        } else {
+            // wild guess, let's assume those are fine
+            [.slashSlash, .hash]
+        }
     }
 }

@@ -228,6 +228,11 @@ extension SnippetParser {
             guard trimmed.trimExpectedPrefix(prefix) else { return false }
             if let closingRange = trimmed.range(of: suffix, options: .backwards) {
                 trimmed = trimmed[..<closingRange.lowerBound]
+                // Note: This trims trailing whitespace inside the block comment,
+                // which is correct for snippet markers (e.g. `/* snippet.hide */`).
+                // If there were code after the suffix (e.g. `/* snippet.hide */ code`),
+                // the trailing whitespace trimmed here would be the wrong whitespace,
+                // but that's not a realistic scenario for snippet markers
                 while trimmed.last?.isWhitespace == true {
                     trimmed = trimmed.dropLast()
                 }

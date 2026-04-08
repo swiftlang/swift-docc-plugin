@@ -72,4 +72,19 @@ class SnippetSymbolTests: XCTestCase {
         let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
         XCTAssertEqual("python", snippetMixin?.language)
     }
+
+    func testPathComponentsForUnknownLanguageSnippetSymbol() throws {
+        let source = """
+        // A Pkl snippet
+        host = "localhost"
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/Config.pkl"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "Config"], symbol.pathComponents)
+        // Unknown languages fall back to using the file extension as the language id
+        XCTAssertEqual("pkl", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("pkl", snippetMixin?.language)
+    }
 }
