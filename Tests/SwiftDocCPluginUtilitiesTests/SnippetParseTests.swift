@@ -1035,12 +1035,20 @@ class SnippetParseMultilineBlockCommentTests: XCTestCase {
           snippet.end
         -->
 
+        <!--
+             snippet.something
+         -->
+        <p>Some other content here</p>
+        <!--
+             snippet.end
+        -->
+
         <footer>End</footer>
         """
 
         let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
         XCTAssertEqual("An HTML example", snippet.explanation)
-        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(2, snippet.slices.count)
         XCTAssertEqual(snippet["body"],
             """
             <div>
@@ -1051,6 +1059,7 @@ class SnippetParseMultilineBlockCommentTests: XCTestCase {
                 <!-- Normal single line comment -->
             </div>
             """)
+        XCTAssertEqual(snippet["something"], "<p>Some other content here</p>")
     }
 
     func testParseMultilineBlockCommentUnclosed() {
