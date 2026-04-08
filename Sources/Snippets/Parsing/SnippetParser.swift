@@ -64,7 +64,7 @@ extension Substring {
             }
             removeFirst(lowercasePrefix.count)
         }
-        
+
         return true
     }
 }
@@ -77,6 +77,7 @@ struct SnippetParser {
     var presentationLines = [Substring]()
     var slices = [String: Range<Int>]()
     var currentSlice: (identifier: String, startLine: Int)? = nil
+    var warnings = [SnippetWarning]()
     private var isVisible = true
     
     mutating func startNewSlice(identifier: String, from lineNumber: Int) {
@@ -125,7 +126,7 @@ struct SnippetParser {
         self.explanationLines = explanationLines
     }
     
-    init(source: String, commentStyles: [CommentStyle]) {
+    init(source: String, commentStyles: [CommentStyle], sourceFile: String) {
         self.source = source
         self.commentStyles = commentStyles
         var lines = source.split(separator: "\n", omittingEmptySubsequences: false)[...]
@@ -134,8 +135,11 @@ struct SnippetParser {
         extractExplanation(from: &lines)
 
         var lineNumber = 0
-        for line in lines {
-            switch SnippetParser.parseContent(from: line, commentStyles: commentStyles) {
+        for index in lines.indices {
+            let line = lines[index]
+            let sourceLineNumber = index + 1 // 1-based
+            let result = SnippetParser.parseContent(from: line, commentStyles: commentStyles)
+            switch result {
             case let .visibilityChange(isVisible):
                 self.isVisible = isVisible
             case let .startSlice(identifier: identifier):
@@ -150,6 +154,20 @@ struct SnippetParser {
                     !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace){
                     presentationLines.append(line)
                     lineNumber += 1
+                }
+            }
+
+            // Warn about content after a block comment snippet marker that would be silently dropped
+            if case .presentationLine = result {} else {
+                if let trailing = SnippetParser.trailingContentAfterBlockCommentMarker(
+                    in: line, commentStyles: commentStyles
+                ) {
+                    warnings.append(SnippetWarning(
+                        file: sourceFile,
+                        line: sourceLineNumber,
+                        warning: "content after block comment snippet marker will be ignored",
+                        text: String(trailing)
+                    ))
                 }
             }
         }
@@ -199,7 +217,7 @@ extension SnippetParser {
         guard line.trimExpectedPrefix("snippet.", considerCase: false) else {
             return nil
         }
-        
+
         if line.trimExpectedPrefix("show", considerCase: false) {
             return .visibilityChange(isVisible: true)
         } else if line.trimExpectedPrefix("hide", considerCase: false) {
@@ -289,5 +307,46 @@ extension SnippetParser {
             return marker
         }
         return .presentationLine
+    }
+
+    /// Check if a line has non-whitespace content after a block comment
+    /// snippet marker suffix (e.g. `/* snippet.hide */ let x = 1`)
+    ///
+    /// Returns the trailing content if found, or `nil` if the line is clean
+    static func trailingContentAfterBlockCommentMarker(
+        in line: Substring,
+        commentStyles: [CommentStyle]
+    ) -> Substring? {
+        for style in commentStyles {
+            guard case .blockComment(let prefix, let suffix) = style else {
+                continue
+            }
+            let trimmed = line.drop { $0.isWhitespace }
+            guard trimmed.hasPrefix(prefix),
+                  let suffixRange = trimmed.range(of: suffix, options: .backwards) else {
+                continue
+            }
+            let afterSuffix = trimmed[suffixRange.upperBound...]
+            if !afterSuffix.allSatisfy(\.isWhitespace) {
+                return afterSuffix.drop { $0.isWhitespace }
+            }
+        }
+        return nil
+    }
+}
+
+/// A warning emitted during snippet parsing
+public struct SnippetWarning: Sendable {
+    /// The source file that triggered the warning
+    public var file: String
+    /// The 1-based line number in the source file
+    public var line: Int
+    /// A short description of the issue
+    public var warning: String
+    /// The source text that caused the warning
+    public var text: String
+
+    public var description: String {
+        "\(file):\(line): warning: \(warning): \(text)"
     }
 }

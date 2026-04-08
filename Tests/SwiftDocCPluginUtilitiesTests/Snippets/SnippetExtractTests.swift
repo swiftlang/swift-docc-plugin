@@ -305,6 +305,30 @@ final class SnippetExtractTests: XCTestCase {
         )
     }
 
+    func testFindSnippetFilesSkipsFilesWithoutExtension() throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("SnippetExtractTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let filesWithExtension = ["Example.swift", "Hello.java", "Config.yaml", "Script.py", "Unknown.pkl"]
+        let filesWithoutExtension = ["Makefile", "Dockerfile", "README"]
+        for name in filesWithExtension + filesWithoutExtension {
+            FileManager.default.createFile(atPath: tempDir.appendingPathComponent(name).path, contents: nil)
+        }
+
+        let foundFiles = snippetExtractor._findSnippetFilesInDirectory(tempDir)
+        let foundNames = Set(foundFiles.map { URL(fileURLWithPath: $0).lastPathComponent })
+
+        for name in filesWithExtension {
+            XCTAssertTrue(foundNames.contains(name), "Expected to find \(name)")
+        }
+
+        for name in filesWithoutExtension {
+            XCTAssertFalse(foundNames.contains(name), "Expected to skip \(name)")
+        }
+    }
+
     func testSnippetExtractArguments() throws {
         // Valid
         XCTAssertNoThrow(try SnippetExtractCommand(arguments: [

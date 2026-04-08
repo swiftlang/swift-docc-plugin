@@ -746,6 +746,68 @@ class SnippetParseTests: XCTestCase {
     }
 }
 
+class SnippetParseWarningTests: XCTestCase {
+    static let fakeSnippetsDir = URL(fileURLWithPath: "/tmp/MyPackage/Snippets")
+
+    func testWarningOnTrailingContentAfterBlockCommentMarker() {
+        let javaSourceFile = SnippetParseWarningTests.fakeSnippetsDir
+            .appendingPathComponent("Example.java")
+
+        let source = """
+        // An example
+
+        /* snippet.hide */ import java.util.List;
+        // snippet.show
+
+        List<String> items = List.of("a", "b");
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: javaSourceFile)
+        XCTAssertEqual(1, snippet.warnings.count)
+        let warning = snippet.warnings[0]
+        XCTAssertEqual("Example.java", warning.file)
+        XCTAssertEqual(3, warning.line)
+        XCTAssertEqual("import java.util.List;", warning.text)
+        XCTAssertTrue(warning.description.contains("Example.java:3:"))
+    }
+
+    func testNoWarningOnCleanBlockCommentMarker() {
+        let javaSourceFile = SnippetParseWarningTests.fakeSnippetsDir
+            .appendingPathComponent("Example.java")
+
+        let source = """
+        // An example
+
+        /* snippet.hide */
+        import java.util.List;
+        // snippet.show
+
+        List<String> items = List.of("a", "b");
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: javaSourceFile)
+        XCTAssertTrue(snippet.warnings.isEmpty)
+    }
+
+    func testNoWarningOnLineCommentMarkers() {
+        let swiftSourceFile = SnippetParseWarningTests.fakeSnippetsDir
+            .appendingPathComponent("Example.swift")
+
+        let source = """
+        // An example
+
+        // snippet.hide
+        import Foundation
+        // snippet.show
+
+        print("hello")
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: swiftSourceFile)
+        XCTAssertTrue(snippet.warnings.isEmpty)
+    }
+}
+
 class SnippetParseMarkerTests: XCTestCase {
     func testParseHideShow() {
         XCTAssertEqual(.visibilityChange(isVisible: true), SnippetParser.tryParseSnippetMarker(from: "// snippet.show", commentStyle: .slashSlash))

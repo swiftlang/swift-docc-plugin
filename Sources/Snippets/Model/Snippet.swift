@@ -29,12 +29,16 @@ public struct Snippet {
     /// Named line ranges in the snippet.
     public var slices: [String: Range<Int>]
 
+    /// Warnings generated during snippet parsing
+    public var warnings: [SnippetWarning]
+
     init(parsing source: String, sourceFile: URL) {
         let commentStyles = SnippetLanguage.commentStyles(forFileExtension: sourceFile.pathExtension)
-        let extractor = SnippetParser(source: source, commentStyles: commentStyles)
+        let extractor = SnippetParser(source: source, commentStyles: commentStyles, sourceFile: sourceFile.lastPathComponent)
         self.explanation = extractor.explanationLines.joined(separator: "\n")
         self.presentationLines = extractor.presentationLines.map(String.init)
         self.slices = extractor.slices
+        self.warnings = extractor.warnings
         self.sourceFile = sourceFile
     }
 
