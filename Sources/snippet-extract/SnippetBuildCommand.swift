@@ -152,11 +152,7 @@ struct SnippetExtractCommand {
     }
 
     func printWarning(_ message: String) {
-        guard let msg = "\(message)\n".data(using: .utf8) else {
-            return 
-        }
-        
-        FileHandle.standardError.write(msg)
+        FileHandle.standardError.write(Data(message.utf8))
     }
 }
 
