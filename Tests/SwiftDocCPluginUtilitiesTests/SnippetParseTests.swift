@@ -880,3 +880,197 @@ class SnippetParseMarkerTests: XCTestCase {
         XCTAssertNil(SnippetParser.tryParseSnippetMarker(from: "// snippet.show", commentStyle: .xml))
     }
 }
+
+// MARK: Multiline Block Comment Tests
+
+class SnippetParseMultilineBlockCommentTests: XCTestCase {
+    static let fakeSnippetsDir = URL(fileURLWithPath: "/tmp/MyPackage/Snippets")
+
+    func testParseMultilineBlockCommentHide() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!--
+          snippet.hide
+        -->
+        <!DOCTYPE html>
+        <!-- snippet.show -->
+
+        <p>Hello</p>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        XCTAssertEqual("<p>Hello</p>", snippet.presentationCode)
+    }
+
+    func testParseMultilineBlockCommentWithSuffixOnMarkerLine() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!--
+          snippet.hide -->
+        <!DOCTYPE html>
+        <!-- snippet.show -->
+
+        <p>Hello</p>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        XCTAssertEqual("<p>Hello</p>", snippet.presentationCode)
+    }
+
+    func testParseMultilineBlockCommentWithPrefixOnMarkerLine() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!-- snippet.hide
+        -->
+        <!DOCTYPE html>
+        <!-- snippet.show -->
+
+        <p>Hello</p>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        XCTAssertEqual("<p>Hello</p>", snippet.presentationCode)
+    }
+
+    func testParseMultilineCBlockComment() {
+        let javaSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.java")
+
+        let source = """
+        // A Java example
+
+        /*
+          snippet.hide
+        */
+        import java.util.List;
+        // snippet.show
+
+        List<String> items = List.of("a", "b");
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: javaSourceFile)
+        XCTAssertEqual("A Java example", snippet.explanation)
+        XCTAssertEqual("List<String> items = List.of(\"a\", \"b\");", snippet.presentationCode)
+    }
+
+    func testParseMultilineBlockCommentIgnoredWithExtraText() {
+        let javaSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.java")
+
+        // Extra text alongside the snippet marker - should be treated as regular content
+        let source = """
+        // A Java example
+
+        /*
+          snippet.hide
+          some extra text
+        */
+        import java.util.List;
+        List<String> items = List.of("a", "b");
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: javaSourceFile)
+        XCTAssertEqual("A Java example", snippet.explanation)
+        // All lines should appear since the block comment is not a snippet marker
+        XCTAssertTrue(snippet.presentationCode.contains("/*"))
+        XCTAssertTrue(snippet.presentationCode.contains("snippet.hide"))
+        XCTAssertTrue(snippet.presentationCode.contains("import java.util.List;"))
+    }
+
+    func testParseMultilineBlockCommentIgnoredWithExtraTextAfterMarker() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!--
+          snippet.hide another
+        -->
+        <!DOCTYPE html>
+        <p>Hello</p>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        // The multiline block comment is not a valid snippet marker, so all content appears
+        XCTAssertTrue(snippet.presentationCode.contains("<!--"))
+        XCTAssertTrue(snippet.presentationCode.contains("snippet.hide another"))
+        XCTAssertTrue(snippet.presentationCode.contains("<!DOCTYPE html>"))
+    }
+
+    func testParseMultilineBlockCommentSlice() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        let source = """
+        <!-- An HTML example -->
+
+        <!--
+          snippet.body
+        -->
+        <div>
+            <!--
+                 Normal multi line comment
+            -->
+            Content
+            <!-- Normal single line comment -->
+        </div>
+        <!--
+          snippet.end
+        -->
+
+        <footer>End</footer>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        XCTAssertEqual(1, snippet.slices.count)
+        XCTAssertEqual(snippet["body"],
+            """
+            <div>
+                <!--
+                     Normal multi line comment
+                -->
+                Content
+                <!-- Normal single line comment -->
+            </div>
+            """)
+    }
+
+    func testParseMultilineBlockCommentUnclosed() {
+        let htmlSourceFile = Self.fakeSnippetsDir
+            .appendingPathComponent("Example.html")
+
+        // An unclosed block comment should just be treated as presentation content
+        let source = """
+        <!-- An HTML example -->
+
+        <!--
+          snippet.hide
+        <p>Hello</p>
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: htmlSourceFile)
+        XCTAssertEqual("An HTML example", snippet.explanation)
+        // All lines after the explanation should be presentation content
+        XCTAssertTrue(snippet.presentationCode.contains("<!--"))
+        XCTAssertTrue(snippet.presentationCode.contains("snippet.hide"))
+        XCTAssertTrue(snippet.presentationCode.contains("<p>Hello</p>"))
+    }
+}

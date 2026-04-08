@@ -98,6 +98,33 @@ struct SnippetParser {
         slices[currentSlice.identifier] = currentSlice.startLine..<presentationLines.count
         self.currentSlice = nil
     }
+
+    /// Apply a parsed snippet marker result (hide/show/slice/end)
+    private mutating func applyMarkerResult(_ result: LineParseResult, lineNumber: inout Int) {
+        switch result {
+        case let .visibilityChange(isVisible):
+            self.isVisible = isVisible
+        case let .startSlice(identifier: identifier):
+            if self.isVisible {
+                startNewSlice(identifier: identifier, from: lineNumber)
+            }
+        case .endSlice:
+            endSlice()
+        case .presentationLine:
+            break
+        }
+    }
+
+    /// Append lines as presentation content, respecting visibility and leading-blank-line rules
+    private mutating func appendPresentationLines(_ lines: [Substring], lineNumber: inout Int) {
+        for line in lines {
+            if isVisible &&
+                !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace) {
+                presentationLines.append(line)
+                lineNumber += 1
+            }
+        }
+    }
     
     mutating func extractExplanation(from lines: inout ArraySlice<Substring>) {
         var explanationLines = [Substring]()
@@ -126,6 +153,55 @@ struct SnippetParser {
         self.explanationLines = explanationLines
     }
     
+    /// State for tracking a multiline block comment that might be a snippet marker
+    private struct PendingBlockComment {
+        var style: CommentStyle
+        var startIndex: Int           // source line index where the prefix appeared
+        var accumulatedContent: String // text after prefix, accumulated across lines
+        var accumulatedLines: [Substring] // raw lines consumed so far
+
+        /// Result of feeding a line into the pending block comment
+        enum AccumulateResult {
+            /// The block comment is still open, keep accumulating
+            case accumulating
+            /// The block comment closed and was a valid snippet marker
+            case snippetMarker(LineParseResult)
+            /// The block comment closed but was not a valid snippet marker;
+            /// the accumulated lines should be treated as presentation content
+            case notAMarker([Substring])
+        }
+
+        /// Feed a new line into this pending block comment
+        ///
+        /// Returns how the caller should proceed: keep accumulating,
+        /// apply a snippet marker, or emit the accumulated lines as content
+        mutating func accumulateBlockComment(line: Substring) -> AccumulateResult {
+            guard case .blockComment(_, let suffix) = style else {
+                fatalError("PendingBlockComment must have a blockComment style")
+            }
+            accumulatedLines.append(line)
+
+            guard let suffixRange = line.range(of: suffix) else {
+                // No closing suffix yet - keep accumulating
+                accumulatedContent += " " + line
+                return .accumulating
+            }
+
+            // Found closing suffix - extract content before it
+            let contentBeforeSuffix = line[line.startIndex..<suffixRange.lowerBound]
+            accumulatedContent += " " + contentBeforeSuffix
+
+            // Try to parse the accumulated content as a snippet marker
+            if let result = SnippetParser.tryParseAccumulatedBlockComment(
+                content: accumulatedContent,
+                style: style
+            ) {
+                return .snippetMarker(result)
+            }
+            return .notAMarker(accumulatedLines)
+        }
+    }
+
     init(source: String, commentStyles: [CommentStyle], sourceFile: String) {
         self.source = source
         self.commentStyles = commentStyles
@@ -135,9 +211,27 @@ struct SnippetParser {
         extractExplanation(from: &lines)
 
         var lineNumber = 0
+        var pendingBlockComment: PendingBlockComment? = nil
+
         for index in lines.indices {
             let line = lines[index]
             let sourceLineNumber = index + 1 // 1-based
+
+            // If we're accumulating a multiline block comment, feed this line in.
+            if var pending = pendingBlockComment {
+                switch pending.accumulateBlockComment(line: line) {
+                case .accumulating:
+                    pendingBlockComment = pending
+                case .snippetMarker(let result):
+                    applyMarkerResult(result, lineNumber: &lineNumber)
+                    pendingBlockComment = nil
+                case .notAMarker(let lines):
+                    appendPresentationLines(lines, lineNumber: &lineNumber)
+                    pendingBlockComment = nil
+                }
+                continue
+            }
+
             let result = SnippetParser.parseContent(from: line, commentStyles: commentStyles)
             switch result {
             case let .visibilityChange(isVisible):
@@ -149,9 +243,14 @@ struct SnippetParser {
             case .endSlice:
                 endSlice()
             case .presentationLine:
-                if isVisible &&
-                    // Don't include leading empty lines in the presentation content.
-                    !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace){
+                // Check if this line starts a multiline block comment
+                if let pending = SnippetParser.tryStartMultilineBlockComment(
+                    from: line, at: index, commentStyles: commentStyles
+                ) {
+                    pendingBlockComment = pending
+                } else if isVisible &&
+                    // Don't include leading empty lines in the presentation content
+                    !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace) {
                     presentationLines.append(line)
                     lineNumber += 1
                 }
@@ -170,6 +269,11 @@ struct SnippetParser {
                     ))
                 }
             }
+        }
+
+        // If we ended with an unclosed block comment, emit the accumulated lines as presentation
+        if let pending = pendingBlockComment {
+            appendPresentationLines(pending.accumulatedLines, lineNumber: &lineNumber)
         }
         
         endSlice()
@@ -307,6 +411,74 @@ extension SnippetParser {
             return marker
         }
         return .presentationLine
+    }
+
+    // ==== -----------------------------------------------------------------------
+    // MARK: Multiline block comment support
+
+    /// Check if a line opens a block comment without closing it on the same line
+    ///
+    /// Returns a `PendingBlockComment` if this line contains a block comment
+    /// prefix (e.g. `<!--`) but no matching suffix, indicating the start of a
+    /// multiline block comment that might be a snippet marker
+    private static func tryStartMultilineBlockComment(
+        from line: Substring,
+        at index: Int,
+        commentStyles: [CommentStyle]
+    ) -> PendingBlockComment? {
+        for style in commentStyles {
+            guard case .blockComment(let prefix, let suffix) = style else {
+                continue
+            }
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix(prefix) else {
+                continue
+            }
+            // If the suffix is also present, this is a single-line block comment (already handled)
+            guard trimmed.range(of: suffix) == nil else {
+                continue
+            }
+            // Started a block comment without closing - begin accumulation
+            let contentAfterPrefix = trimmed.dropFirst(prefix.count)
+            return PendingBlockComment(
+                style: style,
+                startIndex: index,
+                accumulatedContent: String(contentAfterPrefix),
+                accumulatedLines: [line]
+            )
+        }
+        return nil
+    }
+
+    /// Try to parse accumulated multiline block comment content as a snippet marker
+    ///
+    /// The content must contain only whitespace and a valid snippet command
+    /// (e.g. `snippet.hide`) - any additional non-whitespace text means this
+    /// is a regular comment, not a snippet marker
+    private static func tryParseAccumulatedBlockComment(
+        content: String,
+        style: CommentStyle
+    ) -> LineParseResult? {
+        guard case .blockComment(let prefix, let suffix) = style else {
+            return nil
+        }
+        // The accumulated content should be only whitespace + one snippet command
+        // Verify there's no extra text beyond the snippet marker
+        let trimmed = content.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+
+        // Check that the entire trimmed content is just "snippet.<command>" with no extra words
+        let words = trimmed.split(whereSeparator: { $0.isWhitespace })
+        guard words.count == 1 else {
+            // Multiple non-whitespace tokens -> not a pure snippet marker, just a normal comment
+            return nil
+        }
+
+        // Build a synthetic single-line block comment for parsing
+        let synthetic: Substring = Substring("\(prefix) \(trimmed) \(suffix)")
+        return tryParseSnippetMarker(from: synthetic, commentStyle: style)
     }
 
     /// Check if a line has non-whitespace content after a block comment

@@ -12,9 +12,10 @@ public enum CommentStyle: Sendable {
     case lineComment(String)
     /// Block comment with a prefix and suffix, e.g. `<!--` and `-->`
     ///
-    /// Note: The snippet parser requires both the prefix and suffix to appear
-    /// on the same line. Multiline block comments are not supported for
-    /// snippet markers
+    /// Both single-line (e.g. `<!-- snippet.hide -->`) and multiline block
+    /// comments are supported as snippet markers. A multiline block comment
+    /// is recognized as a snippet marker only when the sole non-whitespace
+    /// content between the prefix and suffix is a valid snippet command
     case blockComment(prefix: String, suffix: String)
 
     /// Inline comment style using `//`
