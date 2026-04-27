@@ -91,6 +91,11 @@ struct SnippetExtractCommand {
         let snippets = try snippetFiles.map {
             try Snippet(parsing: URL(fileURLWithPath: $0))
         }
+        for snippet in snippets {
+            for warning in snippet.warnings {
+                printWarning(warning.description)
+            }
+        }
         guard snippets.count > 0 else { return }
         let symbolGraphFilename = URL(fileURLWithPath: outputFile)
         try emitSymbolGraph(for: snippets, to: symbolGraphFilename, moduleName: moduleName)
@@ -144,6 +149,10 @@ struct SnippetExtractCommand {
             printUsage()
             throw error
         }
+    }
+
+    func printWarning(_ message: String) {
+        FileHandle.standardError.write(Data(message.utf8))
     }
 }
 

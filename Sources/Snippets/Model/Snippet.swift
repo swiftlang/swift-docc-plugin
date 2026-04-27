@@ -8,7 +8,7 @@
 
 import Foundation
 
-/// A Swift code snippet.
+/// A code snippet.
 ///
 /// A *snippet* is a short, focused code example that can be shown with little to no context or prose.
 public struct Snippet {
@@ -29,15 +29,20 @@ public struct Snippet {
     /// Named line ranges in the snippet.
     public var slices: [String: Range<Int>]
 
+    /// Warnings generated during snippet parsing
+    public var warnings: [SnippetWarning]
+
     init(parsing source: String, sourceFile: URL) {
-        let extractor = SnippetParser(source: source)
+        let commentStyles = SnippetLanguage.commentStyles(forFileExtension: sourceFile.pathExtension)
+        let extractor = SnippetParser(source: source, commentStyles: commentStyles, sourceFile: sourceFile.lastPathComponent)
         self.explanation = extractor.explanationLines.joined(separator: "\n")
         self.presentationLines = extractor.presentationLines.map(String.init)
         self.slices = extractor.slices
+        self.warnings = extractor.warnings
         self.sourceFile = sourceFile
     }
 
-    /// Create a Swift snippet by parsing a file.
+    /// Create a snippet by parsing a file.
     ///
     /// - Parameter sourceFile: The URL of the file to parse.
     public init(parsing sourceFile: URL) throws {

@@ -66,7 +66,7 @@ public class SnippetExtractor {
         return FileManager.default.fileExists(atPath: path)
     }
 
-    /// Returns all of the `.swift` files under a directory recursively.
+    /// Returns all snippet files under a directory recursively.
     ///
     /// Provided for testing.
     var _findSnippetFilesInDirectory: (_ directory: URL) -> [String] = { directory -> [String] in
@@ -78,7 +78,7 @@ public class SnippetExtractor {
         }
         var snippetInputFiles = [String]()
         for case let potentialSnippetURL as URL in snippetEnumerator {
-            guard potentialSnippetURL.pathExtension.lowercased() == "swift" else {
+            guard !potentialSnippetURL.pathExtension.isEmpty else {
                 continue
             }
             snippetInputFiles.append(potentialSnippetURL.path)

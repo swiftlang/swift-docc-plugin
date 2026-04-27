@@ -255,6 +255,80 @@ final class SnippetExtractTests: XCTestCase {
         XCTAssertNil(snippetDirectory)
     }
 
+    func testSnippetGenerationWithMixedFileExtensions() throws {
+        let expectedFilePaths: Set<String> = [
+            "/my/package/Snippets",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+        ]
+        let existingFilePaths: Set<String> = [
+            "/my/package/Snippets",
+            "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+        ]
+        snippetExtractor._fileExists = { path in
+            XCTAssertTrue(
+                expectedFilePaths.contains(path),
+                "Unexpected file path: '\(path)'"
+            )
+            return existingFilePaths.contains(path)
+        }
+
+        snippetExtractor._findSnippetFilesInDirectory = { _ in
+            [
+                "/my/package/Snippets/SwiftExample.swift",
+                "/my/package/Snippets/JavaExample.java",
+                "/my/package/Snippets/CppExample.cpp",
+            ]
+        }
+
+        var capturedArguments: [String]?
+        snippetExtractor._runProcess = { process in
+            capturedArguments = process.arguments
+        }
+
+        let snippetFile = try snippetExtractor.generateSnippets(
+            for: "package-id",
+            packageDisplayName: "MyPackage",
+            packageDirectory: URL(fileURLWithPath: "/my/package")
+        )
+
+        XCTAssertNotNil(snippetFile)
+        // Verify all three files were passed to the snippet-extract tool
+        XCTAssertEqual(
+            capturedArguments,
+            [
+                "--output", "/test-working-directory/.build/symbol-graphs/snippet-symbol-graphs/MyPackage-package-id/MyPackage-snippets.symbols.json",
+                "--module-name", "MyPackage",
+                "/my/package/Snippets/SwiftExample.swift",
+                "/my/package/Snippets/JavaExample.java",
+                "/my/package/Snippets/CppExample.cpp",
+            ]
+        )
+    }
+
+    func testFindSnippetFilesSkipsFilesWithoutExtension() throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("SnippetExtractTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let filesWithExtension = ["Example.swift", "Hello.java", "Config.yaml", "Script.py", "Unknown.pkl"]
+        let filesWithoutExtension = ["Makefile", "Dockerfile", "README"]
+        for name in filesWithExtension + filesWithoutExtension {
+            FileManager.default.createFile(atPath: tempDir.appendingPathComponent(name).path, contents: nil)
+        }
+
+        let foundFiles = snippetExtractor._findSnippetFilesInDirectory(tempDir)
+        let foundNames = Set(foundFiles.map { URL(fileURLWithPath: $0).lastPathComponent })
+
+        for name in filesWithExtension {
+            XCTAssertTrue(foundNames.contains(name), "Expected to find \(name)")
+        }
+
+        for name in filesWithoutExtension {
+            XCTAssertFalse(foundNames.contains(name), "Expected to skip \(name)")
+        }
+    }
+
     func testSnippetExtractArguments() throws {
         // Valid
         XCTAssertNoThrow(try SnippetExtractCommand(arguments: [

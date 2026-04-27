@@ -40,5 +40,51 @@ class SnippetSymbolTests: XCTestCase {
                                        sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/ASnippet.swift"))
         let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
         XCTAssertEqual(["Snippets", "ASnippet"], symbol.pathComponents)
+        XCTAssertEqual("swift", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("swift", snippetMixin?.language)
+    }
+
+    func testPathComponentsForJavaSnippetSymbol() throws {
+        let source = """
+        // A Java snippet.
+        public class Hello {}
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/Hello.java"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "Hello"], symbol.pathComponents)
+        XCTAssertEqual("java", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("java", snippetMixin?.language)
+    }
+
+    func testPathComponentsForPythonSnippetSymbol() throws {
+        let source = """
+        # A Python snippet
+        print("hello")
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/Hello.py"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "Hello"], symbol.pathComponents)
+        XCTAssertEqual("python", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("python", snippetMixin?.language)
+    }
+
+    func testPathComponentsForUnknownLanguageSnippetSymbol() throws {
+        let source = """
+        // A Pkl snippet
+        host = "localhost"
+        """
+        let snippet = Snippets.Snippet(parsing: source,
+                                       sourceFile: URL(fileURLWithPath: "/path/to/my-package/Snippets/Config.pkl"))
+        let symbol = try SymbolGraph.Symbol(snippet, moduleName: "my-package")
+        XCTAssertEqual(["Snippets", "Config"], symbol.pathComponents)
+        // Unknown languages fall back to using the file extension as the language id
+        XCTAssertEqual("pkl", symbol.identifier.interfaceLanguage)
+        let snippetMixin = symbol[mixin: SymbolGraph.Symbol.Snippet.self]
+        XCTAssertEqual("pkl", snippetMixin?.language)
     }
 }
