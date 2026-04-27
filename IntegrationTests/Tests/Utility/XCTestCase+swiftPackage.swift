@@ -46,6 +46,7 @@ extension XCTestCase {
         
         process.arguments = [
             "package",
+            "--build-system", "native", // FIXME: Remove this workaround once rdar://175674487 is fixed
             "--cache-path", swiftPMCacheDirectory.path,
             "--build-path", swiftPMBuildDirectory.path,
         ] + arguments.map(\.description)
