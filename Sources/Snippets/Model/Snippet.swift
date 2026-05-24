@@ -34,7 +34,13 @@ public struct Snippet {
 
     init(parsing source: String, sourceFile: URL) {
         let commentStyles = SnippetLanguage.commentStyles(forFileExtension: sourceFile.pathExtension)
-        let extractor = SnippetParser(source: source, commentStyles: commentStyles, sourceFile: sourceFile.lastPathComponent)
+        let stringLiteralSyntax = SnippetLanguage.stringLiteralSyntax(forFileExtension: sourceFile.pathExtension)
+        let extractor = SnippetParser(
+            source: source,
+            commentStyles: commentStyles,
+            stringLiteralSyntax: stringLiteralSyntax,
+            sourceFile: sourceFile.lastPathComponent
+        )
         self.explanation = extractor.explanationLines.joined(separator: "\n")
         self.presentationLines = extractor.presentationLines.map(String.init)
         self.slices = extractor.slices

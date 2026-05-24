@@ -744,6 +744,145 @@ class SnippetParseTests: XCTestCase {
         """
         XCTAssertEqual(expectedCode, snippet.presentationCode)
     }
+
+    // MARK: String literal tests
+
+    /// Comment-like lines inside a Swift multiline string literal are content,
+    /// not snippet markers, so the whole literal is shown intact.
+    func testMultilineStringLiteralIgnoresMarkers() {
+        let source = """
+        // snippet.hide
+        import Snippets_Example
+
+        // snippet.show
+        let text = \"\"\"
+        Only this part of the code will be shown.
+
+        // snippet.hide
+
+        Snippet markers inside multiline string literals are ignored.
+
+        // snippet.show
+        \"\"\"
+        """
+
+        let expectedCode = """
+        let text = \"\"\"
+        Only this part of the code will be shown.
+
+        // snippet.hide
+
+        Snippet markers inside multiline string literals are ignored.
+
+        // snippet.show
+        \"\"\"
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    /// Markers continue to work normally on lines after a multiline string literal closes.
+    func testMarkersResumeAfterMultilineStringLiteral() {
+        let source = """
+        let text = \"\"\"
+        // snippet.hide
+        \"\"\"
+        // snippet.hide
+        hidden()
+        // snippet.show
+        shown()
+        """
+
+        let expectedCode = """
+        let text = \"\"\"
+        // snippet.hide
+        \"\"\"
+        shown()
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    /// Markers inside a raw multiline string literal (`#"""..."""#`) are ignored,
+    /// and only the matching number of `#` characters closes it.
+    func testRawMultilineStringLiteralIgnoresMarkers() {
+        let source = """
+        let text = #\"\"\"
+        // snippet.hide
+        \"\"\" still inside because the closing needs a trailing #
+        // snippet.show
+        \"\"\"#
+        after()
+        """
+
+        let expectedCode = """
+        let text = #\"\"\"
+        // snippet.hide
+        \"\"\" still inside because the closing needs a trailing #
+        // snippet.show
+        \"\"\"#
+        after()
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual(expectedCode, snippet.presentationCode)
+    }
+
+    /// A single-line string literal that contains marker-like text on a code line
+    /// is left untouched and does not open multiline tracking.
+    func testSingleLineStringLiteralWithMarkerLikeText() {
+        let source = """
+        let a = "// snippet.hide"
+        let b = 2
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual(source, snippet.presentationCode)
+    }
+
+    /// String literal tracking is language-specific. A `#`-comment language such
+    /// as a shell script does not treat `"""` as a string literal delimiter.
+    func testNonSwiftLanguageDoesNotTrackSwiftStringLiterals() {
+        let shellSourceFile = SnippetParseTests.fakeSnippetsDir
+            .appendingPathComponent("Example.sh")
+        let source = """
+        echo \"\"\"
+        # snippet.hide
+        hidden
+        # snippet.show
+        shown
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: shellSourceFile)
+        // The shell parser has no `"""` literal, so the `# snippet.*` markers apply.
+        XCTAssertEqual("echo \"\"\"\nshown", snippet.presentationCode)
+    }
+
+    /// A slice that contains a multiline string literal keeps a correct line range,
+    /// and marker-like lines inside the literal are part of the slice content.
+    func testSliceContainingMultilineStringLiteral() {
+        let source = """
+        // snippet.foo
+        let text = \"\"\"
+        // snippet.end
+        \"\"\"
+        use(text)
+        // snippet.end
+        after()
+        """
+
+        let expectedSlice = """
+        let text = \"\"\"
+        // snippet.end
+        \"\"\"
+        use(text)
+        """
+
+        let snippet = Snippet(parsing: source, sourceFile: SnippetParseTests.fakeSourceFilename)
+        XCTAssertEqual(expectedSlice, snippet["foo"])
+    }
 }
 
 class SnippetParseWarningTests: XCTestCase {

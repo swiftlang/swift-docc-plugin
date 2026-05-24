@@ -73,6 +73,7 @@ extension Substring {
 struct SnippetParser {
     var source: String
     var commentStyles: [CommentStyle]
+    var stringLiteralSyntax: StringLiteralSyntax?
     var explanationLines = [Substring]()
     var presentationLines = [Substring]()
     var slices = [String: Range<Int>]()
@@ -202,9 +203,10 @@ struct SnippetParser {
         }
     }
 
-    init(source: String, commentStyles: [CommentStyle], sourceFile: String) {
+    init(source: String, commentStyles: [CommentStyle], stringLiteralSyntax: StringLiteralSyntax? = nil, sourceFile: String) {
         self.source = source
         self.commentStyles = commentStyles
+        self.stringLiteralSyntax = stringLiteralSyntax
         var lines = source.split(separator: "\n", omittingEmptySubsequences: false)[...]
             .drop { $0.isEmptyOrWhiteSpace }
 
@@ -212,10 +214,21 @@ struct SnippetParser {
 
         var lineNumber = 0
         var pendingBlockComment: PendingBlockComment? = nil
+        var stringScanner = stringLiteralSyntax.map(MultilineStringScanner.init)
 
         for index in lines.indices {
             let line = lines[index]
             let sourceLineNumber = index + 1 // 1-based
+
+            // A line whose start lies inside an open multiline string literal is
+            // literal text, never a snippet marker or comment. Emit it as
+            // presentation content and let the scanner consume it to track when
+            // the literal closes.
+            if stringScanner?.isInsideMultilineString == true {
+                appendPresentationLines([line], lineNumber: &lineNumber)
+                stringScanner?.consume(line: line)
+                continue
+            }
 
             // If we're accumulating a multiline block comment, feed this line in.
             if var pending = pendingBlockComment {
@@ -248,11 +261,20 @@ struct SnippetParser {
                     from: line, at: index, commentStyles: commentStyles
                 ) {
                     pendingBlockComment = pending
-                } else if isVisible &&
-                    // Don't include leading empty lines in the presentation content
-                    !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace) {
-                    presentationLines.append(line)
-                    lineNumber += 1
+                } else {
+                    // Only ordinary code lines can open a multiline string literal;
+                    // snippet markers and block comments never can. Let the scanner
+                    // observe this line, regardless of visibility, so a literal opened
+                    // here (e.g. `let x = """`) is tracked on later lines and their
+                    // marker-like contents are not misread as markers.
+                    stringScanner?.consume(line: line)
+
+                    if isVisible &&
+                        // Don't include leading empty lines in the presentation content
+                        !(presentationLines.isEmpty && line.isEmptyOrWhiteSpace) {
+                        presentationLines.append(line)
+                        lineNumber += 1
+                    }
                 }
             }
 
@@ -504,6 +526,164 @@ extension SnippetParser {
             }
         }
         return nil
+    }
+}
+
+// MARK: Multiline string literal tracking
+
+/// Tracks whether the current line lies inside an open multiline string literal.
+///
+/// Snippet markers are line comments such as `// snippet.show`. The same text can
+/// appear verbatim inside a multiline string literal, where it is content rather
+/// than a marker. This scanner is fed each source line in order and reports
+/// whether the start of the next line is inside an open literal so the parser can
+/// avoid treating its contents as markers.
+///
+/// The scanner understands single-line string literals and line comments well
+/// enough to avoid being misled by a delimiter that appears inside them. It does
+/// not attempt to track delimiters that appear inside block comments, which is not
+/// a realistic scenario for snippet markers.
+struct MultilineStringScanner {
+    private let syntax: StringLiteralSyntax
+    private let delimiter: [Character]
+
+    /// When inside a multiline literal, the number of `#` characters required to
+    /// close it. `nil` means we are not currently inside a multiline literal.
+    private var openRawHashCount: Int?
+
+    init(syntax: StringLiteralSyntax) {
+        self.syntax = syntax
+        self.delimiter = Array(syntax.multilineDelimiter)
+    }
+
+    /// Whether the start of the next line lies inside an open multiline string literal.
+    var isInsideMultilineString: Bool {
+        openRawHashCount != nil
+    }
+
+    /// Update the scanner's state with the next source line.
+    mutating func consume(line: Substring) {
+        let characters = Array(line)
+        var index = 0
+
+        while index < characters.count {
+            if let requiredHashes = openRawHashCount {
+                // Inside a multiline literal: look only for the matching close.
+                if matchesDelimiter(in: characters, at: index, trailingHashes: requiredHashes) {
+                    index += delimiter.count + requiredHashes
+                    openRawHashCount = nil
+                } else {
+                    index += 1
+                }
+                continue
+            }
+
+            let character = characters[index]
+
+            // A line comment hides everything to the end of the line.
+            if character == "/", index + 1 < characters.count, characters[index + 1] == "/" {
+                return
+            }
+
+            // A run of `#` may introduce a raw string literal.
+            if character == "#" {
+                let hashCount = countHashes(in: characters, from: index)
+                let afterHashes = index + hashCount
+                if afterHashes < characters.count, characters[afterHashes] == "\"" {
+                    index = consumeStringLiteral(in: characters, quoteIndex: afterHashes, leadingHashes: hashCount)
+                } else {
+                    index = afterHashes
+                }
+                continue
+            }
+
+            if character == "\"" {
+                index = consumeStringLiteral(in: characters, quoteIndex: index, leadingHashes: 0)
+                continue
+            }
+
+            index += 1
+        }
+    }
+
+    /// Consume a string literal that begins at `quoteIndex` (the first `"`), with
+    /// `leadingHashes` raw-string `#` characters already before it.
+    ///
+    /// Returns the index just past the literal. If the literal is an unterminated
+    /// multiline literal, records the open state and returns the end of the line.
+    private mutating func consumeStringLiteral(
+        in characters: [Character],
+        quoteIndex: Int,
+        leadingHashes: Int
+    ) -> Int {
+        let isMultiline = matchesDelimiter(in: characters, at: quoteIndex, trailingHashes: 0)
+        if isMultiline {
+            var index = quoteIndex + delimiter.count
+            // A multiline literal may open and close on the same line.
+            while index < characters.count {
+                if matchesDelimiter(in: characters, at: index, trailingHashes: leadingHashes) {
+                    return index + delimiter.count + leadingHashes
+                }
+                index += 1
+            }
+            // Unterminated on this line: the literal stays open on later lines.
+            openRawHashCount = leadingHashes
+            return characters.count
+        }
+
+        // Single-line string literal: always closes before the end of the line.
+        let allowsEscapes = leadingHashes == 0
+        var index = quoteIndex + 1
+        while index < characters.count {
+            let character = characters[index]
+            if allowsEscapes, character == "\\" {
+                index += 2
+                continue
+            }
+            if character == "\"", trailingHashesMatch(in: characters, at: index + 1, count: leadingHashes) {
+                return index + 1 + leadingHashes
+            }
+            index += 1
+        }
+        return characters.count
+    }
+
+    /// Count the run of `#` characters starting at `start`.
+    private func countHashes(in characters: [Character], from start: Int) -> Int {
+        var index = start
+        while index < characters.count, characters[index] == "#" {
+            index += 1
+        }
+        return index - start
+    }
+
+    /// Whether `delimiter` followed by `trailingHashes` `#` characters appears at `index`.
+    private func matchesDelimiter(in characters: [Character], at index: Int, trailingHashes: Int) -> Bool {
+        guard index + delimiter.count + trailingHashes <= characters.count else {
+            return false
+        }
+        for offset in 0..<delimiter.count where characters[index + offset] != delimiter[offset] {
+            return false
+        }
+        return trailingHashesMatch(in: characters, at: index + delimiter.count, count: trailingHashes)
+    }
+
+    /// Whether exactly `count` `#` characters appear at `index` (and not one more).
+    private func trailingHashesMatch(in characters: [Character], at index: Int, count: Int) -> Bool {
+        guard syntax.allowsRawDelimiter || count == 0 else {
+            return false
+        }
+        guard index + count <= characters.count else {
+            return false
+        }
+        for offset in 0..<count where characters[index + offset] != "#" {
+            return false
+        }
+        // For a raw literal, a longer run of `#` than required does not close it.
+        if count > 0, index + count < characters.count, characters[index + count] == "#" {
+            return false
+        }
+        return true
     }
 }
 

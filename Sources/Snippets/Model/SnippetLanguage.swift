@@ -39,6 +39,35 @@ public enum CommentStyle: Sendable {
     }
 }
 
+/// The multiline string literal syntax used by a language.
+///
+/// Snippet markers are line comments such as `// snippet.show`. When such a
+/// sequence appears inside a multiline string literal it is literal text, not a
+/// marker, so the parser must know how a language opens and closes these
+/// literals in order to ignore markers found within them.
+public struct StringLiteralSyntax: Sendable {
+    /// The delimiter that opens and closes a multiline string literal, e.g. `"""`.
+    public var multilineDelimiter: String
+
+    /// Whether the language allows raw-string customization of the delimiter by
+    /// surrounding it with one or more `#` characters, e.g. Swift's `#"""..."""#`.
+    ///
+    /// When `true`, an opening delimiter may be preceded by a run of `#`
+    /// characters and is only closed by the delimiter followed by the same
+    /// number of `#` characters.
+    public var allowsRawDelimiter: Bool
+
+    public init(multilineDelimiter: String, allowsRawDelimiter: Bool) {
+        self.multilineDelimiter = multilineDelimiter
+        self.allowsRawDelimiter = allowsRawDelimiter
+    }
+
+    /// Swift's multiline string literal syntax: `"""`, optionally raw (`#"""..."""#`).
+    public static var swift: Self {
+        .init(multilineDelimiter: "\"\"\"", allowsRawDelimiter: true)
+    }
+}
+
 /// A programming language supported for code snippets
 public enum SnippetLanguage: String, CaseIterable, Sendable {
     case swift
@@ -77,6 +106,19 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
             return [.xml]
         default:
             return [.slashSlash, .cBlock]
+        }
+    }
+
+    /// The multiline string literal syntax used by this language, if any.
+    ///
+    /// Languages without a known multiline string literal syntax return `nil`,
+    /// in which case the parser does not track string literal state for them.
+    public var stringLiteralSyntax: StringLiteralSyntax? {
+        switch self {
+        case .swift:
+            return .swift
+        default:
+            return nil
         }
     }
 
@@ -132,5 +174,14 @@ public enum SnippetLanguage: String, CaseIterable, Sendable {
             // wild guess, let's assume those are fine
             [.slashSlash, .hash]
         }
+    }
+
+    /// Look up the multiline string literal syntax for a given file extension.
+    ///
+    /// - Parameter ext: A file extension (without the leading dot), e.g. `"swift"`.
+    /// - Returns: The matching syntax, or `nil` if the extension is unknown or the
+    ///   language has no tracked multiline string literal syntax.
+    public static func stringLiteralSyntax(forFileExtension ext: String) -> StringLiteralSyntax? {
+        language(forFileExtension: ext)?.stringLiteralSyntax
     }
 }
