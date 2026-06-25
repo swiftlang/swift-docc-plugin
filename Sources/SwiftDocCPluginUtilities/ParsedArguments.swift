@@ -134,6 +134,20 @@ struct ParsedArguments {
         
         return [action.rawValue] + arguments.remainingArguments
     }
+
+
+    /// Returns the enviroment values that should be set in the `docc` process.
+    ///
+    /// The returned dictionary contains settings for the `docc` executable that are configured
+    /// through the process environment, instead of command-line arguments. Merge the values in the
+    /// dictionary to the process environment running the `docc` executable.
+    func doccEnvironment() -> [String: String] {
+        var environment: [String: String] = [:]
+        if pluginArguments.jsonPrettyPrint {
+            environment["DOCC_JSON_PRETTYPRINT"] = "YES"
+        }
+        return environment
+    }
 }
 
 enum DocCArguments {

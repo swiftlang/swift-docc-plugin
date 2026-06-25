@@ -72,6 +72,16 @@ extension DocumentedArgument {
             """
     )
     
+    /// A plugin feature flag to enable pretty-printed and sorted JSON output.
+    static let jsonPrettyPrint = Self(
+        flag: .init(preferred: "--json-prettyprint"),
+        abstract: "Pretty-print the JSON output of the documentation archive.",
+        discussion: """
+            Formats the JSON files in the documentation archive with spacing, indentation, and sorted \
+            keys for a deterministic output.
+            """
+    )
+    
     /// A plugin feature flag to enable verbose logging.
     static let verbose = Self(
         flag: .init(preferred: "--verbose"),

@@ -45,6 +45,7 @@ public enum HelpInformation {
         
         var supportedPluginFlags = [
             DocumentedArgument.disableLMDBIndex,
+            DocumentedArgument.jsonPrettyPrint,
             DocumentedArgument.verbose,
         ]
         

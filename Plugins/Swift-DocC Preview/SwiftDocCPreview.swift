@@ -115,18 +115,22 @@ import PackagePlugin
             symbolGraphDirectoryPath: symbolGraphs.unifiedSymbolGraphsDirectory.path,
             outputPath: parsedArguments.outputDirectory?.path ?? target.doccArchiveOutputPath(in: context)
         )
-        
+
+        let doccEnvironment = parsedArguments.doccEnvironment()
+
         if verbose {
             let arguments = doccArguments.joined(separator: " ")
             print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+            print("add'l environment: '\(doccEnvironment)'")
         }
         
-        // Configure the `docc preview` process with the generated arguments
+        // Configure the `docc preview` process with the generated arguments and environment.
         let previewProcess = Process()
         previewProcess.executableURL = doccExecutableURL
         previewProcess.arguments = doccArguments
-        
-        
+        previewProcess.environment = ProcessInfo.processInfo.environment
+            .merging(doccEnvironment) { _, new in new }
+
         func stopPreviewProcess() {
             #if canImport(Darwin)
             previewProcess.interrupt()
