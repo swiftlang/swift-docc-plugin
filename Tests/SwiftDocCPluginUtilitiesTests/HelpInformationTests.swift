@@ -40,6 +40,8 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --json-prettyprint      Pretty-print the JSON output of the documentation archive.
+                    Formats the JSON files in the documentation archive with spacing, indentation, and sorted keys for a deterministic output.
               --verbose               Increase verbosity to include informational output.
             
             SYMBOL GRAPH OPTIONS:
@@ -187,6 +189,8 @@ final class HelpInformationTests: XCTestCase {
               --disable-indexing, --no-indexing
                                       Disable indexing for the produced DocC archive.
                     Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
+              --json-prettyprint      Pretty-print the JSON output of the documentation archive.
+                    Formats the JSON files in the documentation archive with spacing, indentation, and sorted keys for a deterministic output.
               --verbose               Increase verbosity to include informational output.
             
             SYMBOL GRAPH OPTIONS:
