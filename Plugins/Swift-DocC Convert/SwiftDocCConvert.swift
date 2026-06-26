@@ -64,7 +64,18 @@ import PackagePlugin
         
         let intermediateArchivesDirectory = URL(fileURLWithPath: context.pluginWorkDirectory.appending("intermediates").string)
         try? FileManager.default.createDirectory(at: intermediateArchivesDirectory, withIntermediateDirectories: true)
-        
+
+        // An inner function that configures the process running docc executable with the given
+        // process and environment values.
+        func configureDoccProcess(arguments: [String], environment: [String: String]) -> Process {
+            let process = Process()
+            process.executableURL = doccExecutableURL
+            process.arguments = arguments
+            process.environment = ProcessInfo.processInfo.environment
+                .merging(environment) { _, new in new }
+            return process
+        }
+
         // An inner function that defines the work to build documentation for a given target.
         func performBuildTask(_ task: DocumentationBuildGraph<SourceModuleDocumentationBuildGraphTarget>.Task) throws -> URL? {
             let target = task.target
@@ -128,16 +139,20 @@ import PackagePlugin
                 dependencyArchivePaths: dependencyArchivePaths
             )
             
+            let doccEnvironment = parsedArguments.doccEnvironment()
+
             if verbose {
                 let arguments = doccArguments.joined(separator: " ")
                 print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+                print("add'l environment: '\(doccEnvironment)'")
             }
-            
+
             print("Building documentation for '\(target.name)'...")
             let conversionStartTime = DispatchTime.now()
             
             // Run `docc convert` with the generated arguments and wait until the process completes
-            let process = try Process.run(doccExecutableURL, arguments: doccArguments)
+            let process = configureDoccProcess(arguments: doccArguments, environment: doccEnvironment)
+            try process.run()
             process.waitUntilExit()
             
             // Check whether the `docc convert` invocation was successful.
@@ -221,14 +236,19 @@ import PackagePlugin
         
         // Remove the combined archive if it already exists
         try? FileManager.default.removeItem(at: combinedArchiveOutput)
-        
+
+        let remainingArguments = mergeCommandArguments.remainingArguments
+        let doccEnvironment = parsedArguments.doccEnvironment()
+
         if verbose {
-            let arguments = mergeCommandArguments.remainingArguments.joined(separator: " ")
+            let arguments = remainingArguments.joined(separator: " ")
             print("docc invocation: '\(doccExecutableURL.path) \(arguments)'")
+            print("add'l environment: '\(doccEnvironment)'")
         }
-        
+
         // Create a new combined archive
-        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments.remainingArguments)
+        let process = configureDoccProcess(arguments: remainingArguments, environment: doccEnvironment)
+        try process.run()
         process.waitUntilExit()
         
         print("""

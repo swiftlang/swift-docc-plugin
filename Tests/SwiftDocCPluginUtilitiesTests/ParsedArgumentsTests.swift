@@ -89,6 +89,8 @@ final class ParsedArgumentsTests: XCTestCase {
                 "--output-path", "/my/output-path"
             ]
         )
+
+        XCTAssertEqual(arguments.doccEnvironment(), [:])
     }
     
     func testDocCArgumentsForOneArgument() {
@@ -444,7 +446,46 @@ final class ParsedArgumentsTests: XCTestCase {
         XCTAssertFalse(doccArguments.contains("--include-extended-types"))
         XCTAssertFalse(doccArguments.contains("--experimental-skip-synthesized-symbols"))
     }
-    
+
+    func testDoccEnvironmentWithJSONPrettyPrint() {
+        let prettyPrintArguments = ParsedArguments(
+            ["--json-prettyprint"]
+        )
+
+        XCTAssertTrue(prettyPrintArguments.pluginArguments.jsonPrettyPrint)
+
+        XCTAssertEqual(
+            prettyPrintArguments.doccEnvironment(),
+            ["DOCC_JSON_PRETTYPRINT": "YES"]
+        )
+
+        XCTAssertEqual(
+            prettyPrintArguments.doccArguments(
+                action: .convert,
+                targetKind: .library,
+                doccCatalogPath: "/my/catalog.docc",
+                targetName: "MyTarget",
+                symbolGraphDirectoryPath: "/my/symbol-graph",
+                outputPath: "/my/output-path"
+            ),
+            [
+                "convert",
+                "/my/catalog.docc",
+                "--emit-lmdb-index",
+                "--fallback-display-name", "MyTarget",
+                "--fallback-bundle-identifier", "MyTarget",
+                "--additional-symbol-graph-dir", "/my/symbol-graph",
+                "--output-path", "/my/output-path"
+            ]
+        )
+
+
+        let defaultArguments = ParsedArguments([])
+
+        XCTAssertFalse(defaultArguments.pluginArguments.jsonPrettyPrint)
+        XCTAssertEqual(defaultArguments.doccEnvironment(), [:])
+    }
+
     func testSymbolGraphArguments() {
         do {
             let arguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--symbol-graph-minimum-access-level", "internal"])
