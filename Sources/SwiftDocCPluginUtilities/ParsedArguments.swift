@@ -36,6 +36,15 @@ struct ParsedArguments {
     
     /// The location where the plugin should write the output documentation archive(s).
     var outputDirectory: URL?
+
+    /// Returns the environment to use when invoking DocC.
+    var doccEnvironment: [String: String] {
+        var environment = ProcessInfo.processInfo.environment
+        if pluginArguments.jsonPrettyPrint {
+            environment["DOCC_JSON_PRETTYPRINT"] = "YES"
+        }
+        return environment
+    }
     
     /// Returns the arguments that should be passed to `docc` to invoke the given plugin action.
     ///

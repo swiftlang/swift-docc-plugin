@@ -125,6 +125,7 @@ import PackagePlugin
         let previewProcess = Process()
         previewProcess.executableURL = doccExecutableURL
         previewProcess.arguments = doccArguments
+        previewProcess.environment = parsedArguments.doccEnvironment
         
         
         func stopPreviewProcess() {

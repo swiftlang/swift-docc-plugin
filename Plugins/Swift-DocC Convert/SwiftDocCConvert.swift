@@ -137,7 +137,11 @@ import PackagePlugin
             let conversionStartTime = DispatchTime.now()
             
             // Run `docc convert` with the generated arguments and wait until the process completes
-            let process = try Process.run(doccExecutableURL, arguments: doccArguments)
+            let process = Process()
+            process.executableURL = doccExecutableURL
+            process.arguments = doccArguments
+            process.environment = parsedArguments.doccEnvironment
+            try process.run()
             process.waitUntilExit()
             
             // Check whether the `docc convert` invocation was successful.
@@ -228,7 +232,11 @@ import PackagePlugin
         }
         
         // Create a new combined archive
-        let process = try Process.run(doccExecutableURL, arguments: mergeCommandArguments.remainingArguments)
+        let process = Process()
+        process.executableURL = doccExecutableURL
+        process.arguments = mergeCommandArguments.remainingArguments
+        process.environment = parsedArguments.doccEnvironment
+        try process.run()
         process.waitUntilExit()
         
         print("""

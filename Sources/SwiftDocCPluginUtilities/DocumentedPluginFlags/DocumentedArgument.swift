@@ -71,6 +71,16 @@ extension DocumentedArgument {
             Produces a DocC archive that is best-suited for hosting online but incompatible with Xcode.
             """
     )
+
+    /// A plugin feature flag to enable pretty-printing of JSON output.
+    static let jsonPrettyPrint = Self(
+        flag: .init(preferred: "--json-prettyprint"),
+        abstract: "Pretty-print and order JSON output.",
+        discussion: """
+            Produces JSON output with stable formatting, which is useful when committing generated
+            documentation to a repository.
+            """
+    )
     
     /// A plugin feature flag to enable verbose logging.
     static let verbose = Self(
