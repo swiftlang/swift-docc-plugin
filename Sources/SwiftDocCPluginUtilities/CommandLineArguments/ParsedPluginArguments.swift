@@ -12,6 +12,7 @@ import Foundation
 struct ParsedPluginArguments {
     var enableCombinedDocumentation: Bool
     var disableLMDBIndex: Bool
+    var jsonPrettyPrint: Bool
     var verbose: Bool
     var help: Bool
     
@@ -19,6 +20,7 @@ struct ParsedPluginArguments {
     init(extractingFrom arguments: inout CommandLineArguments) {
         enableCombinedDocumentation = arguments.extractFlag(.enableCombinedDocumentation) ?? false
         disableLMDBIndex = arguments.extractFlag(.disableLMDBIndex) ?? false
+        jsonPrettyPrint   = arguments.extractFlag(.jsonPrettyPrint)   ?? false
         verbose          = arguments.extractFlag(.verbose)          ?? false
         help             = arguments.extract(Self.help).last        ?? false
     }

@@ -28,6 +28,21 @@ final class ParsedArgumentsTests: XCTestCase {
         
         XCTAssertFalse(ParsedArguments(["--hel"]).pluginArguments.help)
     }
+
+    func testJSONPrettyPrint() {
+        let arguments = ParsedArguments(["--json-prettyprint"])
+
+        XCTAssertTrue(arguments.pluginArguments.jsonPrettyPrint)
+        XCTAssertEqual(arguments.doccEnvironment["DOCC_JSON_PRETTYPRINT"], "YES")
+        XCTAssertFalse(arguments.doccArguments(
+            action: .convert,
+            targetKind: .library,
+            doccCatalogPath: nil,
+            targetName: "MyTarget",
+            symbolGraphDirectoryPath: "/my/symbol-graph",
+            outputPath: "/my/output-path"
+        ).contains("--json-prettyprint"))
+    }
     
     func testDocCArgumentsForNoArguments() {
         let arguments = ParsedArguments([])
