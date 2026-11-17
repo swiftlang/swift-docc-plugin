@@ -104,8 +104,11 @@ extension DocumentedArgument {
     ///
     /// `--experimental-skip-synthesized-symbols` produces a DocC archive without compiler-synthesized symbols.
     static let skipSynthesizedSymbols = Self(
-        flag: .init(preferred: "--experimental-skip-synthesized-symbols"),
-        abstract: "Exclude synthesized symbols from the generated documentation.",
+        flag: .init(
+            preferred: "--experimental-skip-synthesized-symbols",
+            inverseNames: .init(preferred: "--experimental-include-synthesized-symbols")
+        ),
+        abstract: "Control whether synthesized symbols are included in the generated documentation. (default: --experimental-include-synthesized-symbols)",
         discussion: """
             Experimental feature that produces a DocC archive without compiler synthesized symbols.
             """
