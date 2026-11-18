@@ -33,13 +33,13 @@ struct ParsedPluginArguments {
 struct ParsedSymbolGraphArguments {
     // The default values for these are only known within the plugin itself.
     var minimumAccessLevel: String?
-    var skipSynthesizedSymbols: Bool?
+    var includeSynthesizedSymbols: Bool?
     var includeExtendedTypes: Bool?
     
     /// Creates a new symbol graph arguments container by extracting the known plugin values from a command line argument list.
     init(extractingFrom arguments: inout CommandLineArguments) {
         minimumAccessLevel     = arguments.extractOption(.minimumAccessLevel)
-        skipSynthesizedSymbols = arguments.extractFlag(.skipSynthesizedSymbols)
+        includeSynthesizedSymbols = arguments.extractFlag(.includeSynthesizedSymbols)
         includeExtendedTypes   = arguments.extractFlag(.extendedTypes)
     }
 }

@@ -59,7 +59,7 @@ public enum HelpInformation {
         
         helpText += "\nSYMBOL GRAPH OPTIONS:\n"
         var supportedSymbolGraphFlags = [
-            DocumentedArgument.skipSynthesizedSymbols,
+            DocumentedArgument.includeSynthesizedSymbols,
             DocumentedArgument.minimumAccessLevel,
         ]
 #if swift(>=5.8)

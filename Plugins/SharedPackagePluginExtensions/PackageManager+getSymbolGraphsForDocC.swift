@@ -55,8 +55,8 @@ extension PackageManager {
             symbolGraphOptions.minimumAccessLevel = minimumAccessLevel
         }
         
-        if let skipSynthesizedSymbols = customSymbolGraphOptions.skipSynthesizedSymbols {
-            symbolGraphOptions.includeSynthesized = !skipSynthesizedSymbols
+        if let includeSynthesizedSymbols = customSymbolGraphOptions.includeSynthesizedSymbols {
+            symbolGraphOptions.includeSynthesized = includeSynthesizedSymbols
         }
         
         if let includeExtendedTypes = customSymbolGraphOptions.includeExtendedTypes {

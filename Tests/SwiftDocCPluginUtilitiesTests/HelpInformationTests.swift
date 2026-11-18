@@ -43,7 +43,7 @@ final class HelpInformationTests: XCTestCase {
               --verbose               Increase verbosity to include informational output.
             
             SYMBOL GRAPH OPTIONS:
-              --experimental-skip-synthesized-symbols / --experimental-include-synthesized-symbols
+              --experimental-include-synthesized-symbols / --experimental-exclude-synthesized-symbols, --experimental-skip-synthesized-symbols
                                       Control whether synthesized symbols are included in the generated documentation. (default: --experimental-include-synthesized-symbols)
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
               --symbol-graph-minimum-access-level
@@ -190,7 +190,7 @@ final class HelpInformationTests: XCTestCase {
               --verbose               Increase verbosity to include informational output.
             
             SYMBOL GRAPH OPTIONS:
-              --experimental-skip-synthesized-symbols / --experimental-include-synthesized-symbols
+              --experimental-include-synthesized-symbols / --experimental-exclude-synthesized-symbols, --experimental-skip-synthesized-symbols
                                       Control whether synthesized symbols are included in the generated documentation. (default: --experimental-include-synthesized-symbols)
                     Experimental feature that produces a DocC archive without compiler synthesized symbols.\(extendedTypesSection)
               --symbol-graph-minimum-access-level

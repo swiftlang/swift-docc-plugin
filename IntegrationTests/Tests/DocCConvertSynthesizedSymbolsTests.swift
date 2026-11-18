@@ -24,6 +24,21 @@ final class DocCConvertSynthesizedSymbolsTests: ConcurrencyRequiringTestCase {
         ])
     }
     
+    func testGenerateDocumentationWithExcludeSynthesizedSymbolsEnabled() throws {
+        let result = try swiftPackage(
+            "generate-documentation", "--experimental-exclude-synthesized-symbols",
+            workingDirectory: try setupTemporaryDirectoryForFixture(named: "PackageWithConformanceSymbols")
+        )
+        
+        result.assertExitStatusEquals(0)
+        let archiveURL = try XCTUnwrap(result.onlyOutputArchive)
+        
+        XCTAssertEqual(try relativeFilePathsIn(.dataSubdirectory, of: archiveURL), [
+            "documentation/packagewithconformancesymbols.json",
+            "documentation/packagewithconformancesymbols/foo.json",
+        ])
+    }
+    
     func testGenerateDocumentationWithSynthesizedSymbols() throws {
         let result = try swiftPackage(
             "generate-documentation",
