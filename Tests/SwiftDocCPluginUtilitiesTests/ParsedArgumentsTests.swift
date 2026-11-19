@@ -450,7 +450,7 @@ final class ParsedArgumentsTests: XCTestCase {
             let arguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--symbol-graph-minimum-access-level", "internal"])
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
-            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, false)
             XCTAssertEqual(arguments.symbolGraphArguments.minimumAccessLevel, "internal")
         }
         
@@ -458,7 +458,7 @@ final class ParsedArgumentsTests: XCTestCase {
             let arguments = ParsedArguments(["--exclude-extended-types", "--experimental-skip-synthesized-symbols"])
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
-            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, false)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
         
@@ -466,23 +466,68 @@ final class ParsedArgumentsTests: XCTestCase {
             let arguments = ParsedArguments(["--include-extended-types", "--experimental-skip-synthesized-symbols", "--exclude-extended-types"])
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, false)
-            XCTAssertEqual(arguments.symbolGraphArguments.skipSynthesizedSymbols, true)
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, false)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
         do {
             let arguments = ParsedArguments(["--exclude-extended-types", "--include-extended-types"])
             
             XCTAssertEqual(arguments.symbolGraphArguments.includeExtendedTypes, true)
-            XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+            XCTAssertNil(arguments.symbolGraphArguments.includeSynthesizedSymbols)
             XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
         }
     }
     
+    func testSynthesizedSymbolsArguments() {
+        do {
+            let arguments = ParsedArguments(["--experimental-include-synthesized-symbols"])
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, true)
+        }
+
+        do {
+            let arguments = ParsedArguments(["--experimental-skip-synthesized-symbols", "--experimental-include-synthesized-symbols"])
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, true, "The last specified value is used")
+        }
+
+        do {
+            let arguments = ParsedArguments(["--experimental-include-synthesized-symbols", "--experimental-skip-synthesized-symbols"])
+            XCTAssertEqual(arguments.symbolGraphArguments.includeSynthesizedSymbols, false, "The last specified value is used")
+        }
+    }
+
+    func testExcludeSynthesizedSymbolsArguments() {
+        let exclude = "--experimental-exclude-synthesized-symbols"
+        let include = "--experimental-include-synthesized-symbols"
+        let skip = "--experimental-skip-synthesized-symbols"
+
+        XCTAssertEqual(ParsedArguments([exclude]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(ParsedArguments([skip]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(ParsedArguments([include, exclude]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(ParsedArguments([exclude, include]).symbolGraphArguments.includeSynthesizedSymbols, true)
+        XCTAssertEqual(ParsedArguments([include, skip]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(ParsedArguments([skip, exclude, include]).symbolGraphArguments.includeSynthesizedSymbols, true)
+    }
+
+    func testLastSynthesizedSymbolsArgumentWinsWhenSpecifiedMultipleTimes() {
+        let skip = "--experimental-skip-synthesized-symbols"
+        let include = "--experimental-include-synthesized-symbols"
+
+        XCTAssertEqual(ParsedArguments([skip, include, skip]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(ParsedArguments([include, skip, include]).symbolGraphArguments.includeSynthesizedSymbols, true)
+        XCTAssertEqual(ParsedArguments([skip, skip, include, include]).symbolGraphArguments.includeSynthesizedSymbols, true)
+        XCTAssertEqual(ParsedArguments([include, include, skip, skip]).symbolGraphArguments.includeSynthesizedSymbols, false)
+        XCTAssertEqual(
+            ParsedArguments([skip, include, "--verbose", skip, include, skip]).symbolGraphArguments.includeSynthesizedSymbols,
+            false,
+            "Unrelated arguments in between don't affect which value is last"
+        )
+    }
+
     func testDefaultSymbolGraphArguments() {
         let arguments = ParsedArguments(["--fallback-default-module-kind", "Executable"])
         
         XCTAssertNil(arguments.symbolGraphArguments.includeExtendedTypes)
-        XCTAssertNil(arguments.symbolGraphArguments.skipSynthesizedSymbols)
+        XCTAssertNil(arguments.symbolGraphArguments.includeSynthesizedSymbols)
         XCTAssertNil(arguments.symbolGraphArguments.minimumAccessLevel)
     }
 }

@@ -100,12 +100,16 @@ extension DocumentedArgument {
         discussion: "Allows documenting symbols that a target adds to its dependencies."
     )
     
-    /// A plugin feature flag to exclude synthesized symbols from the generated documentation.
-    ///
-    /// `--experimental-skip-synthesized-symbols` produces a DocC archive without compiler-synthesized symbols.
-    static let skipSynthesizedSymbols = Self(
-        flag: .init(preferred: "--experimental-skip-synthesized-symbols"),
-        abstract: "Exclude synthesized symbols from the generated documentation.",
+    /// A plugin feature flag to either include or exclude synthesized symbols in the generated documentation.
+    static let includeSynthesizedSymbols = Self(
+        flag: .init(
+            preferred: "--experimental-include-synthesized-symbols",
+            inverseNames: .init(
+                preferred: "--experimental-exclude-synthesized-symbols",
+                alternatives: ["--experimental-skip-synthesized-symbols"]
+            )
+        ),
+        abstract: "Control whether synthesized symbols are included in the generated documentation. (default: --experimental-include-synthesized-symbols)",
         discussion: """
             Experimental feature that produces a DocC archive without compiler synthesized symbols.
             """
